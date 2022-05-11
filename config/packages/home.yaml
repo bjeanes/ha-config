@@ -1,0 +1,181 @@
+homeassistant:
+  customize_glob:
+    "input_boolean.*_in_bed":
+      templates: # custom-ui
+        icon: >
+          if (state === 'on')
+            return 'mdi:bed';
+          return 'mdi:bed-empty';
+
+proximity:
+  bo_home:
+    zone: home
+    unit_of_measurement: m
+    devices:
+      - person.bo_jeanes
+  ri_home:
+    zone: home
+    unit_of_measurement: m
+    devices:
+      - person.ri_liu
+
+group:
+  family:
+    name: Family
+    entities:
+      - person.bo_jeanes
+      - person.ri_liu
+  anyone_in_bed:
+    name: Anyone in bed
+    entities:
+      - input_boolean.bo_in_bed
+      - input_boolean.ri_in_bed
+  everyone_in_bed:
+    name: Everyone in bed
+    all: true
+    entities:
+      - input_boolean.bo_in_bed
+      - input_boolean.ri_in_bed
+
+automation:
+  - id: not_in_bed
+    alias: No longer in bed when phone leaves room
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.ri_s_phone
+        from: "bedroom"
+        variables:
+          toggle: input_boolean_ri_in_bed
+        for:
+          minutes: 1
+      - platform: state
+        entity_id:
+          - sensor.ri_s_phone
+        variables:
+          toggle: input_boolean_bo_in_bed
+        from: "bedroom"
+        for:
+          minutes: 1
+    condition:
+      - "{{ trigger.to_state.state not in ['not_home', 'unknown', 'unavailable'] }}"
+      - "{{ is_state(toggle, 'on') }}"
+    action:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: "{{ toggle }}"
+  - id: in_bed
+    alias: In bed detection (based on phone charging)
+    trigger:
+      - platform: state
+        entity_id: sensor.ris_iphone_hass_battery_state
+        variables:
+          # battery_state can be: Full, Charging, Not Charging.
+          target_state: '{% if is_state("sensor.ris_iphone_hass_battery_state", "Not Charging") %}off{% else %}on{% endif %}'
+          toggle: input_boolean.ri_in_bed
+          person: person.ri_liu
+      - platform: state
+        entity_id: sensor.bos_iphone_hass_battery_state
+        variables:
+          target_state: '{% if is_state("sensor.bos_iphone_hass_battery_state", "Not Charging") %}off{% else %}on{% endif %}'
+          toggle: input_boolean.bo_in_bed
+          person: person.bo_jeanes
+    condition:
+      - or:
+          - "{{ target_state == 'off' }}"
+          - alias: "plausible sleep time"
+            condition: time
+            after: "21:00:00"
+            before: "10:00:00"
+      - "{{ trigger.to_state.state not in ['unknown', 'unavailable'] }}"
+      - "{{ not is_state(toggle, target_state) }}"
+      - "{{ is_state(person, 'home') }}"
+    action:
+      - service: "input_boolean.turn_{{ target_state }}"
+        data:
+          entity_id: "{{ toggle }}"
+
+template:
+  - binary_sensor:
+      - unique_id: in_bed
+        name: In bed
+        state: |
+          {{ is_state('input_boolean.bo_in_bed', 'on') or is_state('input_boolean.ri_in_bed', 'on') }}
+        icon: |
+          {% if is_state("binary_sensor.in_bed", "on") %}
+          mdi:bed
+          {% else %}
+          mdi:bed-empty
+          {% endif %}
+        device_class: occupancy
+      - unique_id: sleeping
+        name: Sleeping
+        state: |
+          {{ is_state('input_boolean.bo_in_bed', 'on') and is_state('input_boolean.ri_in_bed', 'on') }}
+        icon: |
+          {% if is_state("binary_sensor.sleeping", "on") %}
+          mdi:bed
+          {% else %}
+          mdi:bed-empty
+          {% endif %}
+
+lifx:
+  light:
+    - broadcast: !secret iot_broadcast
+
+homekit:
+  - name: house
+    port: 21223
+    filter:
+      include_entities:
+        - vacuum.robot_vacuum
+        # - sensor.bathroom_temperature
+        # - sensor.bathroom_humidity
+        # - sensor.bo_s_office_temperature
+        # - sensor.bo_s_office_humidity
+        # - sensor.kitchen_temperature
+        # - sensor.kitchen_humidity
+        # - sensor.living_room_temperature
+        # - sensor.living_room_humidity
+        # - sensor.lounge_room_temperature
+        # - sensor.lounge_room_humidity
+        # - sensor.shower_air_temperature
+        # - sensor.shower_humidity
+
+        - fan.bedroom_purifier
+        - sensor.bedroom_purifier_humidity
+        - sensor.bedroom_purifier_pm2_5
+        - sensor.bedroom_purifier_temperature
+
+        - input_boolean.bo_in_bed
+        - input_boolean.ri_in_bed
+        # - binary_sensor.in_bed
+
+        - switch.bo_s_desk_plug
+        - switch.bo_s_office_plug
+        - switch.ri_s_desk_plug
+      include_entity_globs:
+        - binary_sensor.*_is_occupied
+        - sensor.ble_temperature*
+        - sensor.ble_humidity*
+        - sensor.ble_illuminance*
+      include_domains:
+        - light
+      exclude_entities: []
+      exclude_entity_globs:
+        - "*.*tent*"
+        - "sensor.*fridge*"
+        - "sensor.*freezer*"
+        - "sensor.*cure*"
+        - "sensor.*stash*"
+        - sensor.*garden*
+        - sensor.*battery_temperature*
+        - sensor.*forecast*
+        - sensor.*weather*
+        - sensor.nas_*
+        - sensor.*_nas_*
+      exclude_domains: []
+    entity_config:
+      vacuum.robot_vacuum:
+        linked_battery_sensor: sensor.robot_vacuum_battery_level
+        linked_battery_charging_sensor: binary_sensor.robot_vacuum_charging

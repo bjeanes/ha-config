@@ -1,0 +1,13 @@
+substitutions:
+  device_name: athom-smart-plug-v2-3feafe
+  friendly_name: Fridge Plug
+  relay_restore_mode: RESTORE_DEFAULT_ON
+packages:
+  athom.smart-plug-v2: github://athom-tech/athom-configs/athom-smart-plug-v2.yaml
+esphome:
+  name_add_mac_suffix: false
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password

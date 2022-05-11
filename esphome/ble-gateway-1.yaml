@@ -1,0 +1,18 @@
+substitutions:
+  node_name: ble-gateway-1
+  friendly_name: BLE Gateway 1
+
+esphome:
+  platform: ESP32
+  board: esp32dev
+
+packages:
+  base: !include common/base.yaml
+  ble: !include common/ble-gateway.yaml
+
+wifi:
+  use_address: 10.10.30.121
+
+web_server:
+  version: 2
+  include_internal: true

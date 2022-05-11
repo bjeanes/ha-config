@@ -1,0 +1,23 @@
+template:
+  - sensor:
+      - unique_id: nzbget_speed_kilobytes_per_sec
+        name: "NZBGet Speed"
+        unit_of_measurement: kB/s
+        state: |
+          {% if states('sensor.nzbget_speed') is number %}
+          {{ states('sensor.nzbget_speed') / 1000.0 }}
+          {% else %}
+          {{ states('sensor.nzbget_speed') }}
+          {% endif %}
+
+sensor:
+  - platform: rtorrent
+    url: "https://rutorrent.home.bjeanes.com/RPC2"
+    monitored_variables:
+      - "current_status"
+      - "download_speed"
+      - "upload_speed"
+      - "all_torrents"
+      - "uploading_torrents"
+      - "downloading_torrents"
+      - "active_torrents"

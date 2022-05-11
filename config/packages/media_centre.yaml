@@ -1,0 +1,390 @@
+template:
+  - trigger:
+      - platform: time_pattern
+        seconds: "/10"
+    sensor:
+      - unique_id: living_room_media_player_source_volumes
+        name: Living Room Media Player Source Volumes
+        state: "voluming"
+        attributes:
+          volumes: |
+            {{ state_attr('sensor.current_living_room_media_player', 'volumes') or [] }}
+
+  - binary_sensor:
+      - unique_id: should_play_background_music
+        name: Should play background music
+        state: |
+          {{ is_state('group.family', 'home') and is_state('group.anyone_in_bed', 'off') }}
+        icon: |
+          {% if is_state('binary_sensor.should_play_background_music', 'on')%}
+            mdi:music
+          {% else %}
+            mdi:music-off'
+          {% endif %}
+
+  - sensor:
+      - unique_id: current_living_room_media_player
+        name: Current Living Room Media Player
+        state: |
+          {% if is_state('media_player.apple_tv', 'playing')
+               or is_state_attr('media_player.denon_avr_x1600h', 'source', 'Media Player')
+               or is_state_attr('media_player.denon_avr_x1600h', 'source', 'Apple TV') %}
+          media_player.apple_tv
+          {% elif is_state_attr('media_player.spotify_bjeanes', 'source', 'Denon AVR-X1600H') or state_attr('media_player.denon_avr_x1600h_heos', 'media_content_id').startswith('spotify:') %}
+          media_player.spotify_bjeanes
+          {% elif is_state_attr('media_player.denon_avr_x1600h', 'source', 'HEOS Music') %}
+          media_player.denon_avr_x1600h_heos
+          {% else %}
+          media_player.denon_avr_x1600h
+          {% endif %}
+        attributes:
+          state: >
+            {{ states(states('sensor.current_living_room_media_player')) }}
+          source: >
+            {{ state_attr(states('sensor.current_living_room_media_player'), 'source') }}
+          device_class: "tv" # so we can expose it to HomeKit with channel controls
+          volumes: >-
+            {% set cached_volumes = state_attr('sensor.living_room_media_player_source_volumes', 'volumes') %}
+            {% if cached_volumes in ["unknown", "unavailable", None, ""] %}
+              {% set cached_volumes = [] %}
+            {% endif %}
+
+            {% set volumes = namespace(list= []) %}
+            {% set sources = [
+                state_attr('media_player.denon_avr_x1600h', 'source'),
+                state_attr('media_player.denon_avr_x1600h_heos', 'source'),
+                state_attr('sensor.current_living_room_media_player', 'source')
+              ] | unique | list %}
+            {% set level = state_attr('media_player.denon_avr_x1600h', 'volume_level') %}
+
+            {# copy over volumes for other sources #}
+            {% for v in cached_volumes %}
+              {% if v.source != None and v.source not in sources %}
+                {% set volumes.list = volumes.list + [v] %}
+              {% endif %}
+            {% endfor %}
+
+            {# update volumes for current sources #}
+            {% for source in sources %}
+              {% if source != None %}
+                {% set volumes.list = volumes.list + [{"source": source, "volume_level": level}] %}
+              {% endif %}
+            {% endfor %}
+
+            {{ volumes.list }}
+
+          # TODO: pull volume/is_muted from Apple TV (when using AirPods) or from TV (when Denon is off)
+          is_volume_muted: >
+            {% if states('media_player.denon_avr_x1600h') in ['idle', 'on', 'playing'] %}
+            {{ state_attr('media_player.denon_avr_x1600h', 'is_volume_muted') }}
+            {% else %}
+            unknown
+            {% endif %}
+          volume_level: >
+            {% if states('media_player.denon_avr_x1600h') in ['idle', 'on', 'playing'] %}
+            {{ state_attr('media_player.denon_avr_x1600h', 'volume_level') }}
+            {% else %}
+            unknown
+            {% endif %}
+        icon: >
+          {% if is_state('sensor.current_living_room_media_player', 'media_player.apple_tv') %}
+          mdi:apple-tv
+          {% elif is_state('sensor.current_living_room_media_player', 'media_player.spotify_bjeanes') %}
+          mdi:spotify
+          {% elif is_state('sensor.current_living_room_media_player', 'media_player.denon_avr_x1600h_heos') %}
+          mdi:audio-video
+          {% elif is_state('sensor.current_living_room_media_player', 'media_player.denon_avr_x1600h') %}
+            {% if is_state_attr('media_player.denon_avr_x1600h', 'source', 'Tuner') %}
+            mdi:radio
+            {% else %}
+            mdi:audio-video
+            {% endif %}
+          {% else %}
+          mdi:audio-video-off
+          {% endif %}
+
+      - unique_id: current_living_room_media_player_source
+        name: Current Living Room Media Player Source
+        state: |
+          {%- if is_state('media_player.apple_tv', 'playing')
+               or is_state_attr('media_player.denon_avr_x1600h', 'source', 'Media Player')
+               or is_state_attr('media_player.denon_avr_x1600h', 'source', 'Apple TV') -%}
+            {%- if state_attr('media_player.apple_tv', 'app_name') != None -%}
+              {{ state_attr('media_player.apple_tv', 'app_name') }}
+            {%- else -%}
+              Apple TV
+            {%- endif -%}
+          {%- elif is_state_attr('media_player.denon_avr_x1600h', 'source', 'Tuner') %}
+          Radio
+          {%- elif is_state_attr('media_player.denon_avr_x1600h', 'source', 'TV') %}
+          TV
+          {%- elif not is_state('media_player.spotify_bjeanes', 'idle')
+              and (is_state_attr('media_player.spotify_bjeanes', 'source', 'Denon AVR-X1600H') or
+                   state_attr('media_player.denon_avr_x1600h_heos', 'media_content_id').startswith('spotify:')
+                  ) -%}
+          Spotify
+          {%- elif is_state_attr('media_player.denon_avr_x1600h', 'source', 'HEOS Music') -%}
+          {{ state_attr('media_player.denon_avr_x1600h_heos', 'source') }}
+          {%- endif -%}
+        icon: >
+          {% if is_state('sensor.current_living_room_media_player_source', 'Apple TV') %}
+          mdi:apple-tv
+          {% elif is_state('sensor.current_living_room_media_player_source', 'Radio') %}
+          mdi:radio
+          {% elif is_state('sensor.current_living_room_media_player_source', 'Spotify') %}
+          mdi:spotify
+          {% elif is_state('sensor.current_living_room_media_player', 'media_player.denon_avr_x1600h_heos') or is_state('sensor.current_living_room_media_player', 'media_player.denon_avr_x1600h')  %}
+          mdi:audio-video
+          {% else %}
+          mdi:audio-video-off
+          {% endif %}
+        attributes:
+          source_list: >
+            {%- set current_source = states('sensor.current_living_room_media_player_source') -%}
+            {%- set sources = ['Apple TV', 'Plex', 'YouTube', 'Netflix', '10 play', '7plus', '9Now', 'MUBI', 'ABC iview', 'Prime Video', 'Vimeo', 'Spotify', 'Radio'] -%}
+            {%- if current_source is not none -%}
+              {% set sources = sources + [current_source] -%}
+            {%- endif %}
+            {%- set sources = sources + (state_attr('media_player.denon_avr_x1600h_heos', 'source_list') or []) -%}
+            {%- set sources = sources + (state_attr('media_player.denon_avr_x1600h', 'source_list') or []) -%}
+
+            {{- sources | sort | unique | list -}}
+
+media_player:
+  - platform: universal
+    name: Living Room Spotify (bjeanes) # create a media player that is only "on"/"playing"/etc when it is playing in the living room
+    children:
+      - media_player.spotify_bjeanes
+    state_template: >
+      {% if is_state_attr('media_player.spotify_bjeanes', 'source', 'Denon AVR-X1600H') %}
+      {{ states(media_player.spotify_bjeanes) }}
+      {% else %}
+      idle
+      {% endif %}
+    commands: {}
+  - platform: universal
+    # unique_id: media_player_living_room_universal
+    name: Living Room Media Player
+    children:
+      - media_player.denon_avr_x1600h_heos
+      - media_player.living_room_apple_tv
+      - media_player.living_room_tv_webos
+      - media_player.living_room_tv_homekit
+      - media_player.denon_avr_x1600h
+      - media_player.living_room_spotify_bjeanes
+    state_template: >
+      {{ states(states('sensor.current_living_room_media_player')) }}
+    commands: {}
+    attributes:
+      active_child: sensor.current_living_room_media_player
+      is_volume_muted: sensor.current_living_room_media|is_volume_muted
+      volume_level: sensor.current_living_room_media|volume_level
+      source_list: sensor.current_living_room_media_player_source|source_list
+      device_class: sensor.current_living_room_media|device_class
+
+automation:
+  - id: turn_on_apple_tv_on_source
+    trigger:
+      - platform: state
+        entity_id: media_player.living_room_media_player
+        attribute: "source"
+        to: "Apple TV"
+    action:
+      - service: media_player.turn_on
+        target:
+          area_id: living_room
+      - service: remote.turn_on
+        target:
+          entity_id: remote.living_room_apple_tv
+
+  - id: adjust_denon_volume
+    alias: Automatically adjust Denon volume
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: media_player.denon_avr_x1600h
+        attribute: "source"
+      - platform: state
+        entity_id: media_player.denon_avr_x1600h_heos
+        attribute: "source"
+      - platform: state
+        entity_id: media_player.living_room_media_player
+        attribute: "source"
+    action:
+      - variables:
+          current_volume_level: "{{ state_attr('media_player.denon_avr_x1600h', 'volume_level') }}"
+          new_volume_level: >-
+            # TODO model as a dictionary https://community.home-assistant.io/t/remember-volume-levels-of-each-source-for-a-media-player-to-automate-restoring/416749/6?u=bjeanes
+            {% set volumes = state_attr('sensor.living_room_media_player_source_volumes', 'volumes') or [] %}
+            {% set specific_source = state_attr('media_player.living_room_media_player', 'source') %}
+            {% set general_source = state_attr('media_player.denon_avr_x1600h', 'source') %}
+            {% set ns = namespace(volume_level=None) %}
+            {% for v in volumes %}
+              {% if v.source == specific_source %}
+                {% set ns.volume_level = v.volume_level %}
+              {% endif %}
+            {% endfor %}
+
+            {% if ns.volume_level == None %}
+              {% for v in volumes %}
+                {% if v.source == general_source %}
+                  {% set ns.volume_level = v.volume_level %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+
+            {% if ns.volume_level == None %}
+              {% if general_source == "HEOS Music" %}
+                {% set ns.volume_level = 0.4 %}
+              {% else %}
+                {% set ns.volume_level = 0.6 %}
+              {% endif %}
+            {% endif %}
+
+            {{ ns.volume_level }}
+      - repeat:
+          sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: "{{ new_volume_level }}"
+              target:
+                entity_id: media_player.denon_avr_x1600h
+            - delay: 2 # seconds
+          until: "{{ current_volume_level == new_volume_level or not is_state_attr('media_player.denon_avr_x1600h', 'volume_level', current_volume_level) }}"
+  - id: manage_background_playlist
+    alias: Manage Background playlist
+    trigger:
+      - platform: state
+        entity_id: sensor.background_playlist
+    condition:
+      # rule out error states (HA bootup, reloading, etc)
+      - "{{ trigger.to_state.state not in ['unavailable', 'unknown'] }}"
+
+      # has to have been off or describing what is already playing
+      - "{{ trigger.from_state.state in ['off', states('sensor.current_living_room_media_player_source')] }}"
+
+      # We be turning off unless the should_play_background_music is true
+      - "{{ trigger.to_state.state == 'off' or is_state('binary_sensor.should_play_background_music', 'on') }}"
+    action:
+      - variables:
+          player_is_off_like: >-
+            {{
+              (
+                is_state('media_player.denon_avr_x1600h', 'off') or
+                (
+                  is_state_attr('media_player.denon_avr_x1600h', 'source', 'HEOS Music') and
+                  is_state('media_player.denon_avr_x1600h_heos', 'idle')
+                )
+              )
+            }}
+      - choose:
+          - conditions:
+              - "{{ trigger.to_state.state == 'off' }}"
+            sequence:
+              - service: media_player.turn_off
+                target:
+                  area_id: living_room
+          - conditions:
+              - "{{ trigger.from_state != 'off' or player_is_off_like }}"
+            sequence:
+              - service: media_player.select_source
+                data:
+                  source: "{{ trigger.to_state.state }}"
+                target:
+                  entity_id: media_player.denon_avr_x1600h_heos # TODO: make the universal media player capable of receiving this
+
+sensor:
+  - platform: rest
+    resource: https://airnet.org.au/rest/stations/3rrr/guides/fm
+    name: RRR Now Playing
+    value_template: >-
+      {{ value_json
+        | selectattr('day', 'eq', now().isoweekday() | string)
+        | reverse
+        | selectattr('start', 'lt', now().strftime('%H:%M:%S'))
+        | map(attribute='name')
+        | first
+      }}
+  - platform: rest
+    resource: https://airnet.org.au/rest/stations/3pbs/guides/fm
+    name: PBS Now Playing
+    value_template: >-
+      {{ value_json
+        | selectattr('day', 'eq', now().isoweekday() | string)
+        | reverse
+        | selectattr('start', 'lt', now().strftime('%H:%M:%S'))
+        | map(attribute='name')
+        | first
+      }}
+  - platform: rest
+    resource: https://program.abcradio.net.au/api/v1/programitems/triplej/live.json
+    name: JJJ Now Playing
+    value_template: >-
+      {{ value_json.now.title }}
+  - platform: rest
+    resource: https://program.abcradio.net.au/api/v1/programitems/doublej/live.json
+    name: JJ Now Playing
+    value_template: >-
+      {{ value_json.now.title }}
+  - platform: rest
+    resource: https://program.abcradio.net.au/api/v1/programitems/jazz/live.json
+    name: ABC Jazz Now Playing
+    value_template: >-
+      {{ value_json.now.title }}
+
+  - platform: schedule_state # https://github.com/aneeshd/schedule_state
+    name: Background Playlist
+    refresh: "5:00:00"
+    default_state: "off"
+    events:
+      - state: ABC Jazz (Jazz Music) # Default background music
+        start: "8:00:00"
+        end: "23:00:00"
+
+      - state: Triple R 102.7 (Variety) # https://www.rrr.org.au/explore/programs/radiotherapy
+        start: "10:00:00"
+        end: "11:00:00"
+        condition:
+          condition: time
+          weekday: [sun]
+
+      - state: Triple R 102.7 (Variety) # https://www.rrr.org.au/explore/programs/einstein-a-go-go
+        start: "11:00:00"
+        end: "12:00:00"
+        condition:
+          condition: time
+          weekday: [sun]
+
+      - state: Triple R 102.7 (Variety)
+        condition:
+          condition: state
+          entity_id: sensor.rrr_now_playing
+          state: "On The Blower"
+
+      - state: triple j 107.5 (Alternative Rock)
+        condition:
+          condition: state
+          entity_id: sensor.jjj_now_playing
+          state: "Science with Dr Karl"
+
+      - state: triple j 107.5 (Alternative Rock)
+        condition:
+          condition: state
+          entity_id: sensor.jjj_now_playing
+          state: "Hack"
+
+      # ...
+
+      - state: "off" # must be last so that it overrides everything else when its conditions are true
+        condition:
+          - condition: state
+            entity_id: binary_sensor.should_play_background_music
+            state: "off"
+
+homekit:
+  - name: living_room_media_centre
+    port: 21242
+    mode: accessory
+    filter:
+      include_entities:
+        - media_player.living_room_media_player

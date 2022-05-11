@@ -1,0 +1,162 @@
+config:
+  title: 3D Printing
+  views:
+  - badges: []
+    cards:
+    - aspect_ratio: '4:3'
+      camera_image: camera.3d_printer
+      camera_view: live
+      entity: camera.3d_printer
+      show_name: false
+      show_state: false
+      type: picture-entity
+      view_layout:
+        position: sidebar
+    - entities:
+      - entity: switch.3d_printer_plug
+        name: 3D Printer Power
+      - conditions:
+        - entity: switch.3d_printer_plug
+          state: 'on'
+        row:
+          entity: switch.3d_printer_connection
+        type: conditional
+      - conditions:
+        - entity: switch.3d_printer_plug
+          state: 'on'
+        - entity: sensor.octoprint_current_state
+          state_not: unavailable
+        - entity: sensor.octoprint_current_state
+          state_not: Operational
+        row:
+          entity: button.octoprint_stop_job
+        type: conditional
+      - conditions:
+        - entity: switch.3d_printer_plug
+          state: 'on'
+        - entity: binary_sensor.octoprint_printing
+          state: 'on'
+        - entity: sensor.octoprint_current_state
+          state: Printing
+        row:
+          entity: button.octoprint_pause_job
+        type: conditional
+      - conditions:
+        - entity: switch.3d_printer_plug
+          state: 'on'
+        - entity: binary_sensor.octoprint_printing
+          state: 'off'
+        - entity: sensor.octoprint_current_state
+          state_not: Printing
+        - entity: sensor.octoprint_current_state
+          state_not: Operational
+        - entity: sensor.octoprint_current_state
+          state_not: unknown
+        row:
+          entity: button.octoprint_resume_job
+        type: conditional
+      - entity: sensor.octoprint_current_state
+        name: Current status
+        secondary_info:
+          entity: binary_sensor.octoprint_printing
+          name: Printing
+        type: custom:multiple-entity-row
+      - conditions:
+        - entity: switch.3d_printer_plug
+          state: 'on'
+        - entity: sensor.octoprint_current_state
+          state_not: unavailable
+        - entity: sensor.octoprint_current_state
+          state_not: Operational
+        row:
+          entities:
+          - entity: sensor.octoprint_estimated_finish_time
+            format: total
+            hide_unavailable: true
+            name: ETA
+          entity: sensor.octoprint_job_percentage
+          name: Progress
+          secondary_info:
+            entity: sensor.octoprint_start_time
+            format: relative
+            hide_unavailable: true
+            name: started
+          state_header: completion
+          type: custom:multiple-entity-row
+        type: conditional
+      - conditions:
+        - entity: switch.3d_printer_plug
+          state: 'on'
+        - entity: sensor.octoprint_current_state
+          state_not: unavailable
+        row:
+          entities:
+          - entity: sensor.octoprint_target_bed_temp
+            name: target
+          entity: sensor.octoprint_actual_bed_temp
+          name: Bed temperature
+          secondary_info: last-changed
+          state_header: actual
+          type: custom:multiple-entity-row
+        type: conditional
+      - conditions:
+        - entity: switch.3d_printer_plug
+          state: 'on'
+        - entity: sensor.octoprint_current_state
+          state_not: unavailable
+        row:
+          entities:
+          - entity: sensor.octoprint_target_tool0_temp
+            name: target
+          entity: sensor.octoprint_target_tool0_temp
+          name: Nozzle temperature
+          secondary_info: last-changed
+          state_header: actual
+          type: custom:multiple-entity-row
+        type: conditional
+      - conditions:
+        - entity: binary_sensor.octoprint_printing_error
+          state: 'on'
+        row:
+          entity: binary_sensor.octoprint_printing_error
+        type: conditional
+      type: entities
+      view_layout:
+        position: sidebar
+    - entities:
+      - sensor.3d_printer_plug_wattage
+      - sensor.3d_printer_plug_total_daily_energy
+      footer:
+        detail: 2
+        entity: sensor.3d_printer_plug_wattage
+        hours_to_show: 6
+        type: graph
+      type: entities
+      view_layout:
+        position: sidebar
+    - card:
+        aspect_ratio: 50%
+        type: iframe
+        url: https://10.10.20.42/?fullscreen=1#tab_plugin_prettygcode
+      conditions:
+      - entity: binary_sensor.octoprint_printing
+        state: 'on'
+      type: conditional
+    - entities:
+      - entity: sensor.octoprint_actual_bed_temp
+        name: Actual bed temp
+      - entity: sensor.octoprint_target_bed_temp
+        name: Target bed temp
+      - entity: sensor.octoprint_actual_tool0_temp
+        name: Actual nozzle temp
+      - entity: sensor.octoprint_target_tool0_temp
+        name: Target nozzle temp
+      hours_to_show: 2
+      type: history-graph
+      view_layout:
+        position: sidebar
+    icon: mdi:printer-3d
+    path: 0
+    theme: Backend-selected
+    title: 3D Printer
+    type: sidebar

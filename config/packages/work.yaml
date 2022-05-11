@@ -1,0 +1,34 @@
+calendar:
+  - platform: ics_calendar
+    calendars:
+      - name: "On-call"
+        url: !secret oncall_schedule_url
+        includeAllDay: true
+        days: 30
+
+automation:
+  - id: remind_bo_to_take_laptop_when_oncall
+    trigger:
+      - platform: state
+        entity_id: cover.front_gate
+        from: "closed"
+        to: "open"
+      - platform: state
+        entity_id: cover.front_gate
+        from: "closed"
+        to: "opening"
+      - platform: event
+        event_type: homekit_state_change
+        event_data:
+          entity_id: cover.front_gate
+          service: open_cover
+    condition: >-
+      {{ is_state('calendar.on_call', 'on') or is_state('calendar.ical_on_call', 'on') }}
+    action:
+      - service: notify.mobile_app_bos_iphone
+        data:
+          message: You are on-call! Bring your laptop
+          title: Bring laptop!
+          data:
+            push:
+              interruption-level: time-sensitive

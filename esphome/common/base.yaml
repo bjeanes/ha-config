@@ -1,0 +1,63 @@
+substitutions:
+  new_ota_password: !secret ota_password
+
+esphome:
+  name: ${node_name}
+  build_path: ./build/${node_name}
+  on_boot:
+    - lambda: |-
+        id(my_ota).set_auth_password("${new_ota_password}");
+
+logger:
+
+time:
+  - platform: homeassistant
+    id: hass_time
+    timezone: 'Australia/Melbourne'
+  - platform: sntp
+    id: net_time
+    timezone: 'Australia/Melbourne'
+
+api:
+  # password: !secret api_password
+
+ota:
+  id: my_ota
+  password: !secret ota_password
+
+<<: !include wifi.yaml
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+    disabled_by_default: true
+    hide_timestamp: true
+
+  - platform: wifi_info
+    ip_address:
+      name: ${friendly_name} IP Address
+      disabled_by_default: true
+    ssid:
+      name: ${friendly_name} SSID
+      disabled_by_default: true
+    bssid:
+      name: ${friendly_name} BSSID
+      disabled_by_default: true
+    mac_address:
+      name: ${friendly_name} MAC Address
+      disabled_by_default: true
+
+sensor:
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal"
+    update_interval: 60s
+
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+    disabled_by_default: true
+
+button:
+  - platform: restart
+    id: restart_button
+    name: "${friendly_name} Restart"

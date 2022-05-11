@@ -1,0 +1,71 @@
+# If door opens when sun is down, turn lights on
+# If sun sets and door is open or presense detected, turn lights on
+# If lights on but no presence for one hour, turn lights off
+# When lights turned off, turn off desk and couch plugs
+# When lights turned on, turn on desk and couch plugs
+# When bo leaves home, turn off desk plug
+# When everybody leaves home, turn off couch plug
+automation:
+  - id: a1459b6c502b7d9df65a101dd31c9c55f164388c
+    alias: Turn on Bo's office when door opened
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.bo_s_office_door_contact
+        from: "off"
+        to: "on"
+    action:
+      # - if:
+      #     - "{{ is_state('sun.sun', 'below_horizon') }}"
+      #   then:
+      - service: light.turn_on
+        data:
+          transition: 0.25
+          color_temp: 500
+          brightness_pct: 100
+        target:
+          area_id: bo_s_office
+      - service: switch.turn_on
+        target:
+          area_id: bo_s_office
+
+  - id: 2d1034acdee3afde7b67224b4898bd87b5cd356c
+    alias: Turn on Ri's office when door opened
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.ri_s_office_door_contact
+        from: "off"
+        to: "on"
+    action:
+      - if:
+          - "{{ is_state('sun.sun', 'below_horizon') }}"
+        then:
+          - service: light.turn_on
+            data:
+              transition: 0.25
+              color_temp: 500
+              brightness_pct: 100
+            target:
+              area_id: ri_s_office
+      - service: switch.turn_on
+        target:
+          area_id: ri_s_office
+
+  - id: b3f8aa9d20fee297accbd6aad27ba29c28aa02dc
+    alias: Turn off offices when in bed
+    trigger:
+      - platform: state
+        entity_id: group.everyone_in_bed
+        to: "on"
+        for:
+          minutes: 5
+    action:
+      - service: light.turn_off
+        target:
+          area_id:
+            - bo_s_office
+            - ri_s_office
+      - service: switch.turn_off
+        target:
+          area_id:
+            - bo_s_office
+            - ri_s_office

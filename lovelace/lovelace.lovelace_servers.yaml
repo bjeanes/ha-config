@@ -1,0 +1,326 @@
+config:
+  title: Servers
+  views:
+  - badges:
+    - entity: sensor.plex_tumtum_tree
+      name: Tumtum
+    - entity: media_player.apple_tv
+      name: "\uF8FF TV"
+    - entity: media_player.plex_plex_for_apple_tv_living_room
+      name: Plex
+    cards:
+    - entities:
+      - entity: sensor.nas_cpu_utilization_total
+      - entity: sensor.nas_memory_usage_real
+      - entity: sensor.nas_volume_1_volume_used
+      hours_to_show: 24
+      refresh_interval: 0
+      type: history-graph
+    - entities:
+      - entity: sensor.rtorrent_down_speed
+      - entity: sensor.rtorrent_up_speed
+      - entity: sensor.nzbget_speed_kilobytes_per_sec
+      - entity: sensor.rtorrent_downloading_torrents
+      - entity: sensor.rtorrent_uploading_torrents
+      hours_to_show: 6
+      refresh_interval: 5
+      type: history-graph
+    - cards:
+      - entity: sensor.plex_tumtum_tree
+        name: Plex
+        type: entity
+      - card:
+          type: entities
+        filter:
+          exclude:
+          - state: unavailable
+          - state: 'off'
+          - state: idle
+          - state: ok
+          - state: problem
+          include:
+          - domain: media_player
+            entity_id: /plex/
+        sort:
+          method: friendly_name
+        type: custom:auto-entities
+      type: vertical-stack
+    - entities:
+      - entity: sensor.plex_tumtum_tree
+      - entity: sensor.sonarr_upcoming
+      - entity: sensor.sonarr_queue
+      - entity: sensor.nas_cpu_utilization_total
+      - entity: sensor.nas_cpu_load_averarge_5_min
+      - entity: sensor.nas_cpu_load_averarge_15_min
+      - entity: sensor.nas_memory_usage_real
+      - entity: sensor.nas_network_down
+      - entity: sensor.nas_network_up
+      - entity: sensor.nas_temperature
+      - entity: binary_sensor.nas_update_available
+      - entity: sensor.nas_volume_1_average_disk_temp
+      - entity: sensor.nas_volume_1_volume_used
+      - entity: sensor.rtorrent_all_torrents
+        icon: hass:download
+      - entity: sensor.rtorrent_downloading_torrents
+        icon: hass:download
+      - entity: sensor.rtorrent_uploading_torrents
+        icon: hass:upload
+      - entity: sensor.rtorrent_active_torrents
+      type: entities
+    - entities:
+      - entity: sensor.nzbget_speed_kilobytes_per_sec
+      - entity: sensor.rtorrent_down_speed
+      - entity: sensor.rtorrent_up_speed
+      - entity: sensor.rtorrent_active_torrents
+      - entity: sensor.rtorrent_downloading_torrents
+      - entity: sensor.rtorrent_uploading_torrents
+      type: entities
+    icon: hass:plex
+    path: media
+    title: Media
+  - badges:
+    - entity: sensor.nas_volume_1_status
+    - entity: update.nas_dsm_update
+    - entity: sensor.nas_cpu_utilization_total
+    - entity: sensor.nas_volume_1_volume_used
+    - entity: sensor.nas_memory_usage_real
+    - entity: sensor.nas_ups_battery_charge
+    cards:
+    - card:
+        type: entities
+      filter:
+        exclude:
+        - device: NAS
+        - name: /NAS UPS/
+        - entity_id: /nas_drive_\d/
+        - entity_id: /nas_cache_device_/
+        - entity_id: /device_tracker/
+        - state: unavailable
+        include:
+        - name: /NAS/
+      type: custom:auto-entities
+    - card:
+        type: entities
+      filter:
+        exclude:
+        - attributes:
+            device_class: safety
+          state: 'off'
+        - attributes:
+            device_class: update
+          state: 'off'
+        - state: normal
+        include:
+        - device: NAS
+      type: custom:auto-entities
+    - card:
+        title: Noteworthy
+        type: entities
+      filter:
+        exclude:
+        - attributes:
+            device_class: safety
+          state: 'off'
+        - attributes:
+            device_class: update
+          state: 'off'
+        - state: normal
+        - state: not_use
+        - entity_id: /temp/
+          state: < 45
+        include:
+        - entity_id: /nas_drive/
+        - entity_id: /nas_cache/
+      show_empty: false
+      sort:
+        method: entity_id
+        numeric: true
+      type: custom:auto-entities
+    - entities:
+      - entity: sensor.nas_network_down
+      - entity: sensor.nas_network_up
+      hours_to_show: 24
+      refresh_interval: 0
+      type: history-graph
+    - entities:
+      - entity: sensor.nas_memory_size
+      - entity: sensor.nas_memory_total_real
+      hours_to_show: 24
+      refresh_interval: 0
+      type: history-graph
+    - card:
+        type: history-graph
+      filter:
+        exclude:
+        - entity_id: /status_data/
+        - entity_id: /nominal/
+        - entity_id: /transfer/
+        include:
+        - entity_id: /nas_ups/
+      type: custom:auto-entities
+    - card:
+        type: history-graph
+      filter:
+        exclude: []
+        include:
+        - entity_id: /nas_.*temp/
+      type: custom:auto-entities
+    - card:
+        type: history-graph
+      filter:
+        exclude: []
+        include:
+        - entity_id: /_(rx|tx)$/
+          integration: unifi
+      type: custom:auto-entities
+    icon: mdi:nas
+    path: nas
+    theme: Backend-selected
+    title: NAS
+  - badges: []
+    cards:
+    - entities:
+      - sensor.load_1m
+      - sensor.load_5m
+      - sensor.load_15m
+      - sensor.memory_use_percent
+      - sensor.processor_use
+      - sensor.disk_use_percent_config
+      - sensor.home_assistant_v2_db
+      title: HASS
+      type: history-graph
+    - entities:
+      - sensor.aircast_cpu_percent
+      - sensor.deconz_cpu_percent
+      - sensor.esphome_cpu_percent
+      - sensor.file_editor_cpu_percent
+      - sensor.frigate_nvr_full_access_cpu_percent
+      - sensor.glances_cpu_percent
+      - sensor.home_assistant_google_drive_backup_cpu_percent
+      - sensor.influxdb_cpu_percent
+      - sensor.mosquitto_broker_cpu_percent
+      - sensor.node_red_cpu_percent
+      - sensor.samba_share_cpu_percent
+      - sensor.sqlite_web_cpu_percent
+      - sensor.terminal_ssh_cpu_percent
+      - sensor.vaultwarden_bitwarden_cpu_percent
+      - sensor.zerotier_one_cpu_percent
+      hours_to_show: 24
+      title: CPU
+      type: history-graph
+    - entities:
+      - sensor.zerotier_one_memory_percent
+      - sensor.vaultwarden_bitwarden_memory_percent
+      - sensor.terminal_ssh_memory_percent
+      - sensor.sqlite_web_memory_percent
+      - sensor.samba_share_memory_percent
+      - sensor.node_red_memory_percent
+      - sensor.mosquitto_broker_memory_percent
+      - sensor.influxdb_memory_percent
+      - sensor.home_assistant_google_drive_backup_memory_percent
+      - sensor.glances_memory_percent
+      - sensor.frigate_nvr_full_access_memory_percent
+      - sensor.file_editor_memory_percent
+      - sensor.esphome_memory_percent
+      - sensor.deconz_memory_percent
+      - sensor.aircast_memory_percent
+      hours_to_show: 24
+      title: Memory
+      type: history-graph
+    icon: mdi:home-assistant
+    path: hass
+    theme: Backend-selected
+    title: HASS
+  - badges: []
+    cards:
+    - all_series_config:
+        extend_to_end: false
+        group_by:
+          duration: 30min
+          func: raw
+        show:
+          extremas: true
+        stroke_width: 3
+      apex_config:
+        chart:
+          toolbar:
+            show: true
+            tools:
+              pan: true
+              reset: true
+              zoom: true
+              zoomin: true
+              zoomout: true
+          zoom:
+            enabled: true
+        legend:
+          showForSingleSeries: true
+        plotOptions:
+          bar:
+            columnWidth: 50%
+        responsive:
+        - breakpoint: 765
+          options:
+            chart:
+              height: 500px
+        - breakpoint: 1025
+          options:
+            chart:
+              height: 400px
+        - breakpoint: 10000
+          options:
+            chart:
+              height: auto
+        stroke:
+          curve: smooth
+        yaxis_precision: 0
+      brush:
+        selection_span: 10m
+      experimental:
+        brush: true
+      graph_span: 48h
+      header:
+        show: true
+        title: Internet speed
+      now:
+        show: true
+      series:
+      - entity: sensor.speedtest_download
+        name: Download
+        type: line
+        unit: Mbps
+        yaxis_id: speed
+      - entity: sensor.speedtest_upload
+        name: Upload
+        type: line
+        unit: Mbps
+        yaxis_id: speed
+      - entity: sensor.speedtest_ping
+        group_by:
+          duration: 30min
+          func: max
+        name: Ping
+        stroke_width: 2
+        type: column
+        unit: ms
+        yaxis_id: latency
+      type: custom:apexcharts-card
+      yaxis:
+      - id: speed
+        max: ~50
+        min: ~0
+      - id: latency
+        max: ~50
+        min: ~0
+        opposite: true
+    - card:
+        type: entities
+      filter:
+        exclude: []
+        include:
+        - device: Laser Printer
+      type: custom:auto-entities
+    icon: ''
+    panel: false
+    path: misc
+    title: misc

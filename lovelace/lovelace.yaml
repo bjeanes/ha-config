@@ -1,0 +1,712 @@
+config:
+  title: Home
+  views:
+  - badges: []
+    cards:
+    - cards:
+      - cards:
+        - entity: person.bo_jeanes
+          fill_container: false
+          hide_name: false
+          hide_state: false
+          type: custom:mushroom-person-card
+          use_entity_picture: true
+        - double_tap_action:
+            action: none
+          entity: sensor.template_room_bo_phone
+          icon: "{% if is_state(entity, 'not_home') and is_state('person.bo_jeanes',\
+            \ 'home') %}\n  mdi:cellphone-off\n{% else %}\n  mdi:cellphone-marker\n\
+            {% endif %}"
+          secondary: "{% if is_state('person.bo_jeanes', 'not_home') %}\n   ~{{ states('proximity.bo_home')\
+            \ }}m from home\n{% elif is_state(entity, 'not_home') %}\n  Unknown\n\
+            {% else %}\n  {{ states(entity) | replace(\"_s_\",\"'s \") | replace(\"\
+            _\",\" \") | title }}\n  ~{{ state_attr(entity, 'distance') }}m\n{% endif\
+            \ %}"
+          tap_action:
+            action: more-info
+          type: custom:mushroom-template-card
+        type: vertical-stack
+      - cards:
+        - entity: person.ri_liu
+          fill_container: false
+          hide_name: false
+          hide_state: false
+          layout: horizontal
+          type: custom:mushroom-person-card
+          use_entity_picture: true
+        - double_tap_action:
+            action: none
+          entity: sensor.template_room_ri_phone
+          icon: "{% if is_state(entity, 'not_home') and is_state('person.ri_liu',\
+            \ 'home') %}\n  mdi:cellphone-off\n{% else %}\n  mdi:cellphone-marker\n\
+            {% endif %}"
+          secondary: "{% if is_state('person.ri_liu', 'not_home') %}\n   ~{{ states('proximity.ri_home')\
+            \ }}m from home\n{% elif is_state(entity, 'not_home') %}\n  Unknown\n\
+            {% else %}\n  {{ states(entity) | replace(\"_s_\",\"'s \") | replace(\"\
+            _\",\" \") | title }}\n  ~{{ state_attr(entity, 'distance') }}m\n{% endif\
+            \ %}"
+          tap_action:
+            action: more-info
+          type: custom:mushroom-template-card
+        type: vertical-stack
+      type: horizontal-stack
+    - card:
+        type: custom:mushroom-chips-card
+      card_param: chips
+      filter:
+        exclude: []
+        include:
+        - attributes:
+            device_class: door
+          domain: binary_sensor
+          options:
+            content: "{{ state_attr('this.entity_id', 'friendly_name') \n   | replace('\
+              \ contact','') \n   | replace(' Door','') }}"
+            icon: "{% if is_state('this.entity_id', 'on')  %}\n  mdi:door-open\n{%\
+              \ else %}\n  mdi:door-closed\n{% endif %}"
+            tap_action:
+              action: more-info
+            type: template
+            use_light_color: true
+          state: 'on'
+      show_empty: false
+      type: custom:auto-entities
+    - card:
+        type: custom:mushroom-chips-card
+      card_param: chips
+      filter:
+        exclude:
+        - entity_id: /tent/
+        - entity_id: '*double_lamp_*'
+        - area: Garden Shed
+        - name: /Purifier/
+        include:
+        - domain: light
+          options:
+            content_info: name
+            type: light
+            use_light_color: true
+          sort:
+            method: name
+      sort:
+        method: friendly_name
+      type: custom:auto-entities
+    - entity: cover.front_gate
+      layout: horizontal
+      show_buttons_control: true
+      show_position_control: false
+      tap_action:
+        action: call-service
+        service: button.press
+        service_data: {}
+        target:
+          entity_id: button.front_gate_button
+      type: custom:mushroom-cover-card
+    - cards:
+      - card:
+          chips:
+          - chip:
+              content_template: Play default ({{ states('sensor.background_playlist')
+                }})
+              icon: mdi:music
+              tap_action:
+                action: call-service
+                service: media_player.select_source
+                service_data:
+                  source_template: '{{ states(''sensor.background_playlist'') }}'
+                target:
+                  entity_id: media_player.denon_avr_x1600h_heos
+              type: template
+            conditions:
+            - entity: sensor.background_playlist
+              state_not: 'off'
+            type: conditional
+          - chip:
+              content: ABC Jazz - {{ states('sensor.abc_jazz_now_playing') }}
+              icon: mdi:music
+              tap_action:
+                action: call-service
+                service: media_player.select_source
+                service_data:
+                  source: ABC Jazz (Jazz Music)
+                target:
+                  entity_id: media_player.denon_avr_x1600h_heos
+              type: template
+            conditions:
+            - entity: sensor.current_living_room_media_player_source
+              state_not: ABC Jazz (Jazz Music)
+            type: conditional
+          - chip:
+              content: RRR - {{ states('sensor.rrr_now_playing') }}
+              icon: mdi:music
+              tap_action:
+                action: call-service
+                service: media_player.select_source
+                service_data:
+                  source: Triple R 102.7 (Variety)
+                target:
+                  entity_id: media_player.denon_avr_x1600h_heos
+              type: template
+            conditions:
+            - entity: sensor.current_living_room_media_player_source
+              state_not: Triple R 102.7 (Variety)
+            type: conditional
+          - chip:
+              content: PBS - {{ states('sensor.pbs_now_playing') }}
+              icon: mdi:music
+              tap_action:
+                action: call-service
+                service: media_player.select_source
+                service_data:
+                  source: PBS 106.7FM Melbourne | (Variety)
+                target:
+                  entity_id: media_player.denon_avr_x1600h_heos
+              type: template
+            conditions:
+            - entity: sensor.current_living_room_media_player_source
+              state_not: PBS 106.7FM Melbourne | (Variety)
+            type: conditional
+          - chip:
+              content: JJ - {{ states('sensor.jj_now_playing') }}
+              icon: mdi:music
+              tap_action:
+                action: call-service
+                service: media_player.select_source
+                service_data:
+                  source: Double J (Indie Music)
+                target:
+                  entity_id: media_player.denon_avr_x1600h_heos
+              type: template
+            conditions:
+            - entity: sensor.current_living_room_media_player_source
+              state_not: Double J (Indie Music)
+            type: conditional
+          - chip:
+              content: JJJ - {{ states('sensor.jjj_now_playing') }}
+              icon: mdi:music
+              tap_action:
+                action: call-service
+                service: media_player.select_source
+                service_data:
+                  source: triple j 107.5 (Alternative Rock)
+                target:
+                  entity_id: media_player.denon_avr_x1600h_heos
+              type: template
+            conditions:
+            - entity: sensor.current_living_room_media_player_source
+              state_not: triple j 107.5 (Alternative Rock)
+            type: conditional
+          type: custom:mushroom-chips-card
+        entities:
+        - sensor.background_playlist
+        type: custom:card-templater
+      - card:
+          type: vertical-stack
+        card_param: cards
+        filter:
+          exclude:
+          - state: unavailable
+          - state: 'off'
+          - state: idle
+          - state: standby
+          - entity_id: /spotify/
+          - entity_id: /denon/
+          - attributes:
+              source: HEOS Music
+          include:
+          - domain: media_player
+            not:
+              entity_id: '*.plex_*'
+            options:
+              media_controls:
+              - play_pause_stop
+              - on_off
+              - next
+              - previous
+              type: custom:mushroom-media-player-card
+              use_media_artwork: true
+              use_media_info: true
+              volume_controls:
+              - volume_set
+              - volume_buttons
+              - volume_mute
+          - attributes:
+              username: bjeanes
+            domain: media_player
+            entity_id: '*.plex_*'
+            options:
+              media_controls:
+              - play_pause_stop
+              - on_off
+              - next
+              - previous
+              type: custom:mushroom-media-player-card
+              use_media_artwork: true
+              use_media_info: true
+              volume_controls:
+              - volume_set
+              - volume_buttons
+              - volume_mute
+        show_empty: false
+        sort:
+          method: state
+          reverse: true
+        type: custom:auto-entities
+      type: horizontal-stack
+    - card:
+        state_color: true
+        title: Important
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: moisture
+          domain: binary_sensor
+          state: 'on'
+        - attributes:
+            device_class: problem
+          domain: binary_sensor
+          state: 'on'
+        - attributes:
+            device_class: connectivity
+          domain: binary_sensor
+          not:
+            entity_id: /robot_vacuum_(mop|water_box)/
+          state: 'off'
+        - entity_id: calendar.on_call
+          state: 'on'
+        - entity_id: /fire_danger/
+          not:
+            state: /Low|^High/
+        - entity_id: /octoprint_printing/
+          state: 'on'
+        - attributes:
+            state_class: measurement
+            unit_of_measurement: '%'
+          entity_id: /remaining/
+          state: <10
+        - attributes:
+            device_class: safety
+          state: 'on'
+        - entity_id: binary_sensor.electricity_price_spike
+          state: 'on'
+        - attributes:
+            days: <= 1
+            device_class: garbage_collection__schedule
+        - attributes:
+            device_class: battery
+          not 1:
+            attributes:
+              Is Charging: true
+          not 2:
+            attributes:
+              battery_status: Charging
+          not 3:
+            attributes:
+              Is Charged: true
+          not 4:
+            attributes:
+              icon: /charging/
+          options:
+            type: custom:battery-entity-row
+          state: < 10
+        - attributes:
+            weeks_remaining: 0
+        - entity_id: /cpu_percent/
+          state: '> 70'
+        - entity_id: /memory_percent/
+          state: '> 70'
+        - attributes:
+            device_class: update
+          state: 'on'
+        - domain: update
+          state: 'on'
+        - entity_id: sensor.recorder_age
+          state: '> 180'
+      show_empty: false
+      sort:
+        method: none
+      type: custom:auto-entities
+      unique: true
+    icon: hass:home
+    panel: false
+    path: default_view
+    title: Home
+  - badges: []
+    cards:
+    - entities:
+      - entity: binary_sensor.in_bed
+        name: Anyone In bed
+        secondary_info: last-updated
+      - entity: input_boolean.bo_in_bed
+      - entity: input_boolean.ri_in_bed
+      type: entities
+    - aqi:
+        entity_id: sensor.bedroom_purifier_pm2_5
+        unit: "\xB5g/m\xB3"
+      compact_view: true
+      entity: fan.bedroom_purifier
+      shortcuts:
+      - icon: mdi:weather-night
+        name: Silent
+        preset_mode: Silent
+      - icon: mdi:circle-slice-2
+        name: 25%
+        percentage: 25
+      - icon: mdi:circle-slice-4
+        name: 50%
+        percentage: 50
+      - icon: mdi:circle-slice-6
+        name: 75%
+        percentage: 75
+      - icon: mdi:circle-slice-8
+        name: 100%
+        percentage: 100
+      - icon: mdi:brightness-auto
+        name: Auto
+        preset_mode: Auto
+      show_name: false
+      show_state: false
+      show_toolbar: true
+      stats:
+      - entity_id: sensor.bedroom_purifier_temperature
+        unit: "\xB0C"
+      - entity_id: sensor.bedroom_purifier_humidity
+        unit: '%'
+      - entity_id: sensor.bedroom_purifier_filter_life_remaining
+        subtitle: Filter Remaining
+        unit: '%'
+      type: custom:purifier-card
+    - chips:
+      - entity: binary_sensor.in_bed
+        type: entity
+      type: custom:mushroom-chips-card
+    icon: mdi:bed
+    path: bedroom
+    theme: Backend-selected
+    title: Bedroom
+  - badges: []
+    cards:
+    - entity: weather.home_weather
+      number_of_forecasts: '3'
+      type: custom:weather-card
+    - entities:
+      - entity: sun.sun
+      - entity: sensor.home_weather_condition
+      - entity: sensor.home_weather_temperature
+        name: "\xB0C Current"
+      - entity: sensor.home_weather_humidity
+        name: Humidity
+      - entity: sensor.home_weather_cloud_coverage
+        name: Cloud coverage
+      hours_to_show: 24
+      refresh_interval: 0
+      type: history-graph
+    - center_latitude: -36.7769283
+      center_longitude: 144.2634146
+      extra_labels: true
+      map_style: Voyager
+      marker_latitude: -36.7769283
+      marker_longitude: 144.2634146
+      show_marker: true
+      show_range: true
+      show_zoom: true
+      type: custom:bom-radar-card
+      zoom_level: 8
+    icon: hass:thermometer
+    path: climate
+    title: Climate
+  - badges:
+    - entity: sensor.electricity_general_price
+    - entity: sensor.eagle_200_meter_power_demand
+    cards:
+    - link_dashboard: true
+      type: energy-distribution
+    - apex_config:
+        chart:
+          height: 250
+          type: area
+        dataLabels:
+          enabled: false
+        fill:
+          gradient:
+            inverseColors: false
+            opacityFrom: 0.45
+            opacityTo: 0.05
+            shadeIntensity: 1
+            stops:
+            - 20
+            - 100
+            - 100
+            - 100
+          type: gradient
+        legend:
+          show: false
+        stroke:
+          curve: smooth
+          show: true
+          width: 2
+        xaxis:
+          labels:
+            datetimeFormatter:
+              day: ddd
+              month: ddd
+          type: datetime
+      graph_span: 35h
+      header:
+        colorize_states: true
+        show: true
+        show_states: true
+        title: Amber Price 24hrs
+      now:
+        color: red
+        label: Now
+        show: true
+      series:
+      - color: black
+        curve: smooth
+        entity: sensor.electricity_general_price
+        extend_to_end: false
+        name: Price
+        type: area
+        yaxis_id: price
+      - color: lightgrey
+        data_generator: "return entity.attributes.forecasts.map((entry) => {\n  return\
+          \ [new Date(entry.start_time), entry.per_kwh];\n});\n"
+        entity: sensor.electricity_general_forecast
+        extend_to_end: false
+        name: Predicted Price
+        show:
+          in_chart: true
+          in_header: false
+        type: area
+        yaxis_id: price
+      - color: green
+        curve: smooth
+        entity: sensor.electricity_renewables
+        extend_to_end: false
+        name: Renewables in Grid
+        show:
+          in_chart: true
+          in_header: true
+        type: area
+        unit: '%'
+        yaxis_id: renewables_perc
+      - color: lightgreen
+        curve: smooth
+        data_generator: "return entity.attributes.forecasts.map((entry) => {\n  return\
+          \ [new Date(entry.start_time), entry.renewables];\n});\n"
+        entity: sensor.electricity_general_forecast
+        extend_to_end: false
+        name: Renewables in Grid
+        show:
+          in_chart: true
+          in_header: false
+        type: area
+        unit: '%'
+        yaxis_id: renewables_perc
+      - color: grey
+        entity: sensor.electricity_general_forecast
+        extend_to_end: false
+        name: Predicted Price
+        show:
+          in_chart: false
+          in_header: true
+        type: area
+        yaxis_id: price
+      span:
+        offset: -24h
+        start: minute
+      type: custom:apexcharts-card
+      yaxis:
+      - id: price
+        max: ~1
+        min: ~-1
+      - id: renewables_perc
+        max: ~100
+        min: ~0
+        opposite: true
+    - entities:
+      - entity: sensor.eagle_200_meter_power_demand
+        name: Meter Power Demand
+        secondary_info: last-changed
+      - entity: sensor.electricity_renewables
+        secondary_info: last-changed
+      - entity: binary_sensor.electricity_price_spike
+        secondary_info: last-changed
+      - entity: sensor.electricity_general_price
+        secondary_info: last-changed
+      - entity: sensor.electricity_general_forecast
+      type: entities
+    - cards:
+      - entity: sensor.eagle_200_meter_power_demand
+        max: 5
+        min: 0
+        name: Current Usage
+        needle: true
+        severity:
+          green: 0
+          red: 3
+          yellow: 1.5
+        type: gauge
+      - entity: sensor.electricity_general_price
+        max: 2
+        min: 0
+        name: Current Price
+        needle: true
+        severity:
+          green: -1
+          red: 0.65
+          yellow: 0.25
+        type: gauge
+        unit: $
+      type: horizontal-stack
+    - entity: sensor.current_electricity_cost
+      max: 5
+      min: 0
+      name: Current Cost
+      needle: true
+      severity:
+        green: -1000
+        red: 1.5
+        yellow: 0.75
+      type: gauge
+    - entities:
+      - entity: sensor.eagle_200_meter_power_demand
+      - entity: sensor.electricity_general_price
+      - entity: sensor.current_electricity_cost
+      - entity: sensor.eagle_200_net_meter_energy_delivered_minus_received
+      hours_to_show: 24
+      refresh_interval: 5
+      type: history-graph
+    - card:
+        type: history-graph
+      filter:
+        exclude:
+        - name: /UPS/
+        - name: /Eagle-200/
+        - name: /Estimated Power Production/
+        - state: unavailable
+        include:
+        - attributes:
+            device_class: power
+        - attributes:
+            device_class: xxdisabled_voltage
+        - attributes:
+            device_class: current
+      type: custom:auto-entities
+      unique: true
+    - card:
+        show_header_toggle: false
+        type: entities
+      filter:
+        exclude:
+        - name: /Restart/
+        - state: unavailable
+        include:
+        - device: /power|plug/
+          domain: switch
+          options:
+            secondary_info: last-changed
+      show_empty: false
+      sort:
+        method: friendly_name
+      type: custom:auto-entities
+      unique: true
+    - type: energy-devices-graph
+    - type: energy-usage-graph
+    - card:
+        hours_to_show: 3
+        title: Voltage
+        type: history-graph
+      filter:
+        exclude:
+        - entity_id: /nas_ups/
+        - entity_id: /battery/
+        - entity_id: /dht/
+        include:
+        - entity_id: /voltage/
+      type: custom:auto-entities
+    - entities:
+      - sensor.co2_intensity
+      type: history-graph
+    icon: hass:lightning-bolt
+    path: power
+    title: Power
+  - badges: []
+    cards:
+    - calibration_source:
+        camera: true
+      entity: vacuum.robot_vacuum
+      map_source:
+        camera: camera.vacuum_map
+      type: custom:xiaomi-vacuum-map-card
+      vacuum_platform: default
+    icon: ''
+    panel: false
+    path: misc
+    title: misc
+  - badges: []
+    cards:
+    - entities:
+      - switch.washing_machine_plug
+      - sensor.washing_machine_plug_current
+      - sensor.washing_machine_plug_energy_usage
+      - sensor.washing_machine_plug_total_daily_energy
+      - sensor.washing_machine_plug_voltage
+      - sensor.washing_machine_plug_wattage
+      hours_to_show: 120
+      type: history-graph
+    icon: mdi:washing-machine
+    path: washing
+    theme: Backend-selected
+    title: Washing
+  - badges: []
+    cards:
+    - card:
+        type: entities
+      filter:
+        exclude:
+        - entity_id: /tent/
+        include:
+        - entity_id: /adaptive/
+      type: custom:auto-entities
+    - card:
+        type: entities
+      filter:
+        exclude:
+        - entity_id: /tent/
+        include:
+        - domain: light
+      type: custom:auto-entities
+    icon: mdi:lamps
+    path: lighting
+    theme: Backend-selected
+    title: Lighting
+  - badges: []
+    cards:
+    - card:
+        type: entities
+      filter:
+        exclude: []
+        include:
+        - attributes:
+            device_class: door
+          domain: binary_sensor
+      type: custom:auto-entities
+    - card:
+        type: history-graph
+      filter:
+        exclude: []
+        include:
+        - attributes:
+            device_class: door
+          domain: binary_sensor
+      type: custom:auto-entities
+    icon: mdi:door
+    path: doors
+    theme: Backend-selected
+    title: Doors

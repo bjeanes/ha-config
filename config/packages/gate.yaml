@@ -1,0 +1,123 @@
+# alert:
+#   front_gate:
+#     name: Front gate is open
+#     message: >- # templatable
+#       Gate has been left open
+#     skip_first: true # don't send immediately on true condition (HomeKit already does)
+#     repeat: [10, 20, 60, 120]
+#     entity_id: cover.front_gate
+#     state: open
+#     notifiers:
+#       - mobile_app_bos_iphone
+#     data:
+#       actions:
+#         - action: close_gate
+#           title: Close gate
+#       push:
+#         interruption-level: time-sensitive
+
+automation:
+  - id: close_front_gate_from_alert
+    alias: Close front gate from alert
+    trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: close_gate
+    condition: >-
+      {{ is_state('cover.front_gate', 'open')}}
+    action:
+      - service: cover.close_cover
+        target:
+          entity_id: cover.front_gate
+
+  # - id: restart_gate_if_stuck_in_state
+  #   alias: Restart gate if stuck in state
+  #   trigger:
+  #     - platform: state
+  #       entity_id: cover.front_gate
+  #       to: "opening"
+  #       for:
+  #         minutes: 2
+  #     - platform: state
+  #       entity_id: cover.front_gate
+  #       to: "closing"
+  #       for:
+  #         minutes: 2
+  #   action:
+  #     - service: button.press
+  #       target:
+  #         entity_id: button.front_gate_restart
+
+  - id: "1649564112896"
+    alias: Open Gate When Coming Home
+    description: ""
+    trigger:
+      - platform: numeric_state
+        entity_id: proximity.bo_home
+        below: "500"
+    condition:
+      - condition: state
+        entity_id: proximity.bo_home
+        attribute: dir_of_travel
+        state: towards
+      - condition: state
+        entity_id: sensor.bos_iphone_activity
+        state: Automotive
+      - condition: state
+        entity_id: sensor.bos_iphone_activity
+        attribute: Confidence
+        state: High
+    action:
+      - service: cover.open_cover
+        data: {}
+        target:
+          entity_id: cover.front_gate
+#
+# # automation:
+#   - id: "1636803117218"
+#     alias: Alert if gate left open
+#     description: ""
+#     trigger:
+#       - platform: state
+#         for:
+#           hours: 0
+#           minutes: 20
+#           seconds: 0
+#         entity_id: cover.front_gate
+#         to: open
+#     action:
+#       - alias: Set up variables for the actions
+#         variables:
+#           action_close: "{{ 'CLOSE_' ~ context.id }}"
+#       - service: notify.mobile_app_bos_iphone
+#         data:
+#           message: Gate has been open for 20 minutes or more
+#           title: Gate left open
+#           data:
+#             actions:
+#               - action: "{{ action_close }}"
+#                 title: Close gate
+#             push:
+#               interruption-level: time-sensitive
+#       - alias: Wait for a response
+#         wait_for_trigger:
+#           - platform: event
+#             event_type: mobile_app_notification_action
+#             event_data:
+#               action: "{{ action_close }}"
+#       - alias: Perform the action
+#         choose:
+#           - conditions:
+#               - condition: template
+#                 value_template: "{{ wait.trigger.event.data.action == action_close }}"
+#             sequence:
+#               - condition: not
+#                 conditions:
+#                   - condition: state
+#                     entity_id: cover.front_gate
+#                     state: closed
+#               - service: cover.close_cover
+#                 target:
+#                   entity_id: cover.front_gate
+#     mode: single

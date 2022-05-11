@@ -1,0 +1,13 @@
+certfile: fullchain.pem
+customize:
+  active: false
+  folder: mosquitto
+keyfile: privkey.pem
+logins:
+- password: '!secret mosquitto_espresense_password'
+  username: espresense
+- password: '!secret mosquitto_esphome_password'
+  username: esphome
+- password: '!secret mosquitto_zigbee2mqtt_password'
+  username: zigbee2mqtt
+require_certificate: false

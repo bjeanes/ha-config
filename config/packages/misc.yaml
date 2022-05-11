@@ -1,0 +1,60 @@
+anniversaries:
+  sensors:
+    - name: Anniversary
+      date: "2007-08-09"
+    - name: Wedding Anniversary
+      date: "2010-12-07"
+    - name: Bo's Birthday
+      date: "1987-06-24"
+    - name: Ri's Birtthday
+      date: "1988-02-01"
+    - name: Ri's Mum's Birthday
+      date: "1960-03-19"
+    - name: Haley's Birthday
+      date: "2009-08-03"
+    - name: Archie's Birthday
+      date: "2017-10-24"
+    - name: Misty's Birthday
+      date: "2016-04-24"
+    - name: Bo's Mum's Birthday
+      date: "1965-01-20"
+    - name: Bo's Dad's Birthday
+      date: "1952-10-04"
+    - name: Chela's Birthday
+      date: "1996-06-16"
+    - name: Jacob's Birthday
+      date: "1993-06-22"
+    - name: Lucia's Birthday
+      date: "2005-10-26"
+    - name: Kian's Birthday
+      date: "1998-07-27"
+    - name: Andy's Birthday
+      date: "1987-02-17"
+    - name: Jordon's Birthday
+      date: "02-19"
+    - name: Kate's Birthday
+      date: "03-20"
+    - name: Nick's Birthday
+      date: "1983-03-24"
+    - name: Anthony's Birthday
+      date: "1983-11-19"
+    - name: Mischa's Birthday
+      date: "1988-01-18"
+    - name: Suzanne's Birthday
+      date: "1988-04-20"
+    - name: Richy's Birthday
+      date: "1997-10-26"
+    - name: Bo's Nan's Birthday
+      date: "07-05"
+    - name: Shahron's Birthday
+      date: "1962-07-23"
+    - name: Valentin's Birthday
+      date: "03-28"
+    - name: Odin's Birthday
+      date: "06-07"
+    - name: Ellie's Birthday
+      date: "06-17"
+    - name: Tyson's Birthday
+      date: "05-05"
+    - name: Alex Charry's Birthday
+      date: "08-06"

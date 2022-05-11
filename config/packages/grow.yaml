@@ -1,0 +1,420 @@
+android_ip_webcam:
+  - host: 10.10.10.112
+    name: Tent Cam
+    sensors:
+      - battery_level
+      - battery_temp
+      - light
+      - proximity
+    switches:
+      - exposure_lock
+      - ffc
+      - focus
+      - night_vision
+      - overlay
+
+camera:
+  - platform: mjpeg_timelapse
+    image_url: http://10.10.10.112:8080/shot.jpg
+    name: Tent Timelapse
+    fetch_interval: 3600
+    max_frames: 36
+    framerate: 10
+    quality: 80
+    loop: true
+
+template:
+  - binary_sensor:
+      - unique_id: tent_lights_status
+        name: Tent lights status
+        delay_on: "0:00:05"
+        delay_off: "0:00:05"
+        state: |
+          {{ states('sensor.tent_wattage') | float > 150 }}
+        attributes:
+          device_class: power
+  - sensor:
+      - unique_id: tent_temperature_cached
+        name: Tent Temperature (cached)
+        unit_of_measurement: °C
+        device_class: temperature
+        state_class: measurement
+        state: |
+          {{ float(states('sensor.tent_temperature'), default=states('sensor.tent_temperature_cached')) }}
+
+      - unique_id: tent_humidity_cached
+        name: Tent Humidity (cached)
+        unit_of_measurement: "%"
+        device_class: humidity
+        state_class: measurement
+        state: |
+          {{ float(states('sensor.tent_humidity'), default=states('tent_humidity_cached')) }}
+
+      - unique_id: tent_svp
+        name: "Tent SVP (Saturation Vapor Pressure)"
+        unit_of_measurement: kPa
+        device_class: pressure
+        state_class: measurement
+        state: |
+          {% set T = float(states('sensor.tent_temperature_cached')) %}
+          {% if is_number(T) %}
+          {{ (0.61078 * e ** (17.2694 * T / (T + 238.3))) | round(3) }}
+          {% else %}
+          {{ states('sensor.tent_svp') | round(3) }}
+          {% endif %}
+      - unique_id: tent_avp
+        name: "Tent AVP (Actual Vapor Pressure)"
+        unit_of_measurement: kPa
+        device_class: pressure
+        state_class: measurement
+        state: |
+          {% set SVP = float(states('sensor.tent_svp')) %}
+          {% set RH = float(states('sensor.tent_humidity_cached')) %}
+          {% if is_number(SVP) and is_number(RH) %}
+          {{ (SVP * (RH/100.0)) | round(3) }}
+          {% else %}
+          {{ states('sensor.tent_avp') | round(3) }}
+          {% endif %}
+      - unique_id: tent_vpd
+        name: "Tent VPD (Vapor Pressure Deficit)"
+        unit_of_measurement: kPa
+        device_class: pressure
+        state_class: measurement
+        state: |
+          {% set SVP = float(states('sensor.tent_svp')) %}
+          {% set AVP = float(states('sensor.tent_avp')) %}
+          {% if is_number(SVP) and is_number(AVP) %}
+          {{ (SVP - AVP) | round(3) }}
+          {% else %}
+          {{ states('sensor.tent_vpd') | round(3) }}
+          {% endif %}
+
+automation:
+  - id: "1635395611631"
+    alias: Tent Cam Night Mode When Light Is Off
+    description: ""
+    trigger:
+      - platform: device
+        type: turned_off
+        device_id: 3a26463c21d89cc84ffad181fa45ff06
+        entity_id: switch.tent_power_strip_grow_lights
+        domain: switch
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+    condition: []
+    action:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.tent_cam_night_vision
+    mode: single
+  - id: "1635395660038"
+    alias: Tent Cam Night Mode When Light Is On
+    description: ""
+    trigger:
+      - platform: device
+        type: turned_on
+        device_id: 3a26463c21d89cc84ffad181fa45ff06
+        entity_id: switch.tent_power_strip_grow_lights
+        domain: switch
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+    condition: []
+    action:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.tent_cam_night_vision
+    mode: single
+  - id: "1635483973733"
+    alias: Restore tent power strip's state when available
+    description: ""
+    trigger:
+      - platform: state
+        entity_id: switch.tent_lights_local
+        from: unavailable
+        to: "off"
+      - platform: state
+        entity_id: switch.tent_usb_local
+        from: unavailable
+        to: "off"
+      - platform: state
+        entity_id: switch.tent_fans_local
+        from: unavailable
+        to: "off"
+      - platform: state
+        entity_id: switch.tent_misc_local
+        from: unavailable
+        to: "off"
+      - platform: state
+        entity_id: switch.tent_humidifier_local
+        from: unavailable
+        to: "off"
+    condition: []
+    action:
+      - scene: scene.tent_power_strip_state
+    mode: restart
+  - id: "1635546763394"
+    alias: Snapshot Tent Power Strip state on any state change
+    description:
+      Allows restoring that state when the device goes offline and comes
+      back online
+    trigger:
+      - platform: state
+        entity_id: switch.tent_misc_local
+      - platform: state
+        entity_id: switch.tent_lights_local
+      - platform: state
+        entity_id: switch.tent_fans_local
+      - platform: state
+        entity_id: switch.tent_usb_local
+      - platform: state
+        entity_id: switch.tent_humidifier_local
+    condition: []
+    action:
+      - service: scene.create
+        data:
+          scene_id: tent_power_strip_state
+          snapshot_entities:
+            - switch.tent_lights_local
+            - switch.tent_fans_local
+            - switch.tent_humidifier_local
+            - switch.tent_misc_local
+            - switch.tent_usb_local
+    mode: restart
+  - id: "1635838578022"
+    alias: Tent lights off
+    description: ""
+    trigger:
+      - platform: time
+        at: "17:30:00"
+    condition: []
+    action:
+      - type: turn_off
+        device_id: 3a26463c21d89cc84ffad181fa45ff06
+        entity_id: switch.tent_power_strip_grow_lights
+        domain: switch
+    mode: single
+  - id: "1635838786987"
+    alias: Tent lights on after 6 hrs
+    description: ""
+    trigger:
+      - platform: time
+        at: "23:30:00"
+    condition: []
+    action:
+      - type: turn_on
+        device_id: 3a26463c21d89cc84ffad181fa45ff06
+        entity_id: switch.tent_power_strip_grow_lights
+        domain: switch
+    mode: single
+  - id: "1635838809246"
+    alias: Tent lights on after 12 hrs
+    description: ""
+    trigger:
+      - platform: time
+        at: 05:30:00
+    condition: []
+    action:
+      - type: turn_on
+        device_id: 3a26463c21d89cc84ffad181fa45ff06
+        entity_id: switch.tent_power_strip_grow_lights
+        domain: switch
+    mode: single
+  - id: "1640915453691"
+    alias: Alert if pH drops out of range
+    description: ""
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.tent_reservoir_ph
+        above: input_number.maximum_ph
+        for:
+          hours: 0
+          minutes: 5
+          seconds: 0
+      - platform: numeric_state
+        entity_id: sensor.tent_reservoir_ph
+        below: input_number.minimum_ph
+        for:
+          hours: 0
+          minutes: 5
+          seconds: 0
+    condition: []
+    action:
+      - device_id: 180bff5b35717d9bb9082d52551b5065
+        domain: mobile_app
+        type: notify
+        message: pH outside of specified range
+    mode: single
+  - id: "1644557480025"
+    alias: Turn on tent humidifier
+    description: if VPD is high _and_ it is not above maximum allowable humidity
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.tent_vpd
+        above: input_number.maximum_tent_vpd
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 0
+      - platform: numeric_state
+        entity_id: sensor.tent_humidity_cached
+        below: input_number.minimum_tent_humidity
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.tent_humidity_cached
+        below: input_number.maximum_tent_humidity
+    action:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id:
+            - switch.tent_humidifier
+            - switch.tent_humidifier_local
+    mode: restart
+  - id: "1644557631412"
+    alias: Turn off tent humidifier
+    description: if VPD in range or humidity too high
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.tent_vpd
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 0
+        below: input_number.minimum_tent_vpd
+      - platform: numeric_state
+        entity_id: sensor.tent_humidity_cached
+        above: input_number.maximum_tent_humidity
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 0
+    condition:
+      - condition: or
+        conditions:
+          - condition: numeric_state
+            entity_id: sensor.tent_wattage
+            below: "150"
+          - condition: numeric_state
+            entity_id: sensor.tent_humidity_cached
+            above: input_number.minimum_tent_humidity
+    action:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id:
+            - switch.tent_humidifier
+            - switch.tent_humidifier_local
+    mode: restart
+  - id: "1644716285765"
+    alias: Re-focus tent cam regularly
+    description: ""
+    trigger:
+      - platform: time_pattern
+        minutes: /5
+        seconds: "0"
+        hours: "*"
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.tent_wattage
+        above: "150"
+    action:
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.tent_cam_focus
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.tent_cam_focus
+    mode: single
+  - id: "1645058611536"
+    alias: Count humidifier run time
+    description: ""
+    trigger:
+      - platform: time_pattern
+        seconds: /1
+    condition:
+      - condition: device
+        type: is_on
+        device_id: 4f8a04a40876b2a1914ea8d004b6aac5
+        entity_id: switch.tent_humidifier_local
+        domain: switch
+    action:
+      - service: counter.increment
+        data: {}
+        target:
+          entity_id: counter.humidifier_run_time_since_refill
+    mode: queued
+    max: 120
+  - id: "1645060500738"
+    alias: Humidifier tank timer
+    description: ""
+    trigger:
+      - platform: device
+        type: turned_on
+        device_id: 4f8a04a40876b2a1914ea8d004b6aac5
+        entity_id: switch.tent_humidifier_local
+        domain: switch
+      - platform: device
+        type: turned_off
+        device_id: 4f8a04a40876b2a1914ea8d004b6aac5
+        entity_id: switch.tent_humidifier_local
+        domain: switch
+    condition: []
+    action:
+      - service:
+          "timer.{{ 'start' if trigger.to_state.state == 'on' else 'pause'
+          }}
+
+          "
+        data: {}
+        target:
+          entity_id: timer.humidifier_time_till_refill
+    mode: restart
+  - id: "1647038709985"
+    alias: Disable timelapse when lights off
+    description: ""
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.tent_wattage
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 30
+        below: "100"
+    condition: []
+    action:
+      - service: mjpeg_timelapse.pause_recording
+        data: {}
+        target:
+          entity_id: camera.tent_timelapse
+    mode: single
+  - id: "1647038771614"
+    alias: Enable timelapse when lights on
+    description: ""
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.tent_wattage
+        for:
+          hours: 0
+          minutes: 15
+          seconds: 0
+        above: "180"
+    condition: []
+    action:
+      - service: mjpeg_timelapse.resume_recording
+        data: {}
+        target:
+          entity_id: camera.tent_timelapse
+    mode: single

@@ -1,0 +1,98 @@
+-== Watchman Report ==- 
+
+-== Congratulations, all 28 services from your config are available!
+
+-== Missing 85 entity(ies) from 276 found in your config:
++--------------------------------------------------------------+----------------------+----------------------------------------------------------------------------------+
+| Entity ID                                                    | State                | Location                                                                         |
++--------------------------------------------------------------+----------------------+----------------------------------------------------------------------------------+
+| scene.snapshot_humidifier_before_refilling                   | missing              | scripts.yaml:45                                                                  |
+| switch.is_off                                                | missing              | esphome/front-gate.yaml:80,113,130                                               |
+| binary_sensor.is_on                                          | missing              | esphome/front-gate.yaml:114,122                                                  |
+| binary_sensor.is_off                                         | missing              | esphome/front-gate.yaml:131                                                      |
+| sensor.octoprint_current_state                               | unavail              | packages/3d_printing.yaml:28,36                                                  |
+| sensor.room_bo_phone                                         | missing              | packages/presence.yaml:59                                                        |
+| sensor.room_ri_phone                                         | missing              | packages/presence.yaml:60                                                        |
+| sensor.tent_wattage                                          | unavail              | packages/grow.yaml:33,301,324,390,408                                            |
+| sensor.tent_temperature                                      | missing              | packages/grow.yaml:43                                                            |
+| sensor.tent_temperature_cached                               | unavail              | packages/grow.yaml:43,59                                                         |
+| sensor.tent_humidity                                         | missing              | packages/grow.yaml:51                                                            |
+| sensor.tent_svp                                              | unavail              | packages/grow.yaml:63,71,84                                                      |
+| sensor.tent_humidity_cached                                  | unknown              | packages/grow.yaml:72,265,269,291,304                                            |
+| sensor.tent_avp                                              | unavail              | packages/grow.yaml:76,85                                                         |
+| sensor.tent_vpd                                              | unavail              | packages/grow.yaml:89,258,284                                                    |
+| switch.tent_power_strip_grow_lights                          | missing              | packages/grow.yaml:100,120,199,212,225                                           |
+| switch.tent_cam_night_vision                                 | unavail              | packages/grow.yaml:111,131                                                       |
+| sensor.tent_reservoir_ph                                     | missing              | packages/grow.yaml:233,240                                                       |
+| switch.tent_cam_focus                                        | unavail              | packages/grow.yaml:330,339                                                       |
+| sensor.ri_s_phone                                            | missing              | packages/home.yaml:46,54                                                         |
+| input_boolean.turn_                                          | missing              | packages/home.yaml:94                                                            |
+| sensor.bos_iphone_activity                                   | missing              | packages/gate.yaml:65,68                                                         |
+| media_player.apple_tv                                        | missing              | packages/media_centre.yaml:29,32,90,109,112,113                                  |
+| media_player.living_room_tv_homekit                          | unavail              | packages/media_centre.yaml:172                                                   |
+| sensor.current_living_room_media                             | missing              | packages/media_centre.yaml:180,181,183                                           |
+| sensor.eagle_200_net_meter_energy_delivered_minus_received   | missing              | .storage/lovelace:928                                                            |
+| sensor.tent_reservoir_ec_us                                  | missing              | .storage/lovelace.lovelace_gardens:115,272,737                                   |
+| sensor.tent_cam_battery_level                                | unavail              | .storage/lovelace.lovelace_gardens:140                                           |
+| sensor.tent_cam_battery_temperature                          | unavail              | .storage/lovelace.lovelace_gardens:144                                           |
+| sensor.tent_cam_light_level                                  | unavail              | .storage/lovelace.lovelace_gardens:148                                           |
+| switch.tent_power_plug                                       | unavail              | .storage/lovelace.lovelace_gardens:175                                           |
+| sensor.tent_reservoir_temperature                            | missing              | .storage/lovelace.lovelace_gardens:264,725                                       |
+| input_number.tent_temperature                                | missing              | .storage/lovelace.lovelace_gardens:586                                           |
+| sensor.bendigo_temp                                          | missing              | .storage/lovelace.lovelace_gardens:678                                           |
+| sensor.bendigo_humidity                                      | missing              | .storage/lovelace.lovelace_gardens:696                                           |
+| sensor.tent_hhcc_1_illuminance                               | missing              | .storage/lovelace.lovelace_gardens:765                                           |
+| sensor.tent_hhcc_2_illuminance                               | missing              | .storage/lovelace.lovelace_gardens:769                                           |
+| sensor.tent_hhcc_1_moisture                                  | missing              | .storage/lovelace.lovelace_gardens:780                                           |
+| sensor.tent_hhcc_2_moisture                                  | missing              | .storage/lovelace.lovelace_gardens:784                                           |
+| sensor.tent_hhcc_1_temperature                               | missing              | .storage/lovelace.lovelace_gardens:795                                           |
+| sensor.tent_hhcc_2_temperature                               | missing              | .storage/lovelace.lovelace_gardens:799                                           |
+| sensor.tent_hhcc_1_soil_conductivity                         | missing              | .storage/lovelace.lovelace_gardens:810                                           |
+| sensor.tent_hhcc_2_soil_conductivity                         | missing              | .storage/lovelace.lovelace_gardens:814                                           |
+| button.garden_shed_ble_relay_restart                         | missing              | .storage/lovelace.lovelace_gardens:959                                           |
+| binary_sensor.garden_shed_ble_relay_status                   | missing              | .storage/lovelace.lovelace_gardens:963                                           |
+| sensor.garden_shed_ble_relay_wifi_signal                     | missing              | .storage/lovelace.lovelace_gardens:968                                           |
+| sensor.garden_shed_ble_relay_uptime_human_readable           | missing              | .storage/lovelace.lovelace_gardens:972                                           |
+| button.octoprint_stop_job                                    | unavail              | .storage/lovelace.3d_printing:65                                                 |
+| binary_sensor.octoprint_printing                             | unavail              | .storage/lovelace.3d_printing:76,99,121,251                                      |
+| button.octoprint_pause_job                                   | unavail              | .storage/lovelace.3d_printing:85                                                 |
+| button.octoprint_resume_job                                  | unavail              | .storage/lovelace.3d_printing:91                                                 |
+| sensor.octoprint_start_time                                  | unknown              | .storage/lovelace.3d_printing:147                                                |
+| sensor.octoprint_estimated_finish_time                       | unknown              | .storage/lovelace.3d_printing:154                                                |
+| sensor.octoprint_actual_bed_temp                             | unavail              | .storage/lovelace.3d_printing:178,265                                            |
+| sensor.octoprint_target_bed_temp                             | unavail              | .storage/lovelace.3d_printing:182,269                                            |
+| sensor.octoprint_target_tool0_temp                           | unavail              | .storage/lovelace.3d_printing:204,208,277                                        |
+| binary_sensor.octoprint_printing_error                       | unavail              | .storage/lovelace.3d_printing:218,223                                            |
+| sensor.octoprint_actual_tool0_temp                           | unavail              | .storage/lovelace.3d_printing:273                                                |
+| media_player.plex_plex_for_apple_tv_living_room              | unavail              | .storage/lovelace.lovelace_servers:23                                            |
+| sensor.nas_cpu_load_averarge_5_min                           | missing              | .storage/lovelace.lovelace_servers:126                                           |
+| sensor.nas_cpu_load_averarge_15_min                          | missing              | .storage/lovelace.lovelace_servers:129                                           |
+| sensor.nas_network_down                                      | missing              | .storage/lovelace.lovelace_servers:135,333                                       |
+| sensor.nas_network_up                                        | missing              | .storage/lovelace.lovelace_servers:138,336                                       |
+| binary_sensor.nas_update_available                           | missing              | .storage/lovelace.lovelace_servers:144                                           |
+| sensor.nas_memory_size                                       | missing              | .storage/lovelace.lovelace_servers:346                                           |
+| sensor.home_assistant_v2_db                                  | missing              | .storage/lovelace.lovelace_servers:426                                           |
+| sensor.aircast_cpu_percent                                   | missing              | .storage/lovelace.lovelace_servers:433                                           |
+| sensor.deconz_cpu_percent                                    | missing              | .storage/lovelace.lovelace_servers:434                                           |
+| sensor.frigate_nvr_full_access_cpu_percent                   | missing              | .storage/lovelace.lovelace_servers:437                                           |
+| sensor.influxdb_cpu_percent                                  | missing              | .storage/lovelace.lovelace_servers:440                                           |
+| sensor.sqlite_web_cpu_percent                                | unavail              | .storage/lovelace.lovelace_servers:444                                           |
+| sensor.vaultwarden_bitwarden_cpu_percent                     | missing              | .storage/lovelace.lovelace_servers:446                                           |
+| sensor.vaultwarden_bitwarden_memory_percent                  | missing              | .storage/lovelace.lovelace_servers:456                                           |
+| sensor.sqlite_web_memory_percent                             | unavail              | .storage/lovelace.lovelace_servers:458                                           |
+| sensor.influxdb_memory_percent                               | missing              | .storage/lovelace.lovelace_servers:462                                           |
+| sensor.frigate_nvr_full_access_memory_percent                | missing              | .storage/lovelace.lovelace_servers:465                                           |
+| sensor.deconz_memory_percent                                 | missing              | .storage/lovelace.lovelace_servers:468                                           |
+| sensor.aircast_memory_percent                                | missing              | .storage/lovelace.lovelace_servers:469                                           |
+| sensor.speedtest_download                                    | unavail              | .storage/lovelace.lovelace_servers:580                                           |
+| sensor.speedtest_upload                                      | unavail              | .storage/lovelace.lovelace_servers:587                                           |
+| sensor.speedtest_ping                                        | unavail              | .storage/lovelace.lovelace_servers:594                                           |
+| sensor.hl_l2305_black_toner_remaining                        | missing              | .storage/lovelace.lovelace_servers:610                                           |
+| sensor.hl_l2305_drum_remaining_life                          | missing              | .storage/lovelace.lovelace_servers:611                                           |
+| sensor.hl_l2305_page_counter                                 | missing              | .storage/lovelace.lovelace_servers:612                                           |
+| sensor.hl_l2305_status                                       | missing              | .storage/lovelace.lovelace_servers:613                                           |
++--------------------------------------------------------------+----------------------+----------------------------------------------------------------------------------+
+
+-== Report created on 11 May 2022 09:50:54
+-== Parsed 62 files in 0.76s., ignored 160 files 
+-== Generated in: 0.02s. Validated in: 0.00s.

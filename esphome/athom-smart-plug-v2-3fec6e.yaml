@@ -1,0 +1,14 @@
+substitutions:
+  device_name: athom-smart-plug-v2-3fec6e
+  relay_restore_mode: RESTORE_DEFAULT_ON
+  friendly_name: Bo's Office Plug
+packages:
+  athom.smart-plug-v2: github://athom-tech/athom-configs/athom-smart-plug-v2.yaml
+esphome:
+  name_add_mac_suffix: false
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  use_address: 10.10.30.156

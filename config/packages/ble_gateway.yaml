@@ -1,0 +1,63 @@
+input_boolean:
+  settings_ble_gateway:
+    name: BLE Gateway
+    icon: mdi:bluetooth
+
+input_text:
+  settings_ble_gateway_add_device:
+    name: BLE Gateway Add Device
+    icon: mdi:bluetooth-connect
+    initial: ""
+
+template:
+  - binary_sensor:
+      - name: BLE Gateway
+        icon: mdi:bluetooth
+        state: "{{ is_state('input_boolean.settings_ble_gateway', 'on') }}"
+        attributes:
+          devices: >-
+            {{ states
+               | selectattr('attributes.mac_address', 'defined')
+               | rejectattr('attributes.IP', 'defined')
+               | rejectattr('attributes.ip', 'defined')
+               | rejectattr('attributes.lan_ip', 'defined')
+               | map(attribute='attributes.mac_address')
+               | unique
+               | sort
+               | join('')
+               | replace(':', '')
+               ~ (states('input_text.settings_ble_gateway_add_device')
+                  | replace(':', '')
+                  | replace(' ', '')
+                  | trim) if is_state('binary_sensor.ble_gateway', 'on')
+            }}
+
+      - name: "Bluetooth stalled"
+        state: >-
+          {% set last_update = states
+               | selectattr('attributes.mac_address', 'defined')
+               | rejectattr('attributes.IP', 'defined')
+               | rejectattr('attributes.ip', 'defined')
+               | rejectattr('attributes.lan_ip', 'defined')
+               | map(attribute='last_updated')
+               | max %}
+          {{ (as_timestamp(now())-as_timestamp(last_update)) > 120 }}
+        device_class: problem
+        icon: >-
+          {% if is_state("binary_sensor.bluetooth_stalled", "on") %}
+            mdi:bluetooth-off
+          {% else %}
+            mdi:bluetooth
+          {% endif %}
+
+automation:
+  - id: ble_gateway_advertise
+    alias: ESPHome BLE Advertise
+    mode: queued
+    trigger:
+      - platform: event
+        event_type: esphome.on_ble_advertise
+    action:
+      - service: ble_monitor.parse_data
+        data:
+          packet: "{{ trigger.event.data.packet }}"

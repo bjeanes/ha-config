@@ -1,0 +1,14 @@
+substitutions:
+  device_name: athom-smart-plug-v2-3fea2b
+  friendly_name: Ri's Desk Plug
+  relay_restore_mode: RESTORE_DEFAULT_ON
+packages:
+  athom.smart-plug-v2: github://athom-tech/athom-configs/athom-smart-plug-v2.yaml
+esphome:
+  name_add_mac_suffix: false
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  use_address: 10.10.30.114
+  fast_connect: true

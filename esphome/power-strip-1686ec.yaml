@@ -1,0 +1,17 @@
+substitutions:
+  node_name: power-strip-1686ec
+  friendly_name: Power Strip 1686ec
+
+  plug1_restore: RESTORE_DEFAULT_ON
+  plug2_restore: RESTORE_DEFAULT_ON
+  plug3_restore: RESTORE_DEFAULT_ON
+  usb_restore: ALWAYS_ON
+  
+  # Higher value gives lower watt readout
+  current_res: "0.00250"
+  # Lower value gives lower voltage readout
+  voltage_div: "799"
+
+packages:
+  base: !include common/base.yaml
+  strip: !include common/kogan-power-strip.yaml

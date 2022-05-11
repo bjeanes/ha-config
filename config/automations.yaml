@@ -1,0 +1,59 @@
+- id: "1644482494645"
+  alias: Disable vacuum camera update when docked
+  description: ""
+  use_blueprint:
+    path: PiotrMachowski/disable_vacuum_camera_update_when_docked.yaml
+    input:
+      vacuum: vacuum.robot_vacuum
+      camera: camera.vacuum_map
+- id: "1644482497979"
+  alias: Disable vacuum camera update when docked
+  description: ""
+  use_blueprint:
+    path: PiotrMachowski/disable_vacuum_camera_update_when_docked.yaml
+    input:
+      vacuum: vacuum.robot_vacuum
+      camera: camera.vacuum_map
+  mode: single
+- id: "1650353887007"
+  alias: Ri's Office Lights
+  description: ""
+  use_blueprint:
+    path: EPMatt/ikea_e1524_e1810.yaml
+    input:
+      integration: Zigbee2MQTT
+      controller_entity: sensor.ikea_remote_action
+      helper_last_controller_event: input_text.ris_office_ikea_remote_last_action
+      action_button_center_short:
+        - service: light.toggle
+          data: {}
+          target:
+            area_id: ri_s_office
+      action_button_up_short:
+        - device_id: 27cd6e935587684f83d903e5608ea35c
+          domain: light
+          entity_id: light.ris_office
+          type: brightness_increase
+      button_up_long_loop: true
+      button_down_long_loop: true
+      action_button_up_long: []
+      action_button_down_short:
+        - device_id: 27cd6e935587684f83d903e5608ea35c
+          domain: light
+          entity_id: light.ris_office
+          type: brightness_decrease
+      action_button_down_long: []
+- id: "1650766227595"
+  alias: Update OpenUV every 30 minutes during the daytime
+  trigger:
+    platform: time_pattern
+    minutes: /30
+  condition:
+    condition: and
+    conditions:
+      - condition: sun
+        after: sunrise
+      - condition: sun
+        before: sunset
+  action:
+    service: openuv.update_data

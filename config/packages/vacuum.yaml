@@ -1,0 +1,25 @@
+camera:
+  - platform: xiaomi_cloud_map_extractor
+    host: !secret xiaomi_vacuum_host
+    token: !secret xiaomi_vacuum_token
+    username: !secret xiaomi_cloud_username
+    password: !secret xiaomi_cloud_password
+    country: "sg"
+    name: "Vacuum map"
+    draw: ["all"]
+
+template:
+  - sensor:
+      - unique_id: robot_vacuum_battery_level
+        state: |
+          {{ state_attr('vacuum.robot_vacuum', 'battery_level') | int }}
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        name: Robot Vacuum Battery Level
+    binary_sensor:
+      - unique_id: robot_vacuum_charging
+        name: Robot Vacuum Charging
+        device_class: battery_charging
+        state: |
+          {{ is_state_attr('vacuum.robot_vacuum', 'status', 'Charging') }}

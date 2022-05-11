@@ -1,0 +1,623 @@
+config:
+  views:
+  - badges: []
+    cards:
+    - card:
+        type: entities
+      filter:
+        exclude:
+        - entity_id: /tent/
+        - state: unavailable
+        - area: Garden Shed
+        - entity_id: /human_readable/
+        include:
+        - name: /[gG]arden/
+        - name: /[tT]ent/
+      type: custom:auto-entities
+    - card:
+        type: history-graph
+      filter:
+        exclude:
+        - name: /[bB]attery/
+        - state: scening
+        - entity_id: /tent/
+        - state: unavailable
+        - area: Garden Shed
+        - entity_id: /human_readable/
+        include:
+        - name: /[gG]arden/
+        - name: /[tT]ent/
+        - entity_id: sensor.home_weather_temperature
+        - entity_id: sensor.home_weather_forecast_temperature
+      type: custom:auto-entities
+    icon: mdi:flower
+    path: garden
+    title: Garden
+  - badges:
+    - entity: sensor.tent_temperature_cached
+      name: Temp
+    - entity: sensor.tent_humidity_cached
+      name: Humidity
+    - entity: sensor.tent_vpd
+      name: VPD
+    - entity: sensor.tent_reservoir_ph
+      name: pH
+    - entity: sensor.tent_reservoir_ec_us
+      name: EC
+    cards:
+    - card:
+        camera_image: camera.tent_camera_mjpeg
+        camera_view: live
+        entities:
+        - entity: switch.tent_cam_focus
+          show_state: true
+        - entity: switch.tent_cam_night_vision
+          show_state: true
+        - entity: sensor.tent_cam_battery_level
+          show_state: true
+        - entity: sensor.tent_cam_battery_temperature
+          show_state: true
+        - entity: sensor.tent_cam_light_level
+          show_state: true
+        type: picture-glance
+        view_layout:
+          position: sidebar
+      conditions:
+      - entity: binary_sensor.tent_lights_status
+        state: 'on'
+      type: conditional
+    - camera_image: camera.tent_timelapse
+      camera_view: live
+      entity: camera.tent_timelapse
+      name: Timelapse
+      show_name: true
+      show_state: false
+      type: picture-entity
+      view_layout:
+        position: sidebar
+    - entities:
+      - entities:
+        - entity: switch.tent_lights_local
+          icon: mdi:wall-sconce-flat
+          name: false
+          state_color: true
+          tap_action:
+            action: toggle
+        - entity: switch.tent_fans_local
+          icon: mdi:fan
+          name: false
+          state_color: true
+          tap_action:
+            action: toggle
+        - entity: switch.tent_humidifier_local
+          icon: mdi:air-humidifier
+          name: false
+          state_color: true
+          tap_action:
+            action: toggle
+        - entity: switch.tent_misc_local
+          icon: mdi:power-socket-au
+          name: false
+          state_color: true
+          tap_action:
+            action: toggle
+        - entity: switch.tent_usb_local
+          icon: mdi:usb-port
+          name: false
+          state_color: true
+          tap_action:
+            action: toggle
+        entity: switch.tent_power_plug
+        name: Power
+        secondary_info:
+          entity: sensor.tent_wattage
+          name: false
+        show_state: false
+        state_color: true
+        toggle: true
+        type: custom:multiple-entity-row
+      footer:
+        entity: sensor.tent_wattage
+        hours_to_show: 24
+        type: graph
+      show_header_toggle: false
+      state_color: true
+      type: entities
+      view_layout:
+        position: sidebar
+    - entities:
+      - entities:
+        - entity: sensor.tent_humidity
+          format: precision1
+          name: Humidity
+        entity: sensor.tent_temperature
+        format: precision1
+        icon: mdi:tent
+        name: Tent
+        state_header: Temperature
+        type: custom:multiple-entity-row
+      - entities:
+        - entity: sensor.tent_reservoir_ec_us
+          format: kilo
+          name: EC
+          unit: false
+        - entity: sensor.tent_reservoir_ph
+          name: pH
+          unit: false
+        entity: sensor.tent_reservoir_temperature
+        format: precision1
+        icon: mdi:cup-water
+        name: Reservoir
+        state_header: Temperature
+        type: custom:multiple-entity-row
+      show_header_toggle: false
+      state_color: false
+      type: entities
+      view_layout:
+        position: sidebar
+    - card:
+        entities:
+        - entity: input_select.tent_stage
+        - entities:
+          - hide_if_template: '{% set v = states(''sensor.tent_reservoir_ph'') %}
+              {% set min = states(''input_number.minimum_ph'') %} {% set max = states(''input_number.maximum_ph'')
+              %} {{ iif(v < max and v > min, v, -1 * v) }}'
+            icon: mdi:alert-decagram
+            styles:
+              --paper-item-icon-color: red
+          - icon: mdi:chevron-down
+            styles:
+              margin: 0
+            tap_action:
+              action: call-service
+              service: input_number.decrement
+              service_data:
+                entity_id: input_number.minimum_ph
+          - entity: input_number.minimum_ph
+            name: min
+            styles:
+              margin: 0
+            unit: false
+          - icon: mdi:chevron-up
+            tap_action:
+              action: call-service
+              service: input_number.increment
+              service_data:
+                entity_id: input_number.minimum_ph
+          - icon: mdi:chevron-down
+            styles:
+              margin: 0
+            tap_action:
+              action: call-service
+              service: input_number.decrement
+              service_data:
+                entity_id: input_number.maximum_ph
+          - entity: input_number.maximum_ph
+            name: max
+            styles:
+              margin: 0
+            unit: false
+          - icon: mdi:chevron-up
+            tap_action:
+              action: call-service
+              service: input_number.increment
+              service_data:
+                entity_id: input_number.maximum_ph
+          entity: sensor.tent_reservoir_ph
+          name: pH
+          secondary_info:
+            entity: sensor.tent_reservoir_ph
+            name: false
+            unit: false
+          show_state: false
+          type: custom:multiple-entity-row
+        - entities:
+          - hide_if_template: '{% set v = states(''sensor.tent_vpd'') %} {% set min
+              = states(''input_number.minimum_tent_vpd'') %} {% set max = states(''input_number.maximum_tent_vpd'')
+              %} {{ iif(v < max and v > min, v, -1 * v) }}'
+            icon: mdi:alert-decagram
+            styles:
+              --paper-item-icon-color: red
+          - icon: mdi:chevron-down
+            styles:
+              margin: 0
+            tap_action:
+              action: call-service
+              service: input_number.decrement
+              service_data:
+                entity_id: input_number.minimum_tent_vpd
+          - entity: input_number.minimum_tent_vpd
+            name: min
+            styles:
+              margin: 0
+            unit: false
+          - icon: mdi:chevron-up
+            tap_action:
+              action: call-service
+              service: input_number.increment
+              service_data:
+                entity_id: input_number.minimum_tent_vpd
+          - icon: mdi:chevron-down
+            styles:
+              margin: 0
+            tap_action:
+              action: call-service
+              service: input_number.decrement
+              service_data:
+                entity_id: input_number.maximum_tent_vpd
+          - entity: input_number.maximum_tent_vpd
+            name: max
+            styles:
+              margin: 0
+            unit: false
+          - icon: mdi:chevron-up
+            tap_action:
+              action: call-service
+              service: input_number.increment
+              service_data:
+                entity_id: input_number.maximum_tent_vpd
+          entity: sensor.tent_vpd
+          name: VPD
+          secondary_info:
+            entity: sensor.tent_vpd
+            name: false
+          show_state: false
+          type: custom:multiple-entity-row
+        - entities:
+          - hide_if_template: '{% set v = states(''sensor.tent_humidity'') %} {% set
+              min = states(''input_number.minimum_tent_humidity'') %} {% set max =
+              states(''input_number.maximum_tent_humidity'') %} {{ iif(v < max and
+              v > min, v, -1 * v) }}'
+            icon: mdi:alert-decagram
+            styles:
+              --paper-item-icon-color: red
+          - icon: mdi:chevron-down
+            styles:
+              margin: 0
+            tap_action:
+              action: call-service
+              service: input_number.decrement
+              service_data:
+                entity_id: input_number.minimum_tent_humidity
+          - entity: input_number.minimum_tent_humidity
+            format: precision0
+            name: min
+            styles:
+              margin: 0
+            unit: false
+          - icon: mdi:chevron-up
+            tap_action:
+              action: call-service
+              service: input_number.increment
+              service_data:
+                entity_id: input_number.minimum_tent_humidity
+          - icon: mdi:chevron-down
+            styles:
+              margin: 0
+            tap_action:
+              action: call-service
+              service: input_number.decrement
+              service_data:
+                entity_id: input_number.maximum_tent_humidity
+          - entity: input_number.maximum_tent_humidity
+            format: precision0
+            name: max
+            styles:
+              margin: 0
+            unit: false
+          - icon: mdi:chevron-up
+            tap_action:
+              action: call-service
+              service: input_number.increment
+              service_data:
+                entity_id: input_number.maximum_tent_humidity
+          entity: sensor.tent_humidity
+          name: Humidity
+          secondary_info:
+            entity: sensor.tent_humidity
+            name: false
+          show_state: false
+          type: custom:multiple-entity-row
+        - entities:
+          - hide_if_template: '{% set v = states(''sensor.tent_temperature'') %} {%
+              set min = states(''input_number.minimum_tent_temperature'') %} {% set
+              max = states(''input_number.maximum_tent_temperature'') %} {{ iif(v
+              < max and v > min, v, -1 * v) }}'
+            icon: mdi:alert-decagram
+            styles:
+              --paper-item-icon-color: red
+          - icon: mdi:chevron-down
+            styles:
+              margin: 0
+            tap_action:
+              action: call-service
+              service: input_number.decrement
+              service_data:
+                entity_id: input_number.tent_temperature
+          - entity: input_number.minimum_tent_temperature
+            format: precision0
+            name: min
+            styles:
+              margin: 0
+            unit: false
+          - icon: mdi:chevron-up
+            tap_action:
+              action: call-service
+              service: input_number.increment
+              service_data:
+                entity_id: input_number.minimum_tent_temperature
+          - icon: mdi:chevron-down
+            styles:
+              margin: 0
+            tap_action:
+              action: call-service
+              service: input_number.decrement
+              service_data:
+                entity_id: input_number.maximum_tent_temperature
+          - entity: input_number.maximum_tent_temperature
+            format: precision0
+            name: max
+            styles:
+              margin: 0
+            unit: false
+          - icon: mdi:chevron-up
+            tap_action:
+              action: call-service
+              service: input_number.increment
+              service_data:
+                entity_id: input_number.maximum_tent_temperature
+          entity: sensor.tent_temperature
+          icon: mdi:temperature-celsius
+          name: Temperature
+          secondary_info:
+            entity: sensor.tent_temperature
+            name: false
+          show_state: false
+          type: custom:multiple-entity-row
+        - entities:
+          - entity: input_datetime.tent_day_start
+            name: start
+          - entity: input_datetime.tent_night_start
+            name: end
+          entity: input_datetime.tent_day_start
+          icon: mdi:sun-wireless
+          name: Day Cycle
+          show_state: false
+          type: custom:multiple-entity-row
+        type: entities
+      entities:
+      - sensor.tent_reservoir_ph
+      - sensor.tent_vpd
+      - sensor.tent_humidity
+      - sensor.tent_temperature
+      - input_number.minimum_ph
+      - input_number.maximum_ph
+      - input_number.minimum_tent_vpd
+      - input_number.maximum_tent_vpd
+      - input_number.minimum_tent_temperature
+      - input_number.maximum_tent_temperature
+      - input_number.minimum_tent_humidity
+      - input_number.maximum_tent_humidity
+      type: custom:card-templater
+      view_layout:
+        position: sidebar
+    - cards:
+      - days_to_show: 3
+        entities:
+        - entity: sensor.bendigo_temp
+        - entity: sensor.home_weather_temperature
+          name: Weather
+        - entity: sensor.tent_temperature
+          name: Tent
+        title: Air Temperatures
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.bendigo_humidity
+        - entity: sensor.home_weather_humidity
+          name: Weather
+        - entity: sensor.tent_humidity
+          name: Tent
+        title: Humidity
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.tent_vpd
+          name: VPD
+        title: Vapor Pressure Deficit
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.tent_reservoir_temperature
+          name: "\xB0C"
+        refresh_interval: 120
+        title: Reservoir Temperature
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.tent_reservoir_ec_us
+          name: EC
+        refresh_interval: 120
+        title: Reservoir EC
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.tent_reservoir_ph
+          name: pH
+        refresh_interval: 120
+        title: Reservoir pH
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.tent_hhcc_1_illuminance
+          name: A
+        - entity: sensor.tent_hhcc_2_illuminance
+          name: B
+        stat_types:
+        - max
+        title: Illuminance
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.tent_hhcc_1_moisture
+          name: A
+        - entity: sensor.tent_hhcc_2_moisture
+          name: B
+        title: Soil Moisture
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.tent_hhcc_1_temperature
+          name: A
+        - entity: sensor.tent_hhcc_2_temperature
+          name: B
+        title: Soil Temperatures
+        type: statistics-graph
+      - days_to_show: 3
+        entities:
+        - entity: sensor.tent_hhcc_1_soil_conductivity
+          name: A
+        - entity: sensor.tent_hhcc_2_soil_conductivity
+          name: B
+        title: Soil EC
+        type: statistics-graph
+      layout:
+        max_cols: 3
+      layout_type: custom:horizontal-layout
+      square: false
+      type: custom:layout-card
+    - card:
+        title: Automations
+        type: entities
+      filter:
+        exclude:
+        - name: /Snapshot|Restore/
+        - entity_id: /night_mode/
+        include:
+        - entity_id: script.refill_tent_humidifier
+          options:
+            entities:
+            - hide_if: 'on'
+              icon: mdi:play
+              tap_action:
+                action: call-service
+                service: this.entity_id
+            - hide_if: 'off'
+              icon: mdi:stop
+              tap_action:
+                action: call-service
+                service: script.turn_off
+                service_data:
+                  entity_id: this.entity_id
+            - attribute: remaining
+              entity: timer.humidifier_time_till_refill
+              format: relative
+              name: remaining
+            secondary_info:
+              entity: input_datetime.tent_humidifier_refilled_at
+              format: relative
+              name: Refilled
+            show_state: false
+            type: custom:multiple-entity-row
+          sort:
+            method: last_triggered
+            reverse: true
+        - domain: script
+          or:
+          - entity_id: /tent/
+          - area: Garden Shed
+          sort:
+            entities:
+            - hide_if: 'on'
+              icon: mdi:play
+              tap_action:
+                action: call-service
+                service: this.entity_id
+            - hide_if: 'off'
+              icon: mdi:stop
+              tap_action:
+                action: call-service
+                service: script.turn_off
+                service_data:
+                  entity_id: this.entity_id
+            method: last_triggered
+            reverse: true
+        - domain: automation
+          entity_id: /tent/
+          options:
+            entities:
+            - icon: mdi:play
+              tap_action:
+                action: call-service
+                service: automation.trigger
+                service_data:
+                  entity_id: this.entity_id
+            secondary_info: last-triggered
+            state_color: true
+            toggle: true
+            type: custom:multiple-entity-row
+          sort:
+            method: last_triggered
+            reverse: true
+      sort:
+        method: domain
+        numeric: false
+        reverse: true
+      type: custom:auto-entities
+      unique: true
+      view_layout:
+        position: sidebar
+    - entities:
+      - entity: button.garden_shed_ble_relay_restart
+        name: Restart
+      - entity: binary_sensor.garden_shed_ble_relay_status
+        name: Status
+        secondary_info: last-changed
+      - entity: sensor.garden_shed_ble_relay_wifi_signal
+        name: Wi-fi Signal
+      - entity: sensor.garden_shed_ble_relay_uptime_human_readable
+        name: Uptime
+      title: Sensor Proxy
+      type: entities
+      view_layout:
+        position: sidebar
+    icon: mdi:tent
+    title: Tent
+    type: sidebar
+    visible:
+    - user: a85f738edac2433eaba57bcd13669897
+  - badges: []
+    cards:
+    - entities:
+      - entity: sensor.ble_humidity_cure_jar_1_a4c138453702
+      - entity: sensor.ble_humidity_cure_jar_2_a4c138985d30
+      - entity: sensor.ble_humidity_cure_jar_3_a4c138ab2ffc
+      - entity: sensor.ble_humidity_stash_jar_a4c1382baf8a
+      line_width: 3
+      min_bound_range: 10
+      name: Humidities
+      points_per_hour: 2
+      show:
+        fill: fade
+        points: hover
+        state: last
+      type: custom:mini-graph-card
+    - entities:
+      - entity: sensor.ble_temperature_cure_jar_1_a4c138453702
+      - entity: sensor.ble_temperature_cure_jar_2_a4c138985d30
+      - entity: sensor.ble_temperature_cure_jar_3_a4c138ab2ffc
+      - entity: sensor.ble_temperature_stash_jar_a4c1382baf8a
+      line_width: 3
+      min_bound_range: 10
+      name: Temperatures
+      points_per_hour: 2
+      show:
+        fill: fade
+        points: false
+      type: custom:mini-graph-card
+    icon: mdi:bucket-outline
+    path: cure
+    theme: Backend-selected
+    title: Cure
+    visible:
+    - user: a85f738edac2433eaba57bcd13669897

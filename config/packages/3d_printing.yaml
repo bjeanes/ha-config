@@ -1,0 +1,54 @@
+switch:
+  - platform: command_line
+    switches:
+      3d_printer_connection:
+        # 3d_printer_command_on: /usr/bin/curl -m 10 -d '{"command":"connect"}' -H 'Content-Type: application/json' -H 'X-Api-Key: REDACTED' http://REDACTED/api/connection
+        command_on: !secret 3d_printer_command_on
+
+        # 3d_printer_command_off: /usr/bin/curl -m 10 -d '{"command":"disconnect"}' -H 'Content-Type: application/json' -H 'X-Api-Key: REDACTED' http://REDACTED/api/connection
+        command_off: !secret 3d_printer_command_off
+
+        # 3d_printer_command_state: /usr/bin/curl -m 3 -H 'X-Api-Key: REDACTED' http://REDACTED/api/connection
+        command_state: !secret 3d_printer_command_state
+        value_template: >
+          {{ value_json is defined
+               and value_json.current != None
+               and value_json.current.state != "Closed"
+          }}
+        friendly_name: 3D Printer Connection
+        unique_id: F36FEDD3D5A14044B4BA7DC01A22CB6A
+        icon_template: >
+          {% if is_state('switch.3d_printer_connection', 'on') %}
+            mdi:lan-connect
+          {% else %}
+            mdi:lan-disconnect
+          {% endif %}
+
+automation:
+  - id: "1648468335659"
+    alias: Turn off 3D printer when inactive
+    description: ""
+    trigger:
+      - platform: state
+        entity_id: sensor.octoprint_current_state
+        to: Operational
+        for:
+          hours: 0
+          minutes: 20
+          seconds: 0
+        from: Printing
+      - platform: state
+        entity_id: sensor.octoprint_current_state
+        from: unavailable
+        to: Operational
+        for:
+          hours: 1
+          minutes: 0
+          seconds: 0
+    condition: []
+    action:
+      - type: turn_off
+        device_id: 88f6e49883695cfe34b990b70512421a
+        entity_id: switch.3d_printer_plug
+        domain: switch
+    mode: single

@@ -1,0 +1,4 @@
+days_between_backups: 3
+max_backups_in_google_drive: 4
+max_backups_in_ha: 4
+send_error_reports: true

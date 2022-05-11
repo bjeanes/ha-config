@@ -1,0 +1,13 @@
+substitutions:
+  device_name: athom-smart-plug-v2-3ff494
+  name: athom-smart-plug-v2-3ff494
+  friendly_name: Bo's Desk Plug
+packages:
+  athom.smart-plug-v2: github://athom-tech/athom-configs/athom-smart-plug-v2.yaml
+esphome:
+  name_add_mac_suffix: false
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password

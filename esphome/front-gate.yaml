@@ -1,0 +1,134 @@
+substitutions:
+  node_name: "front-gate"
+  friendly_name: "Front Gate"
+
+esphome:
+  platform: ESP8266
+  board: esp8285
+
+packages:
+  base: !include common/base.yaml
+
+logger:
+  level: DEBUG
+
+web_server:
+  version: 2
+  include_internal: true
+
+binary_sensor:
+  - platform: gpio
+    name: "${friendly_name} Contact"
+    disabled_by_default: true
+    device_class: garage_door
+    id: contact
+    pin:
+      number: GPIO4
+      inverted: false
+      mode: INPUT_PULLUP
+    filters:
+      # Takes advantage of the fact that gate movement causes this GPIO pin to
+      # flicker (probably due to wire moving). We can use that initial change
+      # in state as a signal to set the cover operation. Later, when the final
+      # value settles (after debounces) we can set it back to idle.
+      - lambda: |-
+          if(id(gate).current_operation == CoverOperation::COVER_OPERATION_IDLE) {
+            id(gate).current_operation = (x ? COVER_OPERATION_CLOSING : COVER_OPERATION_OPENING);
+            id(gate).publish_state();
+          }
+          return x;
+
+      # during gate movement, the wire movement seems to cause the state to rapidly flicker
+      - delayed_on_off: 5000ms
+
+      - lambda: |-
+          id(gate).current_operation = COVER_OPERATION_IDLE;
+          id(gate).publish_state();
+          return x;
+
+    on_state:
+      then:
+        - cover.template.publish:
+            id: gate
+            current_operation: IDLE
+
+  - platform: gpio
+    pin:
+      number: GPIO14
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "${friendly_name} Button"
+    disabled_by_default: true
+    on_multi_click:
+      - timing:
+          - ON for at most 1s
+          - OFF for at least 0.2s
+        then:
+          switch.turn_on: relay
+      - timing:
+          - ON for at least 4s
+        then:
+          button.press: restart_button # in common/base.yaml
+
+button:
+  - platform: template
+    name: "${friendly_name} Button"
+    on_press:
+      then:
+        - if:
+            condition:
+              - switch.is_off: relay
+            then:
+              - switch.turn_on: relay
+
+switch:
+  - platform: gpio
+    pin: GPIO5
+    name: "${friendly_name} Relay"
+    id: relay
+    disabled_by_default: true
+    on_turn_on:
+      - light.turn_on: wifi_led
+      - delay: 1s
+      - switch.turn_off: relay
+      - light.turn_off: wifi_led
+
+light:
+  - platform: status_led
+    name: "${friendly_name} WiFi LED"
+    id: wifi_led
+    disabled_by_default: true
+    pin: GPIO12
+
+cover:
+  - platform: template
+    id: gate
+    device_class: garage
+    name: "${friendly_name}"
+    lambda: "return id(contact).state ? COVER_CLOSED : COVER_OPEN;"
+    open_action:
+      - if:
+          condition:
+            and:
+              - switch.is_off: relay
+              - binary_sensor.is_on: contact # GATE IS CLOSED
+              - lambda: return id(gate).current_operation == COVER_OPERATION_IDLE; # GATE IS IDLE
+          then:
+            - switch.turn_on: relay
+    stop_action:
+      - if:
+          condition:
+            and:
+              - binary_sensor.is_on: contact
+              - lambda: return id(gate).current_operation != COVER_OPERATION_IDLE; # GATE IS ACTIVE
+          then:
+            - switch.turn_on: relay
+    close_action:
+      - if:
+          condition:
+            and:
+              - switch.is_off: relay
+              - binary_sensor.is_off: contact # GATE NOT CLOSED
+              - lambda: return id(gate).current_operation == COVER_OPERATION_IDLE; # GATE IS IDLE
+          then:
+            - switch.turn_on: relay

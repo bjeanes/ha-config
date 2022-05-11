@@ -1,0 +1,336 @@
+config:
+  views:
+  - badges: []
+    cards:
+    - card:
+        title: Bo's Office
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: bo_s_office
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Ri's Office
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: ri_s_office
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Bedroom
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: bedroom
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Spare Room
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: spare_room
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Living Room
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: living_room
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Analog Room
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: analog_room
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Bathroom
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: bathroom
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Kitchen
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: kitchen
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Laundry
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: laundry
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        title: Outdoors
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - area: outdoors
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    icon: ''
+    path: by-room
+    theme: Backend-selected
+    title: By room
+  - badges: []
+    cards:
+    - card:
+        state_color: false
+        title: Humidity
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: humidity
+            state_class: measurement
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Temperature
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: temperature
+            state_class: measurement
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Battery
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: battery
+            state_class: measurement
+          integration: /ble/
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Power
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: power
+            state_class: measurement
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Current
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: current
+            state_class: measurement
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Voltage
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: voltage
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Pressure
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: pressure
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Illuminance
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: illuminance
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Signal Strength
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: signal_strength
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: Ozone
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: ozone
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    - card:
+        state_color: false
+        title: PM2.5
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        - state: unknown
+        include:
+        - attributes:
+            device_class: pm25
+          options:
+            secondary_info: last-updated
+      show_empty: false
+      sort:
+        method: last_changed
+        reverse: true
+      type: custom:auto-entities
+    theme: Backend-selected
+    title: Recently changed

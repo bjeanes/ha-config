@@ -1,0 +1,169 @@
+# TODO: One of these for each ID that ESPresense uses for our devices + a group each for ri's and mine + a template sensor to pick from each group the one which is most recently updated.
+sensor:
+  # One entry for each beacon you want to track
+  - platform: mqtt_room
+    device_id: "roomAssistant:f76c2617-3d2e-4e35-a669-606e13162a68"
+    name: Room > Bo > Room Assistant
+    state_topic: "espresense/rooms"
+    timeout: 30
+    away_timeout: 120
+
+  - platform: mqtt_room
+    device_id: "apple:1007:11-8"
+    name: Room > Bo > Apple
+    state_topic: "espresense/rooms"
+    timeout: 30
+    away_timeout: 120
+
+  - platform: mqtt_room
+    device_id: "apple:iphone13-1"
+    name: Room > Bo > Apple (Expanded)
+    state_topic: "espresense/rooms"
+    timeout: 30
+    away_timeout: 120
+
+  - platform: mqtt_room
+    device_id: "roomAssistant:95397a15-89d3-44f9-be0a-a30e7b2e4381"
+    name: Room > Ri > Room Assistant
+    state_topic: "espresense/rooms"
+    timeout: 30
+    away_timeout: 120
+
+  - platform: mqtt_room
+    device_id: "apple:1006:10-12"
+    name: Room > Ri > Apple
+    state_topic: "espresense/rooms"
+    timeout: 30
+    away_timeout: 120
+
+  - platform: mqtt_room
+    device_id: "apple:iphone10-3"
+    name: Room > Ri > Apple (Expanded)
+    state_topic: "espresense/rooms"
+    timeout: 30
+    away_timeout: 120
+
+group:
+  room_bo_phone:
+    entities:
+      - sensor.room_bo_room_assistant
+      - sensor.room_bo_apple
+      - sensor.room_bo_apple_expanded
+  room_ri_phone:
+    entities:
+      - sensor.room_ri_room_assistant
+      - sensor.room_ri_apple
+      - sensor.room_ri_apple_expanded
+  room_phones:
+    entities:
+      - sensor.room_bo_phone
+      - sensor.room_ri_phone
+
+template:
+  - sensor:
+      - unique_id: room_bo_phone
+        state: >-
+          {{ states(state_attr('sensor.template_room_bo_phone', 'entity_id') | string) or 'not_home' }}
+        attributes:
+          entity_id: >-
+            {% set identifiers = expand('group.room_bo_phone') %}
+            {% set close_updates = identifiers
+              | selectattr('state', 'ne', 'not_home')
+              | sort(attribute='attributes.distance')
+              | selectattr('last_updated', 'gt', now() - timedelta(seconds=30))
+              | list %}
+            {% set recent_updates = identifiers
+              | sort(attribute='last_updated', reverse=True)
+              | list %}
+            {% set most_recent_home = recent_updates
+              | selectattr('state', 'ne', 'not_home')
+              | list  %}
+            {% set candidates = close_updates + most_recent_home + recent_updates %}
+            {{ candidates | map(attribute='entity_id') | first }}
+          distance: >-
+            {{ state_attr(state_attr('sensor.template_room_bo_phone', 'entity_id') | string, 'distance') }}
+      - unique_id: room_ri_phone
+        state: >-
+          {{ states(state_attr('sensor.template_room_ri_phone', 'entity_id') | string) or 'not_home' }}
+        attributes:
+          entity_id: >-
+            {% set identifiers = expand('group.room_ri_phone') %}
+            {% set close_updates = identifiers
+              | selectattr('state', 'ne', 'not_home')
+              | sort(attribute='attributes.distance')
+              | selectattr('last_updated', 'gt', now() - timedelta(seconds=30))
+              | list %}
+            {% set recent_updates = identifiers
+              | sort(attribute='last_updated', reverse=True)
+              | list %}
+            {% set most_recent_home = recent_updates
+              | selectattr('state', 'ne', 'not_home')
+              | list  %}
+            {% set candidates = close_updates + most_recent_home + recent_updates %}
+            {{ candidates | map(attribute='entity_id') | first }}
+          distance: >-
+            {{ state_attr(state_attr('sensor.template_room_ri_phone', 'entity_id') | string, 'distance') }}
+
+  - trigger:
+      - platform: time_pattern
+        seconds: "/3"
+    binary_sensor:
+      - unique_id: bos_office_is_occupied
+        name: Bo's Office Is Occupied
+        state: |
+          {{ is_state('sensor.template_room_bo_phone', 'bo_s_office') or is_state('sensor.template_room_ri_phone', 'bo_s_office') }}
+        icon: |
+          {% if is_state("binary_sensor.bo_s_office_is_occupied", "on") %}
+          mdi:person
+          {% else %}
+          mdi:person-outline
+          {% endif %}
+        device_class: occupancy
+
+      - unique_id: ris_office_is_occupied
+        name: Ri's Office Is Occupied
+        state: |
+          {{ is_state('sensor.template_room_bo_phone', 'ri_s_office') or is_state('sensor.template_room_ri_phone', 'ri_s_office') }}
+        icon: |
+          {% if is_state("binary_sensor.ri_s_office_is_occupied", "on") %}
+          mdi:person
+          {% else %}
+          mdi:person-outline
+          {% endif %}
+        device_class: occupancy
+
+      - unique_id: bedroom_is_occupied
+        name: Bedroom Is Occupied
+        state: |
+          {{ is_state('sensor.template_room_bo_phone', 'bedroom') or is_state('sensor.template_room_ri_phone', 'bedroom') }}
+        icon: |
+          {% if is_state("binary_sensor.bedroom_is_occupied", "on") %}
+          mdi:person
+          {% else %}
+          mdi:person-outline
+          {% endif %}
+        device_class: occupancy
+
+      - unique_id: living_room_is_occupied
+        name: Living Room Is Occupied
+        state: |
+          {{ is_state('sensor.template_room_bo_phone', 'living_room') or is_state('sensor.template_room_ri_phone', 'living_room') }}
+        icon: |
+          {% if is_state("binary_sensor.living_room_is_occupied", "on") %}
+          mdi:person
+          {% else %}
+          mdi:person-outline
+          {% endif %}
+        device_class: occupancy
+
+      - unique_id: lounge_room_is_occupied
+        name: Lounge Room Is Occupied
+        state: |
+          {{ is_state('sensor.template_room_bo_phone', 'lounge_room') or is_state('sensor.template_room_ri_phone', 'lounge_room') }}
+        icon: |
+          {% if is_state("binary_sensor.lounge_room_is_occupied", "on") %}
+          mdi:person
+          {% else %}
+          mdi:person-outline
+          {% endif %}
+        device_class: occupancy

@@ -1,0 +1,45 @@
+config:
+  views:
+  - badges: []
+    cards:
+    - chips:
+      - entity: light.bos_office
+        type: light
+        use_light_color: true
+      - entity: binary_sensor.bo_s_office_door_contact
+        type: entity
+        use_entity_picture: false
+      - entity: binary_sensor.bo_s_office_is_occupied
+        icon: mdi:motion-sensor
+        type: entity
+      - entity: sensor.ble_temperature_bos_office_a4c1380f0b98
+        type: entity
+      - entity: sensor.ble_humidity_bos_office_a4c1380f0b98
+        type: entity
+      - entity: sensor.bo_s_desk_plug_power
+        name: Desk
+        type: entity
+      - entity: sensor.bo_s_office_plug_power
+        type: entity
+      - entity: sensor.bo_s_office_perception
+        type: entity
+      type: custom:mushroom-chips-card
+    - card:
+        type: entities
+      filter:
+        exclude:
+        - state: unknown
+        - state: unavailable
+        include:
+        - area: Bo's Office
+          options:
+            secondary_info: last-changed
+      show_empty: false
+      sort:
+        method: domain
+        reverse: true
+      type: custom:auto-entities
+    icon: mdi:chair-rolling
+    theme: Backend-selected
+    title: Bo's Office
+    type: custom:grid-layout

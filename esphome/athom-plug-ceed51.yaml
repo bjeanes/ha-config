@@ -1,0 +1,11 @@
+substitutions:
+  node_name: "athom-plug-ceed51"
+  friendly_name: "Plug ceed51"
+  
+esphome:
+  platform: ESP8266
+  board: esp8285
+
+packages:
+  base: !include common/base.yaml
+  plug: !include common/athom-plug.yaml

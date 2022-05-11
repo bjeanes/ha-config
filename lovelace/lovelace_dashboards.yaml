@@ -1,0 +1,43 @@
+items:
+- icon: mdi:greenhouse
+  id: lovelace_shed
+  mode: storage
+  require_admin: true
+  show_in_sidebar: true
+  title: Shed
+  url_path: lovelace-shed
+- icon: mdi:chair-rolling
+  id: bos_office
+  mode: storage
+  require_admin: false
+  show_in_sidebar: true
+  title: Bo's Office
+  url_path: bos-office
+- icon: mdi:leak
+  id: lovelace_sensors
+  mode: storage
+  require_admin: true
+  show_in_sidebar: true
+  title: Sensors
+  url_path: lovelace-sensors
+- icon: mdi:printer-3d
+  id: 3d_printing
+  mode: storage
+  require_admin: false
+  show_in_sidebar: true
+  title: 3D Printing
+  url_path: 3d-printing
+- icon: mdi:nas
+  id: lovelace_servers
+  mode: storage
+  require_admin: true
+  show_in_sidebar: true
+  title: Servers
+  url_path: lovelace-servers
+- icon: mdi:shovel
+  id: lovelace_gardens
+  mode: storage
+  require_admin: false
+  show_in_sidebar: true
+  title: Gardening
+  url_path: lovelace-gardens

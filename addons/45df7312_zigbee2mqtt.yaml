@@ -1,0 +1,9 @@
+data_path: /config/zigbee2mqtt
+mqtt: {}
+serial: {}
+socat:
+  enabled: false
+  log: false
+  master: pty,raw,echo=0,link=/tmp/ttyZ2M,mode=777
+  options: -d -d
+  slave: tcp-listen:8485,keepalive,nodelay,reuseaddr,keepidle=1,keepintvl=1,keepcnt=5

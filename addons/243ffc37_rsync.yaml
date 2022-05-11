@@ -1,0 +1,6 @@
+folders:
+- /config
+private_key_file: /ssl/rsync/id_rsa
+remote_folder: /home/user
+remote_host: ''
+username: user

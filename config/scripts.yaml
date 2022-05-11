@@ -1,0 +1,48 @@
+refill_tent_humidifier:
+  sequence:
+    - service: scene.create
+      data:
+        snapshot_entities:
+          - automation.turn_on_tent_humidifier
+          - switch.tent_humidifier_local
+          - timer.humidifier_time_till_refill
+        scene_id: snapshot_humidifier_before_refilling
+    - type: turn_off
+      device_id: 4f8a04a40876b2a1914ea8d004b6aac5
+      entity_id: switch.tent_humidifier_local
+      domain: switch
+    - service: automation.turn_off
+      data: {}
+      target:
+        entity_id: automation.turn_on_tent_humidifier
+    - service: timer.cancel
+      data: {}
+      target:
+        entity_id: timer.humidifier_time_till_refill
+    - delay:
+        hours: 0
+        minutes: 5
+        seconds: 0
+        milliseconds: 0
+    - service: input_datetime.set_datetime
+      data:
+        timestamp: "{{ now().timestamp() }}"
+      target:
+        entity_id: input_datetime.tent_humidifier_refilled_at
+    - service: timer.start
+      data:
+        duration: "{{ states('counter.humidifier_run_time_since_refill') }}"
+      target:
+        entity_id: timer.humidifier_time_till_refill
+    - service: counter.reset
+      data: {}
+      target:
+        entity_id: counter.humidifier_run_time_since_refill
+    - service: timer.pause
+      data: {}
+      target:
+        entity_id: timer.humidifier_time_till_refill
+    - scene: scene.snapshot_humidifier_before_refilling
+  mode: single
+  alias: Refill tent humidifier
+  icon: mdi:waves-arrow-up

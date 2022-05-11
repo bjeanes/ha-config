@@ -1,0 +1,105 @@
+# https://www.esphome-devices.com/devices/Kogan-Smarterhome-Smart-Power-Board-With-Usb-Ports-Energy-Meter/
+substitutions:
+  plug_icon: mdi:power-socket-au
+  usb_icon: mdi:usb-port
+  plug1_restore: RESTORE_DEFAULT_ON
+  plug2_restore: RESTORE_DEFAULT_ON
+  plug3_restore: RESTORE_DEFAULT_ON
+  usb_restore: ALWAYS_ON
+
+  # Higher value gives lower watt readout
+  current_res: "0.00250"
+  # Lower value gives lower voltage readout
+  voltage_div: "799"
+
+esp8266:
+  board: esp8285
+  restore_from_flash: true
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "${friendly_name}_button"
+    on_press:
+      - switch.toggle: relay3
+
+  - platform: status
+    name: "${friendly_name}_status"
+
+switch:
+  - platform: gpio
+    id: green_led
+    pin:
+      number: GPIO1
+      inverted: true
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    name: "${friendly_name} Plug 1"
+    pin: GPIO13
+    id: relay1
+    icon: ${plug_icon}
+    restore_mode: ${plug1_restore}
+
+  - platform: gpio
+    name: "${friendly_name} Plug 2"
+    pin: GPIO14
+    id: relay2
+    icon: ${plug_icon}
+    restore_mode: ${plug2_restore}
+
+  - platform: gpio
+    name: "${friendly_name} Plug 3"
+    pin: GPIO3
+    id: relay3
+    icon: ${plug_icon}
+    restore_mode: ${plug3_restore}
+    on_turn_on:
+      - switch.turn_on: green_led
+    on_turn_off:
+      - switch.turn_off: green_led
+
+  - platform: gpio
+    name: "${friendly_name} USB"
+    pin: GPIO15
+    id: relayusb
+    icon: ${usb_icon}
+    restore_mode: ${usb_restore}
+
+sensor:
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO12
+      inverted: true
+    cf_pin: GPIO04
+    cf1_pin: GPIO05
+    current:
+      id: current
+      name: "${friendly_name} Current"
+      unit_of_measurement: A
+    voltage:
+      id: voltage
+      name: "${friendly_name} Voltage"
+      unit_of_measurement: V
+    power:
+      id: wattage
+      name: "${friendly_name} Wattage"
+      unit_of_measurement: W
+    energy:
+      id: energy
+      name: "${friendly_name} Energy Usage"
+      unit_of_measurement: Wh
+    current_resistor: ${current_res}
+    voltage_divider: ${voltage_div}
+    change_mode_every: 1 # default 8
+    update_interval: 5s
+
+  - platform: total_daily_energy
+    name: "${friendly_name} Total Daily Energy"
+    power_id: wattage
+    filters:
+      - multiply: 0.001
+    unit_of_measurement: kWh

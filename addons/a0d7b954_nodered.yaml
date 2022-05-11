@@ -1,0 +1,16 @@
+certfile: fullchain.pem
+credential_secret: '!secret nodered_secret'
+dark_mode: false
+http_node:
+  password: ''
+  username: ''
+http_static:
+  password: ''
+  username: ''
+init_commands: []
+keyfile: privkey.pem
+npm_packages: []
+require_ssl: false
+ssl: false
+system_packages: []
+theme: default

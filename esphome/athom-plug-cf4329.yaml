@@ -1,0 +1,10 @@
+substitutions:
+  node_name: "athom-plug-cf4329"
+  friendly_name: "NAS + TumTum Plug"
+
+packages:
+  base: !include common/base.yaml
+  plug: !include common/athom-plug.yaml
+
+wifi:
+  use_address: 10.10.30.141
