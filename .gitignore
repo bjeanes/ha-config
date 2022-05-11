@@ -1,5 +1,29 @@
-# Syncthing
 .stversions
+__pycache__
+*.db
+._*
+.DS_Store
+*.tmp
+*.swp
+.local/
+.vscode/
+.cache/
+.bash_history
 
-custom_components
-esphome/build
+secrets.yaml
+
+build/
+custom_components/
+
+/config/www/community/*
+/config/camera
+/config/image
+/config/themes
+
+log/
+*.log*
+*.fault
+log.txt
+
+deps/
+tts/
