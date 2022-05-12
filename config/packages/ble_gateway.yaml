@@ -54,6 +54,8 @@ automation:
   - id: ble_gateway_advertise
     alias: ESPHome BLE Advertise
     mode: queued
+    max: 30
+    max_exceeded: silent
     trigger:
       - platform: event
         event_type: esphome.on_ble_advertise
