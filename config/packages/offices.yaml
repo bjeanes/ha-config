@@ -7,10 +7,12 @@
 # When everybody leaves home, turn off couch plug
 automation:
   - id: a1459b6c502b7d9df65a101dd31c9c55f164388c
-    alias: Turn on Bo's office when door opened
+    alias: Turn on Bo's office when door opened or motion detected
     trigger:
       - platform: state
-        entity_id: binary_sensor.bo_s_office_door_contact
+        entity_id:
+          - binary_sensor.bo_s_office_door_contact
+          - binary_sensor.bo_s_office_motion
         from: "off"
         to: "on"
     action:
@@ -20,13 +22,36 @@ automation:
       - service: light.turn_on
         data:
           transition: 0.25
-          color_temp: 500
+          kelvin: 3000
           brightness_pct: 100
         target:
           area_id: bo_s_office
       - service: switch.turn_on
         target:
           area_id: bo_s_office
+
+  - id: 8a32a559bfcf43ddfd6ec03a8071eecfbf8161bb
+    alias: Turn off Bo's office if no motion for a while
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.bo_s_office_motion
+        from: "on"
+        to: "off"
+        for:
+          minutes: 15
+    action:
+      - service: light.turn_off
+        target:
+          area_id:
+            - bo_s_office
+      - if:
+          - "{{ is_state('binary_sensor.bo_s_office_door_contact', 'off') }}" # closed
+          - "{{ is_state('binary_sensor.bo_s_office_is_occupied', 'off') }}"
+        then:
+          - service: switch.turn_off
+            target:
+              area_id:
+                - bo_s_office
 
   - id: 2d1034acdee3afde7b67224b4898bd87b5cd356c
     alias: Turn on Ri's office when door opened
@@ -42,7 +67,7 @@ automation:
           - service: light.turn_on
             data:
               transition: 0.25
-              color_temp: 500
+              kelvin: 3000
               brightness_pct: 100
             target:
               area_id: ri_s_office
