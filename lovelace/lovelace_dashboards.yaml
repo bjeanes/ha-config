@@ -1,11 +1,4 @@
 items:
-- icon: mdi:greenhouse
-  id: lovelace_shed
-  mode: storage
-  require_admin: true
-  show_in_sidebar: true
-  title: Shed
-  url_path: lovelace-shed
 - icon: mdi:chair-rolling
   id: bos_office
   mode: storage

@@ -2,10 +2,10 @@ automation:
   - id: f0ca9ef44d3b606864eea88a4704baf60d33614b
     alias: Export HA config to git repo
     trigger:
+      # every hour, but not on the hour
       - platform: time_pattern
-        hours: "*"
         minutes: 25
     action:
       - service: hassio.addon_start
         data:
-          addon: "core_letsencrypt"
+          addon: "243ffc37_git-exporter"

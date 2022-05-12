@@ -105,8 +105,15 @@ template:
             {{ state_attr(state_attr('sensor.template_room_ri_phone', 'entity_id') | string, 'distance') }}
 
   - trigger:
-      - platform: time_pattern
-        seconds: "/3"
+      - platform: state
+        entity_id:
+          - sensor.template_room_bo_phone
+          - sensor.template_room_ri_phone
+        not_to:
+          - unavailable
+          - unknown
+        for:
+          seconds: 5
     binary_sensor:
       - unique_id: bos_office_is_occupied
         name: Bo's Office Is Occupied
@@ -114,9 +121,9 @@ template:
           {{ is_state('sensor.template_room_bo_phone', 'bo_s_office') or is_state('sensor.template_room_ri_phone', 'bo_s_office') }}
         icon: |
           {% if is_state("binary_sensor.bo_s_office_is_occupied", "on") %}
-          mdi:person
+          mdi:account
           {% else %}
-          mdi:person-outline
+          mdi:account-outline
           {% endif %}
         device_class: occupancy
 
@@ -126,9 +133,9 @@ template:
           {{ is_state('sensor.template_room_bo_phone', 'ri_s_office') or is_state('sensor.template_room_ri_phone', 'ri_s_office') }}
         icon: |
           {% if is_state("binary_sensor.ri_s_office_is_occupied", "on") %}
-          mdi:person
+          mdi:account
           {% else %}
-          mdi:person-outline
+          mdi:account-outline
           {% endif %}
         device_class: occupancy
 
@@ -138,9 +145,9 @@ template:
           {{ is_state('sensor.template_room_bo_phone', 'bedroom') or is_state('sensor.template_room_ri_phone', 'bedroom') }}
         icon: |
           {% if is_state("binary_sensor.bedroom_is_occupied", "on") %}
-          mdi:person
+          mdi:account
           {% else %}
-          mdi:person-outline
+          mdi:account-outline
           {% endif %}
         device_class: occupancy
 
@@ -150,20 +157,44 @@ template:
           {{ is_state('sensor.template_room_bo_phone', 'living_room') or is_state('sensor.template_room_ri_phone', 'living_room') }}
         icon: |
           {% if is_state("binary_sensor.living_room_is_occupied", "on") %}
-          mdi:person
+          mdi:account
           {% else %}
-          mdi:person-outline
+          mdi:account-outline
           {% endif %}
         device_class: occupancy
 
-      - unique_id: lounge_room_is_occupied
-        name: Lounge Room Is Occupied
+      - unique_id: analog_room_is_occupied
+        name: analog Room Is Occupied
         state: |
-          {{ is_state('sensor.template_room_bo_phone', 'lounge_room') or is_state('sensor.template_room_ri_phone', 'lounge_room') }}
+          {{ is_state('sensor.template_room_bo_phone', 'analog_room') or is_state('sensor.template_room_ri_phone', 'analog_room') }}
         icon: |
-          {% if is_state("binary_sensor.lounge_room_is_occupied", "on") %}
-          mdi:person
+          {% if is_state("binary_sensor.analog_room_is_occupied", "on") %}
+          mdi:account
           {% else %}
-          mdi:person-outline
+          mdi:account-outline
           {% endif %}
         device_class: occupancy
+
+automation:
+  - id: 20ca57c492451f62ab86cabb9e1e8fee00811e45
+    alias: Restart ESPresense regularly # ESPresense seems to just stop reporting sometimes. Restarting regularly is a workaround.
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.espresense_bedroom_uptime
+          - sensor.espresense_living_room_uptime
+          - sensor.espresense_bos_office_count
+          - sensor.espresense_ris_office_uptime
+          - sensor.espresense_analog_room_uptime
+        not_from:
+          # after restarting it will go unavailable then back to previous uptime, until it receives a new uptime.
+          # so skipping `not_from` will result in boot loops
+          - unavailable
+          - unknown
+        variables:
+          button: "button.{{ trigger.to_state.entity_id | replace('_uptime', '_restart') | replace('sensor.', '') }}"
+    condition: "{{ trigger.to_state.state | int > 3600 }}" # one hour
+    action:
+      - service: button.press
+        target:
+          entity_id: "{{ button }}"

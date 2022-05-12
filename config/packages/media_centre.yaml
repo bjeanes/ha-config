@@ -339,7 +339,7 @@ sensor:
     events:
       - state: ABC Jazz (Jazz Music) # Default background music
         start: "8:00:00"
-        end: "23:00:00"
+        end: "21:00:00"
 
       - state: Triple R 102.7 (Variety) # https://www.rrr.org.au/explore/programs/radiotherapy
         start: "10:00:00"

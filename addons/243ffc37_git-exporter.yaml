@@ -1,7 +1,7 @@
 check:
   check_for_ips: false
   check_for_secrets: true
-  enabled: false
+  enabled: true
 dry_run: false
 exclude:
 - '*.db'
@@ -38,7 +38,7 @@ export:
 repository:
   branch_name: main
   commit_message: Home Assistant Git Exporter
-  password: '!secret git_export_password'
+  password: '!secret git_export_token'
   pull_before_push: true
   url: '!secret git_export_url'
-  username: '!secret git_export_password'
+  username: '!secret git_export_token'

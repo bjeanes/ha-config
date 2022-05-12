@@ -10,7 +10,8 @@ config:
         type: entity
         use_entity_picture: false
       - entity: binary_sensor.bo_s_office_is_occupied
-        icon: mdi:motion-sensor
+        type: entity
+      - entity: binary_sensor.bo_s_office_motion
         type: entity
       - entity: sensor.ble_temperature_bos_office_a4c1380f0b98
         type: entity
