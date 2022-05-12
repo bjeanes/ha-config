@@ -39,6 +39,7 @@ automation:
         to: "off"
         for:
           minutes: 15
+    condition: "{{ is_state('binary_sensor.bo_s_office_is_occupied', 'off') }}"
     action:
       - service: light.turn_off
         target:
@@ -46,12 +47,18 @@ automation:
             - bo_s_office
       - if:
           - "{{ is_state('binary_sensor.bo_s_office_door_contact', 'off') }}" # closed
-          - "{{ is_state('binary_sensor.bo_s_office_is_occupied', 'off') }}"
         then:
+          - if:
+              - or:
+                  - "{{ is_state('sensor.bandersnatch_displays', '1') }}"
+                  - not: "{{ is_state('device_tracker.bandersnatch_hass', 'home') }}"
+            then:
+              - service: switch.turn_off
+                target:
+                  entity_id: switch.bo_s_desk_plug
           - service: switch.turn_off
             target:
-              area_id:
-                - bo_s_office
+              entity_id: switch.bo_s_office_plug
 
   - id: 2d1034acdee3afde7b67224b4898bd87b5cd356c
     alias: Turn on Ri's office when door opened

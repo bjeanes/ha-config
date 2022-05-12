@@ -260,6 +260,9 @@ automation:
       # rule out error states (HA bootup, reloading, etc)
       - "{{ trigger.to_state.state not in ['unavailable', 'unknown'] }}"
 
+      # Without a `from`/`to` in trigger, it fires on any _update_ not necessarily a _change_
+      - "{{ trigger.from_state.state != trigger.to_state.state }}"
+
       # has to have been off or describing what is already playing
       - "{{ trigger.from_state.state in ['off', states('sensor.current_living_room_media_player_source')] }}"
 
