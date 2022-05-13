@@ -24,6 +24,8 @@ config:
         type: entity
       - entity: sensor.bo_s_office_perception
         type: entity
+      - entity: sensor.bo_s_office_simmerzone
+        type: entity
       type: custom:mushroom-chips-card
     - card:
         type: entities
