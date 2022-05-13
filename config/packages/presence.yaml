@@ -183,7 +183,7 @@ automation:
         entity_id:
           - sensor.espresense_bedroom_uptime
           - sensor.espresense_living_room_uptime
-          - sensor.espresense_bos_office_count
+          - sensor.espresense_bos_office_uptime
           - sensor.espresense_ris_office_uptime
           - sensor.espresense_analog_room_uptime
         not_from:
