@@ -26,6 +26,12 @@ config:
         type: entity
       - entity: sensor.bo_s_office_simmerzone
         type: entity
+      - entity: weather.home_weather
+        show_conditions: true
+        show_temperature: true
+        type: weather
+      - entity: sensor.bo_s_office_heatindex
+        type: entity
       type: custom:mushroom-chips-card
     - card:
         type: entities

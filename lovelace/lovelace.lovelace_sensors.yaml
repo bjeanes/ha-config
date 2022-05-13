@@ -334,3 +334,49 @@ config:
       type: custom:auto-entities
     theme: Backend-selected
     title: Recently changed
+  - badges: []
+    cards:
+    - entities:
+      - entity: sensor.ble_temperature_living_room_a4c1382a9b6e
+      - entity: sensor.ble_humidity_living_room_a4c1382a9b6e
+      - entity: sensor.living_room_dewpoint
+      - entity: sensor.living_room_perception
+      - entity: sensor.living_room_simmerindex
+      - entity: sensor.living_room_simmerzone
+      - entity: sensor.living_room_heatindex
+      - entity: sensor.living_room_dewpoint
+      - entity: sensor.living_room_frostpoint
+      - entity: sensor.living_room_absolutehumidity
+      title: Living Room
+      type: history-graph
+    - entities:
+      - entity: sensor.ble_temperature_bos_office_a4c1380f0b98
+      - entity: sensor.ble_humidity_bos_office_a4c1380f0b98
+      - entity: sensor.bo_s_office_dewpoint
+      - entity: sensor.bo_s_office_perception
+      - entity: sensor.bo_s_office_simmerindex
+      - entity: sensor.bo_s_office_simmerzone
+      - entity: sensor.bo_s_office_heatindex
+      - entity: sensor.bo_s_office_dewpoint
+      - entity: sensor.bo_s_office_frostpoint
+      - entity: sensor.bo_s_office_absolutehumidity
+      title: Bo's Office
+      type: history-graph
+    - entities:
+      - entity: sensor.ble_temperature_ris_office_a4c138e78afe
+      - entity: sensor.ble_humidity_ris_office_a4c138e78afe
+      - entity: sensor.ri_s_office_dewpoint
+      - entity: sensor.ri_s_office_perception
+      - entity: sensor.ri_s_office_simmerindex
+      - entity: sensor.ri_s_office_simmerzone
+      - entity: sensor.ri_s_office_heatindex
+      - entity: sensor.ri_s_office_dewpoint
+      - entity: sensor.ri_s_office_frostpoint
+      - entity: sensor.ri_s_office_absolutehumidity
+      title: Ri's Office
+      type: history-graph
+    icon: mdi:home-thermometer-outline
+    path: thermal-comfort
+    theme: Backend-selected
+    title: Thermal Comfort
+    type: custom:horizontal-layout
