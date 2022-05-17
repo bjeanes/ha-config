@@ -94,7 +94,7 @@ items:
   url: /hacsfiles/lovelace-paper-buttons-row/paper-buttons-row.js?hacstag=244872232100
 - id: 78939a4781bd40f6accb3cba860a100f
   type: module
-  url: /hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375180
+  url: /hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375185
 - id: 4795f91c6d3a4fd3a5b1900f9990217e
   type: module
   url: /hacsfiles/stack-in-card/stack-in-card.js?hacstag=248954055020
@@ -116,3 +116,21 @@ items:
 - id: 6a72c3dfa03446ffae4b9d8093bb5b7a
   type: module
   url: /hacsfiles/custom-ui/custom-ui.js?hacstag=267558148202204191
+- id: 60cfcab39c6d46ea82623fc28bcecb9c
+  type: module
+  url: /hacsfiles/power-flow-card/power-flow-card.js?hacstag=484538222230
+- id: 8217392f44e24fe98b652c7f36ab302e
+  type: module
+  url: /hacsfiles/ha-sankey-chart/ha-sankey-chart.js?hacstag=455846088041
+- id: 84ed6341c9b245aba7e66cbdc51e2ccb
+  type: module
+  url: /hacsfiles/state-attribute-element/state-attribute-element.js?hacstag=142038085040
+- id: a70f15c06c9544b7bf7ad3bcf9dc6325
+  type: module
+  url: /hacsfiles/state-element/state-element.js?hacstag=142344403002
+- id: ecebe38b38124fb1ba83b3ca1ee43e7d
+  type: module
+  url: /hacsfiles/text-element/text-element.js?hacstag=141897999002
+- id: 0afffa6b08dd44be820b7e45428e0e4c
+  type: module
+  url: /hacsfiles/radial-menu/radial-menu.js?hacstag=181124811160
