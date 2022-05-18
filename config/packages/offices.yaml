@@ -28,7 +28,30 @@ automation:
           area_id: bo_s_office
       - service: switch.turn_on
         target:
-          area_id: bo_s_office
+          entity_id: switch.bo_s_office_plug
+
+  - id: 2804db52f34458004191f589ed3453dd6f9e1f45
+    alias: Warm up Bo's office heater
+    trigger:
+      - platform: template
+        value_template: |
+          {{ is_state('binary_sensor.bo_s_office_door_contact', 'off')
+               and (is_state('binary_sensor.bo_s_office_motion', 'on')
+                    or is_state('binary_sensor.bo_s_office_is_occupied', 'on'))
+               and states('sensor.ble_temperature_bos_office_a4c1380f0b98') | float < 19 }}
+        variables:
+          service: switch.turn_on
+      - platform: template
+        value_template: |
+          {{ is_state('binary_sensor.bo_s_office_door_contact', 'on')
+               or (is_state('binary_sensor.bo_s_office_motion', 'off') and is_state('binary_sensor.bo_s_office_is_occupied', 'off'))
+               or states('sensor.ble_temperature_bos_office_a4c1380f0b98') | float > 20 }}
+        variables:
+          service: switch.turn_off
+    action:
+      - service: "{{ service }}"
+        target:
+          entity_id: switch.bos_office_heater
 
   - id: 8a32a559bfcf43ddfd6ec03a8071eecfbf8161bb
     alias: Turn off Bo's office if no motion for a while

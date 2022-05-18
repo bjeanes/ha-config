@@ -782,3 +782,23 @@ config:
     path: doors
     theme: Backend-selected
     title: Doors
+  - badges: []
+    cards:
+    - entities:
+      - sensor.ble_temperature_shower_a4c13865903a
+      - sensor.ble_temperature_bathroom_a4c138f6b8cb
+      - sensor.bathroom_sensor_temperature
+      - sensor.ble_humidity_shower_a4c13865903a
+      - sensor.ble_humidity_bathroom_a4c138f6b8cb
+      type: entities
+    - entities:
+      - sensor.ble_temperature_shower_a4c13865903a
+      - sensor.ble_temperature_bathroom_a4c138f6b8cb
+      - sensor.bathroom_sensor_temperature
+      - sensor.ble_humidity_shower_a4c13865903a
+      - sensor.ble_humidity_bathroom_a4c138f6b8cb
+      type: history-graph
+    icon: mdi:shower
+    path: bathroom
+    theme: Backend-selected
+    title: Bathroom

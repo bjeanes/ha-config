@@ -62,10 +62,10 @@ automation:
         attribute: dir_of_travel
         state: towards
       - condition: state
-        entity_id: sensor.bos_iphone_activity
+        entity_id: sensor.bos_iphone_hass_activity
         state: Automotive
       - condition: state
-        entity_id: sensor.bos_iphone_activity
+        entity_id: sensor.bos_iphone_hass_activity
         attribute: Confidence
         state: High
     action:
