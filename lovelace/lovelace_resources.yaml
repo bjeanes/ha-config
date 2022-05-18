@@ -134,3 +134,6 @@ items:
 - id: 0afffa6b08dd44be820b7e45428e0e4c
   type: module
   url: /hacsfiles/radial-menu/radial-menu.js?hacstag=181124811160
+- id: 47115306b9da4199bf15f24220650738
+  type: module
+  url: /hacsfiles/last-changed-element/last-changed-element.js?hacstag=4203650621598

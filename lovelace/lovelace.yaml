@@ -331,6 +331,78 @@ config:
         method: none
       type: custom:auto-entities
       unique: true
+    - elements:
+      - attribute: mean
+        entity: sensor.ble_temperature_living_room_a4c1382a9b6e
+        style:
+          background: rgba(10,10,10,0.2)
+          left: 23%
+          padding: 3px
+          top: 22%
+        suffix: "\xB0C"
+        tap_action: more-info
+        type: custom:state-attribute-element
+      - attribute: mean
+        entity: sensor.ble_temperature_bos_office_a4c1380f0b98
+        style:
+          background: rgba(10,10,10,0.2)
+          left: 72%
+          padding: 3px
+          top: 80%
+        suffix: "\xB0C"
+        tap_action: more-info
+        type: custom:state-attribute-element
+      - attribute: mean
+        entity: sensor.ble_temperature_ris_office_a4c138e78afe
+        style:
+          background: rgba(10,10,10,0.2)
+          left: 88.8%
+          padding: 3px
+          top: 80%
+        suffix: "\xB0C"
+        tap_action: more-info
+        type: custom:state-attribute-element
+      - attribute: mean
+        entity: sensor.ble_temperature_analog_room_a4c138bcab08
+        style:
+          background: rgba(10,10,10,0.2)
+          left: 80%
+          padding: 3px
+          top: 47%
+        suffix: "\xB0C"
+        type: custom:state-attribute-element
+      - attribute: mean
+        entity: sensor.ble_temperature_kitchen_a4c1389485e3
+        style:
+          background: rgba(10,10,10,0.2)
+          left: 53.3%
+          padding: 3px
+          top: 20%
+        suffix: "\xB0C"
+        tap_action: more-info
+        type: custom:state-attribute-element
+      - attribute: mean
+        entity: sensor.ble_temperature_bedroom_a4c138feb60c
+        style:
+          background: rgba(10,10,10,0.2)
+          left: 29%
+          padding: 3px
+          top: 77%
+        suffix: "\xB0C"
+        tap_action: more-info
+        type: custom:state-attribute-element
+      - attribute: mean
+        entity: sensor.ble_temperature_spare_room_a4c138d8ef42
+        style:
+          background: rgba(10,10,10,0.2)
+          left: 53.3%
+          padding: 3px
+          top: 80%
+        suffix: "\xB0C"
+        tap_action: more-info
+        type: custom:state-attribute-element
+      image: /local/floorplan-top.jpg
+      type: picture-elements
     icon: hass:home
     panel: false
     path: default_view
