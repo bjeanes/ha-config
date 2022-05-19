@@ -6,12 +6,33 @@ config:
       - entity: light.bos_office
         type: light
         use_light_color: true
+      - entity: switch.bos_office_heater
+        icon: mdi:radiator
+        tap_action:
+          action: toggle
+        type: entity
+      - content_info: name
+        entity: switch.bo_s_desk_plug
+        icon: mdi:power-plug
+        name: Desk
+        tap_action:
+          action: toggle
+        type: entity
+      - content_info: name
+        entity: switch.bo_s_office_plug
+        icon: mdi:power-plug
+        name: Chair
+        tap_action:
+          action: toggle
+        type: entity
       - entity: binary_sensor.bo_s_office_door_contact
         type: entity
         use_entity_picture: false
       - entity: binary_sensor.bo_s_office_is_occupied
         type: entity
       - entity: binary_sensor.bo_s_office_motion
+        type: entity
+      - entity: binary_sensor.bo_s_office_pir_2_occupancy
         type: entity
       - entity: sensor.ble_temperature_bos_office_a4c1380f0b98
         type: entity
@@ -31,8 +52,16 @@ config:
         show_temperature: true
         type: weather
       - entity: sensor.bo_s_office_heatindex
+        icon: tc:heat-index
         type: entity
       type: custom:mushroom-chips-card
+    - entities:
+      - entity: binary_sensor.bo_s_office_pir_2_occupancy
+      - entity: binary_sensor.bo_s_office_motion
+      - entity: binary_sensor.bo_s_office_is_occupied
+      hours_to_show: 2
+      title: Occupancy
+      type: history-graph
     - card:
         type: entities
       filter:
