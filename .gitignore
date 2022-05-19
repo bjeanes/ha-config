@@ -1,6 +1,7 @@
 .stversions
 __pycache__
 *.db
+*.db-journal
 ._*
 .DS_Store
 *.tmp
