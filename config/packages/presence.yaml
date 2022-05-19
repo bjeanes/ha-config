@@ -114,11 +114,30 @@ template:
           - unknown
         for:
           seconds: 5
+      - platform: state
+        entity_id:
+          - binary_sensor.bo_s_office_pir_2_occupancy
+          - binary_sensor.bo_s_office_motion
+          - binary_sensor.ri_s_office_occupancy
+        to: "on"
+      - platform: state
+        entity_id:
+          - binary_sensor.bo_s_office_pir_2_occupancy
+          - binary_sensor.bo_s_office_motion
+          - binary_sensor.ri_s_office_occupancy
+        to: "off"
+        for:
+          minutes: 1
     binary_sensor:
       - unique_id: bos_office_is_occupied
         name: Bo's Office Is Occupied
         state: |
-          {{ is_state('sensor.template_room_bo_phone', 'bo_s_office') or is_state('sensor.template_room_ri_phone', 'bo_s_office') }}
+          {{
+          is_state('sensor.template_room_bo_phone', 'bo_s_office')
+          or is_state('sensor.template_room_ri_phone', 'bo_s_office')
+          or is_state('binary_sensor.bo_s_office_pir_2_occupancy', 'on')
+          or is_state('binary_sensor.bo_s_office_motion', 'on')
+          }}
         icon: |
           {% if is_state("binary_sensor.bo_s_office_is_occupied", "on") %}
           mdi:account
@@ -130,7 +149,10 @@ template:
       - unique_id: ris_office_is_occupied
         name: Ri's Office Is Occupied
         state: |
-          {{ is_state('sensor.template_room_bo_phone', 'ri_s_office') or is_state('sensor.template_room_ri_phone', 'ri_s_office') }}
+          {{ is_state('sensor.template_room_bo_phone', 'ri_s_office')
+            or is_state('sensor.template_room_ri_phone', 'ri_s_office')
+            or is_state('binary_sensor.ri_s_office_occupancy', 'on')
+          }}
         icon: |
           {% if is_state("binary_sensor.ri_s_office_is_occupied", "on") %}
           mdi:account
