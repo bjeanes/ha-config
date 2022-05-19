@@ -129,18 +129,6 @@ homekit:
     filter:
       include_entities:
         - vacuum.robot_vacuum
-        # - sensor.bathroom_temperature
-        # - sensor.bathroom_humidity
-        # - sensor.bo_s_office_temperature
-        # - sensor.bo_s_office_humidity
-        # - sensor.kitchen_temperature
-        # - sensor.kitchen_humidity
-        # - sensor.living_room_temperature
-        # - sensor.living_room_humidity
-        # - sensor.lounge_room_temperature
-        # - sensor.lounge_room_humidity
-        # - sensor.shower_air_temperature
-        # - sensor.shower_humidity
 
         - fan.bedroom_purifier
         - sensor.bedroom_purifier_humidity
@@ -153,9 +141,13 @@ homekit:
 
         - switch.bo_s_desk_plug
         - switch.bo_s_office_plug
+        - switch.bos_office_heater
         - switch.ri_s_desk_plug
       include_entity_globs:
         - binary_sensor.*_is_occupied
+        - binary_sensor.*_motion
+        - binary_sensor.*_presence
+        - binary_sensor.*_occupancy
         - sensor.ble_temperature*
         - sensor.ble_humidity*
         - sensor.ble_illuminance*
