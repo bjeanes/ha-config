@@ -273,9 +273,12 @@ config:
         - attributes:
             device_class: connectivity
           domain: binary_sensor
+          state: 'off'
+        - attributes:
+            unit_of_measurement: lqi
           not:
             entity_id: /robot_vacuum_(mop|water_box)/
-          state: 'off'
+          state: < 100
         - entity_id: calendar.on_call
           state: 'on'
         - entity_id: /fire_danger/
