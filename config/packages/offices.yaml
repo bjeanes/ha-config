@@ -28,7 +28,9 @@ automation:
           area_id: bo_s_office
       - service: switch.turn_on
         target:
-          area_id: bo_s_office
+          entity_id:
+            - switch.bo_s_office_plug
+            - switch.bo_s_desk_plug
 
   - id: 2804db52f34458004191f589ed3453dd6f9e1f45
     alias: Warm up Bo's office heater
