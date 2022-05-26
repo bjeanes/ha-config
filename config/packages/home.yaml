@@ -46,14 +46,14 @@ automation:
           - sensor.ri_s_phone
         from: "bedroom"
         variables:
-          toggle: input_boolean_ri_in_bed
+          toggle: input_boolean.ri_in_bed
         for:
           minutes: 1
       - platform: state
         entity_id:
           - sensor.ri_s_phone
         variables:
-          toggle: input_boolean_bo_in_bed
+          toggle: input_boolean.bo_in_bed
         from: "bedroom"
         for:
           minutes: 1
@@ -86,7 +86,7 @@ automation:
           - alias: "plausible sleep time"
             condition: time
             after: "21:00:00"
-            before: "10:00:00"
+            before: "08:30:00"
       - "{{ trigger.to_state.state not in ['unknown', 'unavailable'] }}"
       - "{{ not is_state(toggle, target_state) }}"
       - "{{ is_state(person, 'home') }}"
