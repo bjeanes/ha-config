@@ -82,7 +82,7 @@ automation:
           person: person.bo_jeanes
     condition:
       - or:
-          - "{{ target_state == 'off' }}"
+          # - "{{ target_state == 'off' }}"
           - alias: "plausible sleep time"
             condition: time
             after: "21:00:00"
