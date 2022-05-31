@@ -1,2 +1,60 @@
-null
-...
+Expaso Home Assistant Add-Ons:
+  maintainer: Hans van Essen <hans@expaso.nl>
+  slug: 77b2833f
+  source: https://github.com/Expaso/hassos-addons
+Frigate hass.io addons:
+  maintainer: blakeblackshear
+  slug: ccab4aaf
+  source: https://github.com/blakeblackshear/frigate-hass-addons
+HA Add-ons by alexbelgium:
+  maintainer: alexbelgium
+  slug: db21ed7f
+  source: https://github.com/alexbelgium/hassio-addons
+Hass.io add-ons by Nicolai:
+  maintainer: Nicolai Bjerre Pedersen
+  slug: 0844df1a
+  source: https://github.com/overkill32/hassio-addons
+'Home Assistant Add-on: Zigbee2mqtt':
+  maintainer: Daniel Welch <dwelch2102@gmail.com>
+  slug: 45df7312
+  source: https://github.com/zigbee2mqtt/hassio-zigbee2mqtt
+Home Assistant Community Add-ons:
+  maintainer: Franck Nijhof <frenck@addons.community>
+  slug: a0d7b954
+  source: https://github.com/hassio-addons/repository
+Home Assistant Google Drive Backup Repository:
+  maintainer: Stephen Beechen <stephen@beechens.com>
+  slug: cebe7a76
+  source: https://github.com/sabeechen/hassio-google-drive-backup
+Local add-ons:
+  maintainer: you
+  slug: local
+  source: local
+MickMake Hass.io Add-ons:
+  maintainer: MickMake <embed@mickmake.com>
+  slug: ba22da74
+  source: https://github.com/MickMake/HomeAssistantAddons
+Official add-ons:
+  maintainer: Home Assistant
+  slug: core
+  source: core
+Poeschl Home Assistant Add-ons:
+  maintainer: Poeschl <Poeschl@users.noreply.github.com>
+  slug: 243ffc37
+  source: https://github.com/Poeschl/Hassio-Addons
+Sanderdw's add-on repository:
+  maintainer: Sander de Wildt <sanderdw@gmail.com>
+  slug: 0826754b
+  source: https://github.com/sanderdw/hassio-addons
+Tom's Home Assistant Add-ons:
+  maintainer: Thomas Mauerer
+  slug: 15d21743
+  source: https://github.com/thomasmauerer/hassio-addons
+bjeanes Home Assistant add-on repository:
+  maintainer: Bo Jeanes <hassio@bjeanes.com>
+  slug: 9c51689a
+  source: https://github.com/bjeanes/hassio-addons
+bjeanes' fork of Poeschl Home Assistant Add-ons:
+  maintainer: bjeanes <bjeanes@users.noreply.github.com>
+  slug: 61c150fb
+  source: https://github.com/bjeanes/Poeschl-Hassio-Addons
