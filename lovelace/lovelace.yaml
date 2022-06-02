@@ -261,6 +261,7 @@ config:
         exclude:
         - state: unavailable
         - state: unknown
+        - entity_id: /vacuum.*attached/
         include:
         - attributes:
             device_class: moisture
