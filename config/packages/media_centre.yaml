@@ -345,21 +345,21 @@ sensor:
         start: "8:00:00"
         end: "21:00:00"
 
-      - state: Triple R 102.7 (Variety) # https://www.rrr.org.au/explore/programs/radiotherapy
+      - state: Triple R # https://www.rrr.org.au/explore/programs/radiotherapy
         start: "10:00:00"
         end: "11:00:00"
         condition:
           condition: time
           weekday: [sun]
 
-      - state: Triple R 102.7 (Variety) # https://www.rrr.org.au/explore/programs/einstein-a-go-go
+      - state: Triple R # https://www.rrr.org.au/explore/programs/einstein-a-go-go
         start: "11:00:00"
         end: "12:00:00"
         condition:
           condition: time
           weekday: [sun]
 
-      - state: Triple R 102.7 (Variety)
+      - state: Triple R
         condition:
           condition: state
           entity_id: sensor.rrr_now_playing
