@@ -140,3 +140,6 @@ items:
 - id: 713c44b772b54d5ebdb0061a188e2f7b
   type: module
   url: /hacsfiles/custom-icons/custom-icons.js?hacstag=491465538021
+- id: c6b759faf93a4e22ab9faa3ebcaa218b
+  type: module
+  url: /hacsfiles/button-card/button-card.js?hacstag=146194325342
