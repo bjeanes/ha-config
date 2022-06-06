@@ -46,13 +46,13 @@ items:
   url: /hacsfiles/lovelace-swipe-navigation/swipe-navigation.js?hacstag=183995552136
 - id: d612f620a56f4bacb5ce3a10353074dc
   type: module
-  url: /hacsfiles/lovelace-state-switch/state-switch.js?hacstag=158756598193
+  url: /hacsfiles/lovelace-state-switch/state-switch.js?hacstag=158756598195
 - id: 002ab8e9552e45219e21acb08280a8f2
   type: module
   url: /hacsfiles/miflora-card/miflora-card.js?hacstag=197715418010
 - id: ddb6d1b21fc44ae692519ea38c9cf9cb
   type: module
-  url: /hacsfiles/bom-radar-card/bom-radar-card.js?hacstag=294609880205
+  url: /hacsfiles/bom-radar-card/bom-radar-card.js?hacstag=294609880206
 - id: edc63027be67460bab526d3dd3b4a8b2
   type: module
   url: /hacsfiles/secondaryinfo-entity-row/secondaryinfo-entity-row.js?hacstag=15971160550
@@ -79,7 +79,7 @@ items:
   url: /hacsfiles/restriction-card/restriction-card.js?hacstag=215633404127
 - id: 6b5e206532c64526991bbbd84b993316
   type: module
-  url: /hacsfiles/hass-bha-icons/hass-bha-icons.js?hacstag=17980857697739
+  url: /hacsfiles/hass-bha-icons/hass-bha-icons.js?hacstag=17980857689288
 - id: f8fc07fca3fa4274be5f46d82400787c
   type: module
   url: /hacsfiles/thermal_comfort_icons/thermal_comfort_icons.js?hacstag=449218690130
@@ -91,10 +91,10 @@ items:
   url: /hacsfiles/lovelace-time-picker-card/time-picker-card.js?hacstag=261262884121
 - id: 17610f86804c432aafbd0bbd93622916
   type: module
-  url: /hacsfiles/lovelace-paper-buttons-row/paper-buttons-row.js?hacstag=244872232100
+  url: /hacsfiles/lovelace-paper-buttons-row/paper-buttons-row.js?hacstag=244872232101
 - id: 78939a4781bd40f6accb3cba860a100f
   type: module
-  url: /hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375188
+  url: /hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375190
 - id: 4795f91c6d3a4fd3a5b1900f9990217e
   type: module
   url: /hacsfiles/stack-in-card/stack-in-card.js?hacstag=248954055020
@@ -121,7 +121,7 @@ items:
   url: /hacsfiles/power-flow-card/power-flow-card.js?hacstag=484538222250
 - id: 8217392f44e24fe98b652c7f36ab302e
   type: module
-  url: /hacsfiles/ha-sankey-chart/ha-sankey-chart.js?hacstag=455846088061
+  url: /hacsfiles/ha-sankey-chart/ha-sankey-chart.js?hacstag=455846088064
 - id: 84ed6341c9b245aba7e66cbdc51e2ccb
   type: module
   url: /hacsfiles/state-attribute-element/state-attribute-element.js?hacstag=142038085040
@@ -137,3 +137,6 @@ items:
 - id: 47115306b9da4199bf15f24220650738
   type: module
   url: /hacsfiles/last-changed-element/last-changed-element.js?hacstag=4203650621598
+- id: 713c44b772b54d5ebdb0061a188e2f7b
+  type: module
+  url: /hacsfiles/custom-icons/custom-icons.js?hacstag=491465538021
