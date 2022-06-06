@@ -2,82 +2,65 @@ config:
   title: Servers
   views:
   - badges:
-    - entity: sensor.plex_tumtum_tree
-      name: Tumtum
-    - entity: media_player.apple_tv
-      name: "\uF8FF TV"
-    - entity: media_player.plex_plex_for_apple_tv_living_room
-      name: Plex
+    - entity: sensor.ble_humidity_server_closet_a4c13832a83f
+    - entity: sensor.ble_temperature_server_closet_a4c13832a83f
     cards:
-    - entities:
-      - entity: sensor.nas_cpu_utilization_total
-      - entity: sensor.nas_memory_usage_real
-      - entity: sensor.nas_volume_1_volume_used
-      hours_to_show: 24
-      refresh_interval: 0
-      type: history-graph
-    - entities:
-      - entity: sensor.rtorrent_down_speed
-      - entity: sensor.rtorrent_up_speed
-      - entity: sensor.nzbget_speed_kilobytes_per_sec
-      - entity: sensor.rtorrent_downloading_torrents
-      - entity: sensor.rtorrent_uploading_torrents
-      hours_to_show: 6
-      refresh_interval: 5
-      type: history-graph
-    - cards:
-      - entity: sensor.plex_tumtum_tree
-        name: Plex
-        type: entity
-      - card:
-          type: entities
-        filter:
-          exclude:
-          - state: unavailable
-          - state: 'off'
-          - state: idle
-          - state: ok
-          - state: problem
-          include:
-          - domain: media_player
-            entity_id: /plex/
-        sort:
-          method: friendly_name
-        type: custom:auto-entities
-      type: vertical-stack
-    - entities:
-      - entity: sensor.plex_tumtum_tree
-      - entity: sensor.sonarr_upcoming
-      - entity: sensor.sonarr_queue
-      - entity: sensor.nas_cpu_utilization_total
-      - entity: sensor.nas_cpu_load_averarge_5_min
-      - entity: sensor.nas_cpu_load_averarge_15_min
-      - entity: sensor.nas_memory_usage_real
-      - entity: sensor.nas_network_down
-      - entity: sensor.nas_network_up
-      - entity: sensor.nas_temperature
-      - entity: binary_sensor.nas_update_available
-      - entity: sensor.nas_volume_1_average_disk_temp
-      - entity: sensor.nas_volume_1_volume_used
-      - entity: sensor.rtorrent_all_torrents
-        icon: hass:download
-      - entity: sensor.rtorrent_downloading_torrents
-        icon: hass:download
-      - entity: sensor.rtorrent_uploading_torrents
-        icon: hass:upload
-      - entity: sensor.rtorrent_active_torrents
-      type: entities
-    - entities:
-      - entity: sensor.nzbget_speed_kilobytes_per_sec
-      - entity: sensor.rtorrent_down_speed
-      - entity: sensor.rtorrent_up_speed
-      - entity: sensor.rtorrent_active_torrents
-      - entity: sensor.rtorrent_downloading_torrents
-      - entity: sensor.rtorrent_uploading_torrents
-      type: entities
-    icon: hass:plex
-    path: media
-    title: Media
+    - experimental:
+        brush: true
+        color_threshold: true
+      header:
+        colorize_states: true
+        show: true
+        show_states: true
+        title: Server Closet
+      series:
+      - color_threshold:
+        - color: blue
+          value: 0
+        - color: green
+          value: 10
+        - color: yellow
+          value: 25
+        - color: orange
+          value: 30
+        - color: red
+          value: 35
+        entity: sensor.ble_temperature_server_closet_a4c13832a83f
+        group_by:
+          duration: 10m
+        name: Temperature
+        show:
+          extremas: max+time
+        stroke_width: 2
+        yaxis_id: temp
+      - color_threshold:
+        - color: blue
+          value: 0
+        - color: blue
+          value: 40
+        - color: orange
+          value: 60
+        - color: red
+          value: 70
+        entity: sensor.ble_humidity_server_closet_a4c13832a83f
+        group_by:
+          duration: 10m
+        name: Humidity
+        stroke_width: 2
+        yaxis_id: humidity
+      type: custom:apexcharts-card
+      yaxis:
+      - id: temp
+        max: ~30
+        min: ~15
+      - id: humidity
+        max: 100
+        min: 0
+        opposite: true
+    icon: mdi:wardrobe-outline
+    path: server-closet
+    theme: Backend-selected
+    title: Server Closet
   - badges:
     - entity: sensor.nas_volume_1_status
     - entity: update.nas_dsm_update
@@ -177,6 +160,83 @@ config:
     path: nas
     theme: Backend-selected
     title: NAS
+  - badges:
+    - entity: sensor.plex_tumtum_tree
+      name: Tumtum
+    - entity: media_player.apple_tv
+      name: "\uF8FF TV"
+    - entity: media_player.plex_plex_for_apple_tv_living_room
+      name: Plex
+    cards:
+    - entities:
+      - entity: sensor.nas_cpu_utilization_total
+      - entity: sensor.nas_memory_usage_real
+      - entity: sensor.nas_volume_1_volume_used
+      hours_to_show: 24
+      refresh_interval: 0
+      type: history-graph
+    - entities:
+      - entity: sensor.rtorrent_down_speed
+      - entity: sensor.rtorrent_up_speed
+      - entity: sensor.nzbget_speed_kilobytes_per_sec
+      - entity: sensor.rtorrent_downloading_torrents
+      - entity: sensor.rtorrent_uploading_torrents
+      hours_to_show: 6
+      refresh_interval: 5
+      type: history-graph
+    - cards:
+      - entity: sensor.plex_tumtum_tree
+        name: Plex
+        type: entity
+      - card:
+          type: entities
+        filter:
+          exclude:
+          - state: unavailable
+          - state: 'off'
+          - state: idle
+          - state: ok
+          - state: problem
+          include:
+          - domain: media_player
+            entity_id: /plex/
+        sort:
+          method: friendly_name
+        type: custom:auto-entities
+      type: vertical-stack
+    - entities:
+      - entity: sensor.plex_tumtum_tree
+      - entity: sensor.sonarr_upcoming
+      - entity: sensor.sonarr_queue
+      - entity: sensor.nas_cpu_utilization_total
+      - entity: sensor.nas_cpu_load_averarge_5_min
+      - entity: sensor.nas_cpu_load_averarge_15_min
+      - entity: sensor.nas_memory_usage_real
+      - entity: sensor.nas_network_down
+      - entity: sensor.nas_network_up
+      - entity: sensor.nas_temperature
+      - entity: binary_sensor.nas_update_available
+      - entity: sensor.nas_volume_1_average_disk_temp
+      - entity: sensor.nas_volume_1_volume_used
+      - entity: sensor.rtorrent_all_torrents
+        icon: hass:download
+      - entity: sensor.rtorrent_downloading_torrents
+        icon: hass:download
+      - entity: sensor.rtorrent_uploading_torrents
+        icon: hass:upload
+      - entity: sensor.rtorrent_active_torrents
+      type: entities
+    - entities:
+      - entity: sensor.nzbget_speed_kilobytes_per_sec
+      - entity: sensor.rtorrent_down_speed
+      - entity: sensor.rtorrent_up_speed
+      - entity: sensor.rtorrent_active_torrents
+      - entity: sensor.rtorrent_downloading_torrents
+      - entity: sensor.rtorrent_uploading_torrents
+      type: entities
+    icon: hass:plex
+    path: media
+    title: Media
   - badges: []
     cards:
     - entities:
@@ -234,7 +294,6 @@ config:
   - badges: []
     cards:
     - all_series_config:
-        extend_to_end: false
         group_by:
           duration: 30min
           func: raw

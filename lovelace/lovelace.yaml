@@ -545,7 +545,7 @@ config:
       - color: black
         curve: smooth
         entity: sensor.electricity_general_price
-        extend_to_end: false
+        extend_to: now
         name: Price
         type: area
         yaxis_id: price
@@ -553,7 +553,6 @@ config:
         data_generator: "return entity.attributes.forecasts.map((entry) => {\n  return\
           \ [new Date(entry.start_time), entry.per_kwh];\n});\n"
         entity: sensor.electricity_general_forecast
-        extend_to_end: false
         name: Predicted Price
         show:
           in_chart: true
@@ -563,7 +562,7 @@ config:
       - color: green
         curve: smooth
         entity: sensor.electricity_renewables
-        extend_to_end: false
+        extend_to: now
         name: Renewables in Grid
         show:
           in_chart: true
@@ -576,7 +575,6 @@ config:
         data_generator: "return entity.attributes.forecasts.map((entry) => {\n  return\
           \ [new Date(entry.start_time), entry.renewables];\n});\n"
         entity: sensor.electricity_general_forecast
-        extend_to_end: false
         name: Renewables in Grid
         show:
           in_chart: true
@@ -586,7 +584,6 @@ config:
         yaxis_id: renewables_perc
       - color: grey
         entity: sensor.electricity_general_forecast
-        extend_to_end: false
         name: Predicted Price
         show:
           in_chart: false
@@ -670,7 +667,11 @@ config:
         - attributes:
             device_class: power
         - attributes:
-            device_class: xxdisabled_voltage
+            unit_of_measurement: kW
+        - attributes:
+            unit_of_measurement: W
+        - attributes:
+            unit_of_measurement: A
         - attributes:
             device_class: current
       type: custom:auto-entities
@@ -703,6 +704,7 @@ config:
         - entity_id: /nas_ups/
         - entity_id: /battery/
         - entity_id: /dht/
+        - entity_id: /ble_voltage/
         include:
         - entity_id: /voltage/
       type: custom:auto-entities
