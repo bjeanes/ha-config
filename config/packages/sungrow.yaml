@@ -1,0 +1,1105 @@
+# Sungrow integration
+# Based on https://github.com/mkaiser/Sungrow-SHx-Inverter-Modbus-Home-Assistant by Martin Kaiser
+# Heavily modified to work around quirks in WiNet-S and SH5.0RS firmwares
+
+# Commented out sensors are because the registers throw errors when they are read
+
+#   - id: "24321413553543" # random number
+#     alias: update battery charge discharge cmd
+#     description: "Updates Sungrow holding register for battery charge discharge command"
+#     trigger:
+#       - platform: state
+#         entity_id:
+#           - input_select.set_sg_battery_charge_discharge_cmd
+#     condition: []
+#     action:
+#       - service: modbus.write_register
+#         data_template:
+#           address: 13050 # 13051
+#           slave: 1
+#           # 0xAA: 170 Charge
+#           # 0xBB: 187 Discharge
+#           # 0xCC: 204 Stop (Default)
+#           # don't know how to compare the integer values in hexadecimal format in following decoder statement...
+#           value: "{% if is_state('input_select.set_sg_battery_charge_discharge_cmd' , 'Stop (default)') %} 204
+#           {% elif is_state('input_select.set_sg_battery_charge_discharge_cmd' , 'Force charge') %} 170
+#           {% elif is_state('input_select.set_sg_battery_charge_discharge_cmd' , 'Force discharge') %} 187
+#           {% else %} 204 {% endif %}"
+#           hub: SungrowSHx
+#     mode: single
+script:
+  inverter_force_battery_charge:
+    alias: "Inverter - force battery charge"
+    sequence:
+      - service: modbus.write_register
+        data_template:
+          address: 13049 # 13050-13051
+          slave: 1
+          value: [2, 0xAA]
+          hub: SungrowSHx
+  inverter_force_battery_discharge:
+    alias: "Inverter - force battery discharge"
+    sequence:
+      - service: modbus.write_register
+        data_template:
+          address: 13049 # 13050-13051
+          slave: 1
+          value: [2, 0xBB]
+          hub: SungrowSHx
+  inverter_force_battery_stop:
+    alias: "Inverter - force battery stop"
+    sequence:
+      - service: modbus.write_register
+        data_template:
+          address: 13049 # 13050-13051
+          slave: 1
+          value: [2, 0xCC]
+          hub: SungrowSHx
+  inverter_self_consumption:
+    alias: "Inverter - self consumption"
+    sequence:
+      - service: modbus.write_register
+        data_template:
+          address: 13049 # 13050-13051
+          slave: 1
+          value: [0, 0xCC]
+          hub: SungrowSHx
+
+modbus:
+  - name: SungrowSHx
+    type: tcp
+    host: !secret solar_inverter_ip
+    port: 502
+    retry_on_empty: true
+    # retries: 10
+    # close_comm_on_error: true
+    delay: 5
+    #timeout: 5
+    sensors:
+      # - name: Sungrow Device type code
+      #   slave: 1
+      #   address: 4999 # 5000
+      #   input_type: input
+      #   count: 1
+      #   data_type: uint16
+      #   swap: word
+      #   scan_interval: 60
+
+      - name: Inverter output energy today
+        unique_id: d1a3ad60e978aaea9407
+        slave: 1
+        address: 5002
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter output energy total
+        unique_id: e28068b742fd20919aea
+        slave: 1
+        address: 5003
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        unit_of_measurement: kWh
+        precision: 1
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter temperature
+        unique_id: a29ef61bc181d9b95ef7
+        slave: 1
+        address: 5007
+        input_type: input
+        count: 1
+        data_type: int16
+        precision: 1
+        unit_of_measurement: °C
+        device_class: temperature
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter grid frequency
+        unique_id: 489e85158f95e8bd71fb
+        slave: 1
+        address: 5035
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 2
+        unit_of_measurement: Hz
+        device_class: frequency
+        state_class: measurement
+        scale: 0.01 # docs say 0.1 but WiNet-S implementation differs
+        scan_interval: 10
+
+      - name: Inverter phase A voltage
+        unique_id: c892eb3b2a51b37ffab3
+        slave: 1
+        address: 5018
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: V
+        device_class: voltage
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter phase A current
+        unique_id: 5963c0d0bf24ad5412ff
+        slave: 1
+        address: 13030
+        input_type: input
+        count: 1
+        data_type: int16
+        swap: word
+        precision: 1
+        unit_of_measurement: A
+        device_class: current
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter MPPT1 voltage
+        unique_id: 024b2df03fb2d724277c
+        slave: 1
+        address: 5010
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: V
+        device_class: voltage
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter MPPT1 current
+        unique_id: a5179dc512ce97cd1543
+        slave: 1
+        address: 5011
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 2
+        unit_of_measurement: A
+        device_class: current
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter MPPT2 voltage
+        unique_id: 0b856f1678a3afb1002f
+        slave: 1
+        address: 5012
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: V
+        device_class: voltage
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter MPPT2 current
+        unique_id: f732afc7332efa49be11
+        slave: 1
+        address: 5013
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 2
+        unit_of_measurement: A
+        device_class: current
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter PV power
+        unique_id: 4af1ff47ed7fd1bad213
+        slave: 1
+        address: 5016
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 0
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+        scale: 1
+        scan_interval: 10
+
+      - name: Inverter active power
+        unique_id: a3ee41f78c6c55377c00
+        slave: 1
+        address: 13033
+        input_type: input
+        count: 2
+        data_type: int32
+        swap: word
+        precision: 0
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+        scale: 1
+        scan_interval: 10
+
+      - name: Inverter reactive power
+        unique_id: 5a58fe975877eec6d37c
+        slave: 1
+        address: 5032
+        input_type: input
+        count: 2
+        data_type: int32
+        swap: word
+        precision: 0
+        unit_of_measurement: var
+        device_class: reactive_power
+        state_class: measurement
+        scale: 1
+        scan_interval: 10
+
+      - name: Inverter power factor
+        unique_id: 29099a467ed9fec02cb1
+        slave: 1
+        address: 5034
+        input_type: input
+        count: 1
+        data_type: int16
+        swap: word
+        unit_of_measurement: "%"
+        device_class: power_factor
+        state_class: measurement
+        # scale: 0.001 # according to docs...
+        scale: 0.1
+        # precision: 3
+        precision: 1
+        scan_interval: 10
+
+      #       - name: BDC rated power
+      #         slave: 1
+      #         address: 5627 #5628
+      #         input_type: input
+      #         count: 1
+      #         data_type: uint16
+      #         swap: word
+      #         unit_of_measurement: "W"
+      #         device_class: power
+      #         state_class: measurement
+      #         scale: 100
+      #         scan_interval: 10
+
+      #       - name: System state
+      #         slave: 1
+      #         address: 12999
+      #         input_type: input
+      #         count: 1
+      #         data_type: uint16
+      #         swap: word
+      #         precision: 0
+      #         scale: 1
+      #         scan_interval: 10
+
+      #       - name: Running state
+      #         slave: 1
+      #         address: 13000
+      #         input_type: input
+      #         count: 1
+      #         data_type: uint16
+      #         swap: word
+      #         precision: 0
+      #         scale: 1
+      #         scan_interval: 10
+
+      - name: Inverter PV generation today
+        unique_id: 27953d57c315260a7983
+        slave: 1
+        address: 13001
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter PV generation total
+        unique_id: 885db873746c92fcdf2d
+        slave: 1
+        address: 13002
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter exported energy from PV today
+        unique_id: 08454b6e9f7061180795
+        slave: 1
+        address: 13004
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter exported energy from PV total
+        unique_id: 00efcf01e33337d01b5f
+        slave: 1
+        address: 13005
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter load power
+        unique_id: 9777fe694d687a4f30df
+        slave: 1
+        address: 13007
+        input_type: input
+        count: 2
+        data_type: int32
+        swap: word
+        precision: 0
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+        scale: 1
+        scan_interval: 10
+
+      - name: Inverter export power
+        unique_id: 4c3bac29a87561796c06
+        slave: 1
+        address: 13009
+        input_type: input
+        count: 2
+        data_type: int32
+        swap: word
+        precision: 0
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+        scale: 1
+        scan_interval: 10
+
+      - name: Inverter battery charge from PV today
+        unique_id: d496459e40e0d49f5c11
+        slave: 1
+        address: 13011
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter battery charge from PV total
+        unique_id: d743fb021ad5ffd4eaec
+        slave: 1
+        address: 13012
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter direct energy consumption today
+        unique_id: 31666be0c3b9c9b1046c
+        slave: 1
+        address: 13016
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter direct energy consumption total
+        unique_id: 1e52906bf8fb43bd584e
+        slave: 1
+        address: 13017
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter battery voltage
+        unique_id: d847a32343d531d39de9
+        slave: 1
+        address: 13019
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 0
+        unit_of_measurement: V
+        device_class: voltage
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter battery current
+        unique_id: 211c77af04532163e7b0
+        slave: 1
+        address: 13020
+        input_type: input
+        count: 1
+        # data_type: uint16
+        data_type:
+          int16 # docs say unsigned but I'm getting overflows when battery is charging
+          # changing to int shows negative amperage which makes sense.
+        swap: word
+        precision: 1
+        unit_of_measurement: A
+        device_class: current
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter battery power (raw)
+        unique_id: 4f7dacbf06d004b547d9
+        slave: 1
+        address: 13021
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 0
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+        scale: 1
+        scan_interval: 10
+
+      - name: Inverter battery level
+        unique_id: 61e9d0508f0e75a3f25c
+        slave: 1
+        address: 13022
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter battery health
+        slave: 1
+        address: 13023
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 0
+        unit_of_measurement: "%"
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 10
+
+      - name: Inverter battery temperature
+        slave: 1
+        address: 13024
+        input_type: input
+        count: 1
+        data_type: int16
+        precision: 1
+        unit_of_measurement: °C
+        device_class: temperature
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter battery discharge today
+        unique_id: aa16dda43d9420767429
+        slave: 1
+        address: 13025
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter battery discharge total
+        unique_id: c69ba5e6d4b5233e1d4b
+        slave: 1
+        address: 13026
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 10
+
+      #       - name: Grid state raw
+      #         slave: 1
+      #         address: 13029
+      #         input_type: input
+      #         count: 1
+      #         data_type: uint16
+      #         swap: word
+      #         precision: 0
+      #         scan_interval: 10
+
+      - name: Inverter imported energy today
+        unique_id: b2b294f51055baee4d83
+        slave: 1
+        address: 13035
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter imported energy total
+        unique_id: 3b0efbeb671df362890c
+        slave: 1
+        address: 13036
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter battery charge today
+        unique_id: 88a0d3dadb8aa103728d
+        slave: 1
+        address: 13039
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter battery charge total
+        unique_id: ac30fabc192dd714df73
+        slave: 1
+        address: 13040
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter exported energy today
+        unique_id: 68e619a9b5ee8d444486
+        slave: 1
+        address: 13044
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      - name: Inverter exported energy total
+        unique_id: 6a4ef5fdd89be709656a
+        slave: 1
+        address: 13045
+        input_type: input
+        count: 2
+        data_type: uint32
+        swap: word
+        precision: 1
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total_increasing
+        scale: 0.1
+        scan_interval: 60
+
+      #       # holding registers
+      #       - name: Inverter Start Stop
+      #         slave: 1
+      #         address: 12999 # 13000
+      #         input_type: holding
+      #         count: 1
+      #         data_type: uint16
+      #         swap: word
+      #         precision: 0
+      #         scan_interval: 10
+      #       - name: EMS Mode Selection raw
+      #         slave: 1
+      #         address: 13049 # 13050
+      #         input_type: holding
+      #         count: 1
+      #         data_type: uint16
+      #         swap: word
+      #         scan_interval: 10
+      # - name: Inverter charge command (raw)
+      #   unique_id: d1158bbfa40d73933a72
+      #   slave: 1
+      #   address: 13050 # 13051
+      #   input_type: holding
+      #   count: 1
+      #   data_type: uint16
+      #   swap: word
+      #   precision: 0
+      #   scan_interval: 60
+
+#       - name: Battery Charge Discharge Power
+#         slave: 1
+#         address: 13051 # 13052
+#         input_type: holding
+#         count: 1
+#         data_type: uint16
+#         swap: word
+#         precision: 0
+#         # datasheet says:
+#         # 0 to 5000 W for SH*K-*
+#         # 0 to 100 % for SH*.0RT
+#         # for my SH10RT it is set in W...
+#         unit_of_measurement: W
+#         device_class: power
+#         state_class: measurement
+#         scan_interval: 10
+
+# - name: Inverter max SoC
+#   unique_id: c602a1446bddc9d6fa7a
+#   slave: 1
+#   address: 13057 # 13058
+#   input_type: holding
+#   count: 1
+#   data_type: uint16
+#   swap: word
+#   precision: 1
+#   unit_of_measurement: "%"
+#   device_class: battery
+#   state_class: measurement
+#   scale: 0.1
+#   scan_interval: 60
+
+# - name: Inverter min SoC
+#   unique_id: 61a08ee663d37248f372
+#   slave: 1
+#   address: 13058 # 13059
+#   input_type: holding
+#   count: 1
+#   data_type: uint16
+#   swap: word
+#   precision: 1
+#   unit_of_measurement: "%"
+#   device_class: battery
+#   state_class: measurement
+#   scale: 0.1
+#   scan_interval: 60
+
+# binary_sensor:
+#   - platform: template
+#     sensors:
+#       pv_generating:
+#         friendly_name: "PV generating"
+#         value_template: "{{ states('sensor.running_state')|int|bitwise_and(0x1) > 0 }}"
+#       battery_charging:
+#         friendly_name: "Battery charging"
+#         value_template: "{{ states('sensor.running_state')|int|bitwise_and(0x2) > 0 }}"
+#       battery_discharging:
+#         friendly_name: "Battery discharging"
+#         value_template: "{{ states('sensor.running_state')|int|bitwise_and(0x4) > 0 }}"
+#       exporting_power:
+#         friendly_name: "Exporting power"
+#         value_template: "{{ states('sensor.running_state')|int|bitwise_and(0x10) > 0 }}"
+#       importing_power:
+#         friendly_name: "Importing power"
+#         value_template: "{{ states('sensor.running_state')|int|bitwise_and(0x20) > 0 }}"
+
+# # 'virtual' template sensors for better readability
+sensor:
+  - platform: template
+    sensors:
+      inverter_battery_power:
+        unique_id: 7ef0fbbb0d9825b99f35
+        friendly_name: Inverter battery power
+        value_template: >-
+          {% set current = states('sensor.inverter_battery_current') %}
+          {% set power = states('sensor.inverter_battery_power_raw') %}
+          {% if 'unavailable' in [current, power] %}
+            unavailable
+          {% elif current|float < 0.0 and power|float > 0.0 %}
+            {{ -1 * power | float }}
+          {% else %}
+            {{ power | float }}
+          {% endif %}
+        unit_of_measurement: W
+        device_class: power
+#       sungrow_inverter_state:
+#         # Inverter States from modbus reference manual
+#         friendly_name: "Sungrow Inverter State"
+#         value_template: >-
+#           {% if ((states('sensor.system_state') | int(default=0)) == 0x0002) %}
+#             Stop
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0008) %}
+#             Standby
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0010) %}
+#             Initial Standby
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0020) %}
+#             Startup
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0040) %}
+#             Running
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0100) %}
+#             Fault
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0400) %}
+#             Maintain mode
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0800) %}
+#             Forced mode
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x1000) %}
+#             Off-grid mode
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x2501) %}
+#             Restarting
+#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x4000) %}
+#             External EMS mode
+#           {% else %}
+#             Unknown - should not see me!
+#           {% endif %}
+
+#       sungrow_grid_state:
+#         friendly_name: "Sungrow Grid State"
+#         value_template: >-
+#           {% if ((states('sensor.grid_state_raw') | int(default=0)) == 0x00AA) %}
+#             Off Grid
+#           {% elif ((states('sensor.grid_state_raw') | int(default=0)) == 0x0055) %}
+#             On Grid
+#           {% else %}
+#             Unknown - should not see me!
+#           {% endif %}
+
+#       sungrow_device_type:
+#         # device codes from modbus reference manual
+#         friendly_name: "Sungrow Device Type"
+#         value_template: >-
+#           {% if ((states('sensor.sungrow_device_type_code') | int(default=0))  == 0x0D09) %}
+#             SH5K-20
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D06) %}
+#             SH3K6
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D07) %}
+#             SH4K6
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D03) %}
+#             SH5K-V13
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D0C) %}
+#             SH5K-30
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D0A) %}
+#             SH3K6-30
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D0B) %}
+#             SH4K6-30
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D0F) %}
+#             SH5.0RS
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D0D) %}
+#             SH3.6RS
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D0E) %}
+#             SH4.6RS
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0D10) %}
+#             SH6.0RS
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0E03) %}
+#             SH10RT
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0E02) %}
+#             SH8.0RT
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0E01) %}
+#             SH6.0RT
+#           {% elif ((states('sensor.sungrow_device_type_code') | int(default=0)) == 0x0E00) %}
+#             SH5.0RT
+#           {% else %}
+#             Unknown device code!
+#           {% endif %}
+
+#       # make the sensor battery_charge_discharge_cmd more human readable
+#       sungrow_battery_charge_discharge_cmd:
+#         # Inverter States from modbus reference manual
+#         # 0xAA (170) Force charge
+#         # 0xBB (187) Force discharge
+#         # 0xCC (204) Stop (Default)
+#         # don't know how to compare the integer values in hexadecimal format in following decoder statement...
+#         friendly_name: "Battery Charge Discharge Cmd"
+#         value_template: >-
+#           {% if ((states('sensor.battery_charge_discharge_cmd_raw') | int(default=0)) == 0x00AA) %}
+#             Force charge
+#           {% elif ((states('sensor.battery_charge_discharge_cmd_raw') | int(default=0))  == 0x00BB) %}
+#             Force discharge
+#           {% elif ((states('sensor.battery_charge_discharge_cmd_raw') | int(default=0))  == 0x00CC) %}
+#             Stop (Default)
+#           {% else %}
+#             Unknown - should not see me!
+#           {% endif %}
+
+#       # make the sensor ems_selection_raw more human readable
+#       sungrow_ems_mode_selection:
+#         friendly_name: "EMS Mode Selection"
+#         value_template: >-
+#           {% if ((states('sensor.ems_mode_selection_raw') | int(default=0)) == 0) %}
+#             Self-consumption mode (default)
+#           {% elif ((states('sensor.ems_mode_selection_raw') | int(default=0)) == 2) %}
+#             Forced mode
+#           {% elif ((states('sensor.ems_mode_selection_raw') | int(default=0)) == 3) %}
+#             External EMS
+#           {% elif ((states('sensor.ems_mode_selection_raw') | int(default=0)) == 4) %}
+#             VPP
+#           {% else %}
+#             Unknown - should not see me!
+#           {% endif %}
+
+# # getting input for Min and Max SoC
+# input_number:
+#   set_sg_min_soc:
+#     name: min Soc
+#     #initial: 15
+#     min: 5
+#     max: 50
+#     step: 1
+
+#   set_sg_max_soc:
+#     name: max Soc
+#     #initial: 85
+#     min: 50
+#     max: 95
+#     step: 1
+
+#   set_sg_charge_discharge_power_percentage:
+#     name: max charge discharge power in W
+#     #initial: 40
+#     min: 0
+#     max: 5000
+#     step: 50
+
+# input_select:
+#   set_sg_start_stop_mode:
+#     name: Inverter mode
+#     options:
+#       - "Start"
+#       - "Stop"
+
+# # get input for battery mode (forced charge/discharge, stop (default) )
+#   set_sg_ems_mode:
+#     name: EMS mode
+#     options:
+#       - "Self-consumption mode (default)"
+#       - "Forced mode"
+#       - "External EMS"
+#       - "VPP"
+#     icon: mdi:battery-unknown
+
+#   set_sg_battery_charge_discharge_cmd:
+#     name: Battery charge discharge cmd
+#     options:
+#       - "Stop (default)"
+#       - "Force charge"
+#       - "Force discharge"
+#     icon: mdi:battery-unknown
+
+# # Automation: Write modbus registers on input changes via GUI
+
+# # note: If you change a value by the sliders, it will take up to 60 seconds until the state variables are updated
+# # Unfortunately, I could not find a way to "force update" modbus registers, yet...
+# automation:
+
+#   # Start 0xCF = 207
+#   # Stop 0xCE = 206
+#   # Todo I want to use hexadecimal format to write values!?
+#   - id: "24334413543545" # random number
+#     alias: start stop
+#     description: "Starts/ Stops the inverter"
+#     trigger:
+#       - platform: state
+#         entity_id:
+#           - input_select.set_sg_start_stop_mode
+#     condition: []
+#     action:
+#       - service: modbus.write_register
+#         data_template:
+#           address: 12999 # 13000
+#           slave: 1
+#           value: "{% if is_state('input_select.set_sg_start_stop_mode' , 'Start') %} 207
+#           {% else %} 206 {% endif %}"
+#           hub: SungrowSHx
+#     mode: single
+
+#   - id: "24321413543543" # random number
+#     alias: update max SoC
+#     description: "Updates Sungrow max Soc holding register"
+#     trigger:
+#       - platform: state
+#         entity_id:
+#           - input_number.set_sg_max_soc
+#     condition: []
+#     action:
+#       - service: modbus.write_register
+#         data_template:
+#           address: 13057 # 13058
+#           slave: 1
+#           value: "{{ states('input_number.set_sg_max_soc') | int *10}}"
+#           hub: SungrowSHx
+#     mode: single
+
+#   - id: "24321413543545" # random number
+#     alias: update min SoC
+#     description: "Updates Sungrow min Soc holding register"
+#     trigger:
+#       - platform: state
+#         entity_id:
+#           - input_number.set_sg_min_soc
+#     condition: []
+#     action:
+#       - service: modbus.write_register
+#         data_template:
+#           address: 13058 # 13059
+#           slave: 1
+#           value: "{{ states('input_number.set_sg_min_soc') | int *10}}"
+#           hub: SungrowSHx
+#     mode: single
+
+#   - id: "24321413553543" # random number
+#     alias: update battery charge discharge cmd
+#     description: "Updates Sungrow holding register for battery charge discharge command"
+#     trigger:
+#       - platform: state
+#         entity_id:
+#           - input_select.set_sg_battery_charge_discharge_cmd
+#     condition: []
+#     action:
+#       - service: modbus.write_register
+#         data_template:
+#           address: 13050 # 13051
+#           slave: 1
+#           # 0xAA: 170 Charge
+#           # 0xBB: 187 Discharge
+#           # 0xCC: 204 Stop (Default)
+#           # don't know how to compare the integer values in hexadecimal format in following decoder statement...
+#           value: "{% if is_state('input_select.set_sg_battery_charge_discharge_cmd' , 'Stop (default)') %} 204
+#           {% elif is_state('input_select.set_sg_battery_charge_discharge_cmd' , 'Force charge') %} 170
+#           {% elif is_state('input_select.set_sg_battery_charge_discharge_cmd' , 'Force discharge') %} 187
+#           {% else %} 204 {% endif %}"
+#           hub: SungrowSHx
+#     mode: single
+
+#   - id: "24323313553543" # random number
+#     alias: update EMS mode
+#     description: "Updates EMS mode"
+#     trigger:
+#       - platform: state
+#         entity_id:
+#           - input_select.set_sg_ems_mode
+#     condition: []
+#     action:
+#       - service: modbus.write_register
+#         data_template:
+#           address: 13049 # 13050
+#           slave: 1
+#           # 0: Self-consumption mode (Default)
+#           # 1: entry does not exist
+#           # 2: Forced Mode
+#           # 3: External EMS
+#           # 4: VPP
+#           # don't know how to compare the integer values in hexadecimal format in following decoder statement...
+#           value: "{% if is_state('input_select.set_sg_ems_mode' , 'Self-consumption mode (default)') %} 0
+#           {% elif is_state('input_select.set_sg_ems_mode' , 'Forced mode') %} 2
+#           {% elif is_state('input_select.set_sg_ems_mode' , 'External EMS') %} 3
+#           {% elif is_state('input_select.set_sg_ems_mode' , 'VPP') %} 4
+#           {% else %} 0 {% endif %}"
+#           hub: SungrowSHx
+#     mode: single
+
+#   - id: "24321413543521" # random number
+#     alias: "update max charge discharge power percent"
+#     description: "Sets max charge discharge power in % of BDC rated power"
+#     trigger:
+#       - platform: state
+#         entity_id:
+#           - input_number.set_sg_charge_discharge_power_percentage
+#     condition: []
+#     action:
+#       - service: modbus.write_register
+#         data_template:
+#           address: 13051 # 13052
+#           slave: 1
+#           value: "{{ states('input_number.set_sg_charge_discharge_power_percentage') | int}}"
+#           hub: SungrowSHx
+#     mode: single

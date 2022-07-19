@@ -12,7 +12,7 @@ template:
 
 sensor:
   - platform: rtorrent
-    url: "https://rutorrent.home.bjeanes.com/RPC2"
+    url: !secret rtorrent_url
     monitored_variables:
       - "current_status"
       - "download_speed"

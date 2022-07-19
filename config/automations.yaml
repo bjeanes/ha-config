@@ -53,6 +53,7 @@
         data: {}
         target:
           area_id: ri_s_office
+      controller_device: a68268df00fb475e9dbffc45c6de8a6f
 - id: '1650766227595'
   alias: Update OpenUV every 30 minutes during the daytime
   trigger:

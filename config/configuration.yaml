@@ -17,6 +17,7 @@ homeassistant:
 recorder:
   db_url: !secret recorder_db
   commit_interval: 30
+  purge_keep_days: 60
 
 http:
   use_x_forwarded_for: true
@@ -42,12 +43,3 @@ tts:
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
-
-spotify:
-  client_id: !secret spotify_client_id
-  client_secret: !secret spotify_client_secret
-
-google:
-  client_id: !secret google_client_id
-  client_secret: !secret google_client_secret
-  track_new_calendar: false

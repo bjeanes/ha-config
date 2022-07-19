@@ -1,27 +1,27 @@
 sensor:
-  - platform: sql
-    db_url: !secret recorder_db
-    queries:
-      - name: Recorder age
-        column: "last_state_age"
-        unit_of_measurement: seconds
-        ## For SQLite
-        #query: >
-        #  SELECT strftime("%s", "now") - strftime("%s", last_updated)
-        #         AS last_state_age
-        #       , last_updated
-        #  FROM "states"
-        #  ORDER BY last_updated DESC
-        #  LIMIT 1
+  # - platform: sql
+  #   db_url: !secret recorder_db
+  #   queries:
+  #     - name: Recorder age
+  #       column: "last_state_age"
+  #       unit_of_measurement: seconds
+  #       ## For SQLite
+  #       #query: >
+  #       #  SELECT strftime("%s", "now") - strftime("%s", last_updated)
+  #       #         AS last_state_age
+  #       #       , last_updated
+  #       #  FROM "states"
+  #       #  ORDER BY last_updated DESC
+  #       #  LIMIT 1
 
-        # For Postgres
-        query: >
-          SELECT extract(epoch from now() - last_updated)
-                 AS last_state_age
-               , last_updated
-          FROM "states"
-          ORDER BY last_updated DESC
-          LIMIT 1
+  #       # For Postgres
+  #       query: >
+  #         SELECT extract(epoch from now() - last_updated)
+  #                AS last_state_age
+  #              , last_updated
+  #         FROM "states"
+  #         ORDER BY last_updated DESC
+  #         LIMIT 1
   - platform: systemmonitor
     resources:
       - type: disk_use_percent

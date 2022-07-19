@@ -5,8 +5,29 @@ camera:
     username: !secret xiaomi_cloud_username
     password: !secret xiaomi_cloud_password
     country: "sg"
-    name: "Vacuum map"
+    name: Roborock S5 Map
+    force_api: xiaomi
     draw: ["all"]
+    attributes:
+      - calibration_points
+      - rooms
+      - room_numbers
+      - vacuum_position
+
+  - platform: xiaomi_cloud_map_extractor
+    host: !secret xiaomi_vacuum2_host
+    token: !secret xiaomi_vacuum2_token
+    username: !secret xiaomi_cloud_username
+    password: !secret xiaomi_cloud_password
+    country: "sg"
+    name: Dreame Z10 Pro Map
+    force_api: dreame
+    draw: ["all"]
+    attributes:
+      - calibration_points
+      - rooms
+      - room_numbers
+      - vacuum_position
 
 template:
   - sensor:

@@ -38,11 +38,11 @@ config:
         type: entity
       - entity: sensor.ble_humidity_bos_office_a4c1380f0b98
         type: entity
-      - entity: sensor.bo_s_desk_plug_power
-        name: Desk
-        type: entity
-      - entity: sensor.bo_s_office_plug_power
-        type: entity
+      - content: "{{ \n  \"{:,}\".format(\n    (states('sensor.bo_s_desk_plug_power')\
+          \ | float(default=0)\n     +\n     states('sensor.bo_s_office_plug_power')\
+          \ | float(default=0)\n    ) | round\n  )\n}} W"
+        icon: mdi:flash
+        type: template
       - entity: sensor.bo_s_office_perception
         type: entity
       - entity: sensor.bo_s_office_simmerzone
@@ -55,28 +55,17 @@ config:
         icon: tc:heat-index
         type: entity
       type: custom:mushroom-chips-card
-    - entities:
-      - entity: binary_sensor.bo_s_office_pir_2_occupancy
-      - entity: binary_sensor.bo_s_office_motion
-      - entity: binary_sensor.bo_s_office_is_occupied
-      hours_to_show: 2
-      title: Occupancy
-      type: history-graph
-    - card:
+    - cards:
+      - entities:
+        - entity: automation.warm_up_bo_s_office
         type: entities
-      filter:
-        exclude:
-        - state: unknown
-        - state: unavailable
-        include:
-        - area: Bo's Office
-          options:
-            secondary_info: last-changed
-      show_empty: false
-      sort:
-        method: domain
-        reverse: true
-      type: custom:auto-entities
+      - entities:
+        - entity: sensor.ble_temperature_bos_office_a4c1380f0b98
+        - entity: sensor.ble_humidity_bos_office_a4c1380f0b98
+        type: history-graph
+      layout: {}
+      layout_type: masonry
+      type: custom:layout-card
     icon: mdi:chair-rolling
     theme: Backend-selected
     title: Bo's Office

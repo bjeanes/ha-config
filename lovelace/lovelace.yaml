@@ -143,13 +143,13 @@ config:
                 action: call-service
                 service: media_player.select_source
                 service_data:
-                  source: Triple R 102.7 (Variety)
+                  source: Triple R
                 target:
                   entity_id: media_player.denon_avr_x1600h_heos
               type: template
             conditions:
             - entity: sensor.current_living_room_media_player_source
-              state_not: Triple R 102.7 (Variety)
+              state_not: Triple R
             type: conditional
           - chip:
               content: PBS - {{ states('sensor.pbs_now_playing') }}
@@ -158,13 +158,28 @@ config:
                 action: call-service
                 service: media_player.select_source
                 service_data:
-                  source: PBS 106.7FM Melbourne | (Variety)
+                  source: PBS 106.7FM Melbourne
                 target:
                   entity_id: media_player.denon_avr_x1600h_heos
               type: template
             conditions:
             - entity: sensor.current_living_room_media_player_source
-              state_not: PBS 106.7FM Melbourne | (Variety)
+              state_not: PBS 106.7FM Melbourne
+            type: conditional
+          - chip:
+              content: KLFM
+              icon: mdi:music
+              tap_action:
+                action: call-service
+                service: media_player.select_source
+                service_data:
+                  source: KLFM
+                target:
+                  entity_id: media_player.denon_avr_x1600h_heos
+              type: template
+            conditions:
+            - entity: sensor.current_living_room_media_player_source
+              state_not: KLFM
             type: conditional
           - chip:
               content: JJ - {{ states('sensor.jj_now_playing') }}
@@ -335,6 +350,15 @@ config:
         method: none
       type: custom:auto-entities
       unique: true
+    - entities:
+        battery: sensor.inverter_battery_power
+        battery_charge: sensor.inverter_battery_level
+        grid: sensor.eagle_200_meter_power_demand
+        solar: sensor.inverter_pv_power
+      kw_decimals: 2
+      type: custom:power-flow-card
+      w_decimals: 0
+      watt_threshold: 900
     - elements:
       - attribute: mean
         entity: sensor.ble_temperature_living_room_a4c1382a9b6e
@@ -407,6 +431,150 @@ config:
         type: custom:state-attribute-element
       image: /local/floorplan-top.jpg
       type: picture-elements
+    - calibration_source:
+        camera: true
+      entity: vacuum.dreame_p2028_4394_robot_cleaner
+      map_locked: true
+      map_modes:
+      - max_repeats: 3
+        max_selections: 10
+        predefined_selections:
+        - icon:
+            name: mdi:broom
+            x: -450
+            y: -9175
+          id: 8
+          label:
+            offset_y: 35
+            text: Analog Room
+            x: -450
+            y: -9175
+        - icon:
+            name: mdi:broom
+            x: -5625
+            y: -9175
+          id: 3
+          label:
+            offset_y: 35
+            text: Ri's Office
+            x: -5625
+            y: -9175
+        - icon:
+            name: mdi:broom
+            x: 2000
+            y: -9700
+          id: 4
+          label:
+            offset_y: 35
+            text: Laundry
+            x: 2000
+            y: -9700
+        - icon:
+            name: mdi:broom
+            x: 1925
+            y: -6625
+          id: 2
+          label:
+            offset_y: 35
+            text: Bathroom
+            x: 1925
+            y: -6625
+        - icon:
+            name: mdi:broom
+            x: -5750
+            y: -6350
+          id: 1
+          label:
+            offset_y: 35
+            text: Bo's Office
+            x: -5750
+            y: -6350
+        - icon:
+            name: mdi:broom
+            x: -2525
+            y: -750
+          id: 9
+          label:
+            offset_y: 35
+            text: Hallway
+            x: -2525
+            y: -750
+        - icon:
+            name: mdi:broom
+            x: 675
+            y: -3100
+          id: 5
+          label:
+            offset_y: 35
+            text: Kitchen
+            x: 675
+            y: -3100
+        - icon:
+            name: mdi:broom
+            x: -5575
+            y: -2525
+          id: 10
+          label:
+            offset_y: 35
+            text: Spare Room
+            x: -5575
+            y: -2525
+        - icon:
+            name: mdi:broom
+            x: 675
+            y: 1825
+          id: 6
+          label:
+            offset_y: 35
+            text: Living Room
+            x: 675
+            y: 1825
+        - icon:
+            name: mdi:broom
+            x: -5650
+            y: 1025
+          id: 7
+          label:
+            offset_y: 35
+            text: Bedroom
+            x: -5650
+            y: 1025
+        repeats_type: EXTERNAL
+        service_call_schema:
+          service: xiaomi_miot.call_action
+          service_data:
+            aiid: 1
+            entity_id: '[[entity_id]]'
+            force_params: true
+            params:
+            - piid: 1
+              value: 18
+            - piid: 10
+              value: '{"selects":[[[[selection_unwrapped]],[[repeats]],3,3,1]]}'
+            siid: 4
+        template: vacuum_clean_segment
+      - template: vacuum_goto
+      - max_repeats: 5
+        max_selections: 10
+        repeats_type: EXTERNAL
+        service_call_schema:
+          service: xiaomi_miot.call_action
+          service_data:
+            aiid: 1
+            entity_id: '[[entity_id]]'
+            force_params: true
+            params:
+            - piid: 1
+              value: 19
+            - piid: 10
+              value: '{"areas":[[[[selection_unwrapped]],[[repeats]],1,1]]}'
+            siid: 4
+        template: vacuum_clean_zone
+      map_source:
+        camera: camera.dreame_z10_pro_map
+      two_finger_pan: true
+      type: custom:xiaomi-vacuum-map-card
+      vacuum_platform: default
     icon: hass:home
     panel: false
     path: default_view
@@ -495,225 +663,6 @@ config:
     icon: hass:thermometer
     path: climate
     title: Climate
-  - badges:
-    - entity: sensor.electricity_general_price
-    - entity: sensor.eagle_200_meter_power_demand
-    cards:
-    - link_dashboard: true
-      type: energy-distribution
-    - apex_config:
-        chart:
-          height: 250
-          type: area
-        dataLabels:
-          enabled: false
-        fill:
-          gradient:
-            inverseColors: false
-            opacityFrom: 0.45
-            opacityTo: 0.05
-            shadeIntensity: 1
-            stops:
-            - 20
-            - 100
-            - 100
-            - 100
-          type: gradient
-        legend:
-          show: false
-        stroke:
-          curve: smooth
-          show: true
-          width: 2
-        xaxis:
-          labels:
-            datetimeFormatter:
-              day: ddd
-              month: ddd
-          type: datetime
-      graph_span: 35h
-      header:
-        colorize_states: true
-        show: true
-        show_states: true
-        title: Amber Price 24hrs
-      now:
-        color: red
-        label: Now
-        show: true
-      series:
-      - color: black
-        curve: smooth
-        entity: sensor.electricity_general_price
-        extend_to: now
-        name: Price
-        type: area
-        yaxis_id: price
-      - color: lightgrey
-        data_generator: "return entity.attributes.forecasts.map((entry) => {\n  return\
-          \ [new Date(entry.start_time), entry.per_kwh];\n});\n"
-        entity: sensor.electricity_general_forecast
-        name: Predicted Price
-        show:
-          in_chart: true
-          in_header: false
-        type: area
-        yaxis_id: price
-      - color: green
-        curve: smooth
-        entity: sensor.electricity_renewables
-        extend_to: now
-        name: Renewables in Grid
-        show:
-          in_chart: true
-          in_header: true
-        type: area
-        unit: '%'
-        yaxis_id: renewables_perc
-      - color: lightgreen
-        curve: smooth
-        data_generator: "return entity.attributes.forecasts.map((entry) => {\n  return\
-          \ [new Date(entry.start_time), entry.renewables];\n});\n"
-        entity: sensor.electricity_general_forecast
-        name: Renewables in Grid
-        show:
-          in_chart: true
-          in_header: false
-        type: area
-        unit: '%'
-        yaxis_id: renewables_perc
-      - color: grey
-        entity: sensor.electricity_general_forecast
-        name: Predicted Price
-        show:
-          in_chart: false
-          in_header: true
-        type: area
-        yaxis_id: price
-      span:
-        offset: -24h
-        start: minute
-      type: custom:apexcharts-card
-      yaxis:
-      - id: price
-        max: ~1
-        min: ~-1
-      - id: renewables_perc
-        max: ~100
-        min: ~0
-        opposite: true
-    - entities:
-      - entity: sensor.eagle_200_meter_power_demand
-        name: Meter Power Demand
-        secondary_info: last-changed
-      - entity: sensor.electricity_renewables
-        secondary_info: last-changed
-      - entity: binary_sensor.electricity_price_spike
-        secondary_info: last-changed
-      - entity: sensor.electricity_general_price
-        secondary_info: last-changed
-      - entity: sensor.electricity_general_forecast
-      type: entities
-    - cards:
-      - entity: sensor.eagle_200_meter_power_demand
-        max: 5
-        min: 0
-        name: Current Usage
-        needle: true
-        severity:
-          green: 0
-          red: 3
-          yellow: 1.5
-        type: gauge
-      - entity: sensor.electricity_general_price
-        max: 2
-        min: 0
-        name: Current Price
-        needle: true
-        severity:
-          green: -1
-          red: 0.65
-          yellow: 0.25
-        type: gauge
-        unit: $
-      type: horizontal-stack
-    - entity: sensor.current_electricity_cost
-      max: 5
-      min: 0
-      name: Current Cost
-      needle: true
-      severity:
-        green: -1000
-        red: 1.5
-        yellow: 0.75
-      type: gauge
-    - entities:
-      - entity: sensor.eagle_200_meter_power_demand
-      - entity: sensor.electricity_general_price
-      - entity: sensor.current_electricity_cost
-      - entity: sensor.eagle_200_net_meter_energy_delivered_minus_received
-      hours_to_show: 24
-      refresh_interval: 5
-      type: history-graph
-    - card:
-        type: history-graph
-      filter:
-        exclude:
-        - name: /UPS/
-        - name: /Eagle-200/
-        - name: /Estimated Power Production/
-        - state: unavailable
-        include:
-        - attributes:
-            device_class: power
-        - attributes:
-            unit_of_measurement: kW
-        - attributes:
-            unit_of_measurement: W
-        - attributes:
-            unit_of_measurement: A
-        - attributes:
-            device_class: current
-      type: custom:auto-entities
-      unique: true
-    - card:
-        show_header_toggle: false
-        type: entities
-      filter:
-        exclude:
-        - name: /Restart/
-        - state: unavailable
-        include:
-        - device: /power|plug/
-          domain: switch
-          options:
-            secondary_info: last-changed
-      show_empty: false
-      sort:
-        method: friendly_name
-      type: custom:auto-entities
-      unique: true
-    - type: energy-devices-graph
-    - type: energy-usage-graph
-    - card:
-        hours_to_show: 3
-        title: Voltage
-        type: history-graph
-      filter:
-        exclude:
-        - entity_id: /nas_ups/
-        - entity_id: /battery/
-        - entity_id: /dht/
-        - entity_id: /ble_voltage/
-        include:
-        - entity_id: /voltage/
-      type: custom:auto-entities
-    - entities:
-      - sensor.co2_intensity
-      type: history-graph
-    icon: hass:lightning-bolt
-    path: power
-    title: Power
   - badges: []
     cards:
     - calibration_source:

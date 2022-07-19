@@ -34,3 +34,10 @@ items:
   show_in_sidebar: true
   title: Gardening
   url_path: lovelace-gardens
+- icon: mdi:solar-power-variant
+  id: lovelace_solar
+  mode: storage
+  require_admin: false
+  show_in_sidebar: true
+  title: Solar
+  url_path: lovelace-solar

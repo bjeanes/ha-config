@@ -1,0 +1,23 @@
+sensor:
+  - platform: unifigateway
+    host: !secret unifi_controller
+    port: 443
+    username: !secret unifi_username
+    password: !secret unifi_password
+    monitored_conditions:
+      - www
+      - vpn
+      - lan
+      - wan
+      - wlan
+      - alerts
+      - firmware
+
+wake_on_lan:
+
+switch:
+  - platform: wake_on_lan
+    name: TumTum
+    mac: !secret tumtum_mac
+    host: !secret tumtum_ip
+    broadcast_address: !secret lan_broadcast

@@ -1,8 +1,0 @@
-template:
-  - sensor:
-      - unique_id: current_electricity_cost
-        state: |
-          {{ (states('sensor.electricity_general_price') | float * states('sensor.eagle_200_meter_power_demand') | float) | round(2) }}
-        unit_of_measurement: $/hr
-        device_class: monetary
-        name: Current electricity cost

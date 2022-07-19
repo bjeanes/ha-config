@@ -359,11 +359,30 @@ sensor:
           condition: time
           weekday: [sun]
 
+      - state: KLFM
+        start: "12:00:00"
+        end: "15:00:00"
+        condition:
+          condition: time
+          weekday: [sat]
+
       - state: Triple R
         condition:
           condition: state
           entity_id: sensor.rrr_now_playing
           state: "On The Blower"
+
+      - state: Triple R
+        condition:
+          condition: state
+          entity_id: sensor.rrr_now_playing
+          state: "Stylin'"
+
+      - state: PBS
+        condition:
+          condition: state
+          entity_id: sensor.pbs_now_playing
+          state: "Jazz on Saturday"
 
       - state: triple j 107.5 (Alternative Rock)
         condition:
@@ -371,11 +390,18 @@ sensor:
           entity_id: sensor.jjj_now_playing
           state: "Science with Dr Karl"
 
-      - state: triple j 107.5 (Alternative Rock)
+      - state: ABC Jazz (Jazz Music) # https://www.abc.net.au/jazz/upbeat/
+        start: "9:00:00"
+        end: "13:00:00"
         condition:
-          condition: state
-          entity_id: sensor.jjj_now_playing
-          state: "Hack"
+          condition: time
+          weekday: [sun]
+
+      # - state: triple j 107.5 (Alternative Rock)
+      #   condition:
+      #     condition: state
+      #     entity_id: sensor.jjj_now_playing
+      #     state: "Hack"
 
       # ...
 

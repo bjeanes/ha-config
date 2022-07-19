@@ -1,0 +1,376 @@
+config:
+  views:
+  - badges: []
+    cards:
+    - cards:
+      - content: "{%- set household_usage =\n  states('sensor.inverter_active_power')\
+          \ | float +\n  states('sensor.eagle_200_meter_power_demand_w') | float\n\
+          -%}\n**Household usage:** {{ household_usage }} W\n**PV+Bat:** {{ states('sensor.inverter_battery_power')\
+          \ | float + states('sensor.inverter_pv_power') | float }} W\n**Active (AC?):**\
+          \ {{ states('sensor.inverter_active_power') | float }} W\n**AC from PV:**\
+          \ {{ states('sensor.inverter_active_power') | float - states('sensor.inverter_battery_power')\
+          \ | float }} W\n**Inverter Load (claimed):** {{ states('sensor.inverter_load_power')\
+          \ | float }} W\n**Inverter Load (gap):** {{ states('sensor.inverter_load_power')\
+          \ | float - household_usage }} W\n**{Im,Ex}port:** {{ states('sensor.eagle_200_meter_power_demand_w')\
+          \ | float }} W\n"
+        type: markdown
+      title: Scratch
+      type: custom:stack-in-card
+    - cards:
+      - entities:
+          battery: sensor.inverter_battery_power
+          battery_charge: sensor.inverter_battery_level
+          grid: sensor.eagle_200_meter_power_demand
+          solar: sensor.inverter_pv_power
+        kw_decimals: 2
+        type: custom:power-flow-card
+        w_decimals: 0
+        watt_threshold: 900
+      - entities:
+        - entity: sensor.inverter_active_power
+          name: Active (AC) power
+          secondary_info: last-updated
+        - entity: sensor.inverter_reactive_power
+          name: Reactive power
+          secondary_info: last-updated
+        - entity: sensor.inverter_power_factor
+          name: Power factor
+          secondary_info: last-updated
+        - entity: sensor.inverter_pv_power
+          name: PV Power
+          secondary_info: last-updated
+        - entity: sensor.inverter_load_power
+          name: Load power (inverter claimed)
+          secondary_info: last-updated
+        - entity: sensor.household_power_demand
+          name: Actual load
+          secondary_info: last-updated
+        - entity: sensor.inverter_battery_power
+          name: Battery power
+          secondary_info: last-updated
+        - entity: sensor.inverter_grid_power_demand
+          name: Grid demand (inverter)
+          secondary_info: last-updated
+        - entity: sensor.eagle_200_meter_power_demand_w
+          name: Grid demand (meter)
+          secondary_info: last-updated
+        type: entities
+      - entities:
+        - entity: sensor.inverter_grid_power_demand
+          name: Grid demand (inverter)
+          secondary_info: last-updated
+        - entity: sensor.eagle_200_meter_power_demand_w
+          name: Grid demand (meter)
+          secondary_info: last-updated
+        hours_to_show: 6
+        type: history-graph
+      - entities:
+        - entity: sensor.inverter_load_power
+          name: Inverter's claimed load power
+        - entity: sensor.household_power_demand
+          name: Actual household power demand
+        hours_to_show: 6
+        type: history-graph
+      - entities:
+        - entity: sensor.inverter_load_gap
+          name: Load gap
+        - entity: sensor.inverter_demand_gap
+          name: Demand gap
+        hours_to_show: 6
+        type: history-graph
+      title: Power
+      type: custom:stack-in-card
+    - cards:
+      - link_dashboard: false
+        type: energy-distribution
+      title: Energy (today)
+      type: custom:stack-in-card
+    - entities:
+      - entity: sensor.inverter_pv_power
+        name: PV Power
+      - entity: sensor.inverter_active_power
+        name: Active Power
+      - entity: sensor.inverter_load_power
+        name: Load power
+      type: history-graph
+    - entities:
+      - entity: sensor.inverter_battery_level
+        name: Charge
+      - entity: sensor.inverter_battery_power
+        name: Power
+      title: Battery
+      type: history-graph
+    - card:
+        type: entities
+      filter:
+        exclude:
+        - state: unavailable
+        include:
+        - entity_id: sensor.eagle_200_meter_power_demand
+        - entity_id: /sensor.inverter_/
+      type: custom:auto-entities
+    - card:
+        title: Actions
+        type: entities
+      filter:
+        exclude: []
+        include:
+        - domain: /script|automation/
+          entity_id: /\.inverter_/
+      type: custom:auto-entities
+    - cards:
+      - entities:
+        - entity: sensor.inverter_grid_frequency
+          name: Frequency
+          secondary_info: last-updated
+        - entity: sensor.inverter_phase_a_voltage
+          name: Voltage
+          secondary_info: last-updated
+        - entity: sensor.inverter_phase_a_current
+          name: Current
+          secondary_info: last-updated
+        type: entities
+      - entities:
+        - entity: sensor.inverter_grid_frequency
+          name: Frequency
+        - entity: sensor.inverter_phase_a_voltage
+          name: Voltage
+        - entity: sensor.inverter_phase_a_current
+          name: Current
+        type: history-graph
+      title: Grid
+      type: custom:stack-in-card
+    icon: mdi:solar-power-variant
+    theme: Backend-selected
+    title: Solar
+  - badges:
+    - entity: sensor.electricity_general_price
+    - entity: sensor.eagle_200_meter_power_demand
+    cards:
+    - link_dashboard: true
+      type: energy-distribution
+    - apex_config:
+        chart:
+          height: 250
+          type: area
+        dataLabels:
+          enabled: false
+        fill:
+          gradient:
+            inverseColors: false
+            opacityFrom: 0.45
+            opacityTo: 0.05
+            shadeIntensity: 1
+            stops:
+            - 20
+            - 100
+            - 100
+            - 100
+          type: gradient
+        legend:
+          show: false
+        stroke:
+          curve: smooth
+          show: true
+          width: 2
+        xaxis:
+          labels:
+            datetimeFormatter:
+              day: ddd
+              month: ddd
+          type: datetime
+      graph_span: 35h
+      header:
+        colorize_states: true
+        show: true
+        show_states: true
+        title: Amber Price 24hrs
+      now:
+        color: red
+        label: Now
+        show: true
+      series:
+      - color: black
+        curve: smooth
+        entity: sensor.electricity_general_price
+        extend_to: now
+        name: Price
+        type: area
+        yaxis_id: price
+      - color: lightgrey
+        data_generator: "return entity.attributes.forecasts.map((entry) => {\n  return\
+          \ [new Date(entry.start_time), entry.per_kwh];\n});\n"
+        entity: sensor.electricity_general_forecast
+        name: Predicted Price
+        show:
+          in_chart: true
+          in_header: false
+        type: area
+        yaxis_id: price
+      - color: green
+        curve: smooth
+        entity: sensor.electricity_renewables
+        extend_to: now
+        name: Renewables in Grid
+        show:
+          in_chart: true
+          in_header: true
+        type: area
+        unit: '%'
+        yaxis_id: renewables_perc
+      - color: lightgreen
+        curve: smooth
+        data_generator: "return entity.attributes.forecasts.map((entry) => {\n  return\
+          \ [new Date(entry.start_time), entry.renewables];\n});\n"
+        entity: sensor.electricity_general_forecast
+        name: Renewables in Grid
+        show:
+          in_chart: true
+          in_header: false
+        type: area
+        unit: '%'
+        yaxis_id: renewables_perc
+      - color: grey
+        entity: sensor.electricity_general_forecast
+        name: Predicted Price
+        show:
+          in_chart: false
+          in_header: true
+        type: area
+        yaxis_id: price
+      span:
+        offset: -24h
+        start: minute
+      type: custom:apexcharts-card
+      yaxis:
+      - id: price
+        max: ~1
+        min: ~-1
+      - id: renewables_perc
+        max: ~100
+        min: ~0
+        opposite: true
+    - entities:
+      - entity: sensor.eagle_200_meter_power_demand
+        name: Meter Power Demand
+        secondary_info: last-changed
+      - entity: sensor.electricity_renewables
+        secondary_info: last-changed
+      - entity: binary_sensor.electricity_price_spike
+        secondary_info: last-changed
+      - entity: sensor.electricity_general_price
+        secondary_info: last-changed
+      - entity: sensor.electricity_general_forecast
+      type: entities
+    - content: "{% set wattage = states.sensor\n   | rejectattr('state', 'in', ['unknown',\
+        \ 'unavailable'])\n   | selectattr('attributes.device_class', 'defined')\n\
+        \   | selectattr('attributes.device_class', 'eq', 'power')\n   | selectattr('attributes.unit_of_measurement',\
+        \ 'defined')\n   | selectattr('attributes.unit_of_measurement', 'eq', \"W\"\
+        )\n   | rejectattr('name', 'search', 'Estimate')\n   | rejectattr('name',\
+        \ 'search', 'Inverter')\n   | list\n   %}\n\n{% set total = wattage|map(attribute='state')|map('float')|list|sum\
+        \ / 1000.0|round(3) %}\n{% set meter = (states('sensor.inverter_load_power')|float/1000.0\
+        \ + states('sensor.eagle_200_meter_power_demand')|float) |round(3) %}\n**TOTAL:**\
+        \ {{ total }} kW\n**METER:** {{ meter }} kW\n**Unaccounted:** {{ (meter -\
+        \ total) | round(2) }} kW\n\n{% for s in wattage|sort(attribute='state') %}\n\
+        - {{ s.name}}: {{s.state}} W\n{% endfor %}"
+      type: markdown
+    - cards:
+      - entity: sensor.eagle_200_meter_power_demand
+        max: 5
+        min: 0
+        name: Current Usage
+        needle: true
+        severity:
+          green: 0
+          red: 3
+          yellow: 1.5
+        type: gauge
+      - entity: sensor.electricity_general_price
+        max: 2
+        min: 0
+        name: Current Price
+        needle: true
+        severity:
+          green: -1
+          red: 0.65
+          yellow: 0.25
+        type: gauge
+        unit: $
+      type: horizontal-stack
+    - entity: sensor.current_electricity_cost
+      max: 5
+      min: 0
+      name: Current Cost
+      needle: true
+      severity:
+        green: -1000
+        red: 1.5
+        yellow: 0.75
+      type: gauge
+    - entities:
+      - entity: sensor.eagle_200_meter_power_demand
+      - entity: sensor.electricity_general_price
+      - entity: sensor.current_electricity_cost
+      - entity: sensor.eagle_200_net_meter_energy_delivered_minus_received
+      hours_to_show: 24
+      refresh_interval: 5
+      type: history-graph
+    - card:
+        type: history-graph
+      filter:
+        exclude:
+        - name: /UPS/
+        - name: /Eagle-200/
+        - name: /Estimated Power Production/
+        - state: unavailable
+        include:
+        - attributes:
+            device_class: power
+        - attributes:
+            unit_of_measurement: kW
+        - attributes:
+            unit_of_measurement: W
+        - attributes:
+            unit_of_measurement: A
+        - attributes:
+            device_class: current
+      type: custom:auto-entities
+      unique: true
+    - card:
+        show_header_toggle: false
+        type: entities
+      filter:
+        exclude:
+        - name: /Restart/
+        - state: unavailable
+        include:
+        - device: /power|plug/
+          domain: switch
+          options:
+            secondary_info: last-changed
+      show_empty: false
+      sort:
+        method: friendly_name
+      type: custom:auto-entities
+      unique: true
+    - type: energy-devices-graph
+    - type: energy-usage-graph
+    - card:
+        hours_to_show: 3
+        title: Voltage
+        type: history-graph
+      filter:
+        exclude:
+        - entity_id: /nas_ups/
+        - entity_id: /battery/
+        - entity_id: /dht/
+        - entity_id: /ble_voltage/
+        include:
+        - entity_id: /voltage/
+      type: custom:auto-entities
+    - entities:
+      - sensor.co2_intensity
+      type: history-graph
+    icon: hass:lightning-bolt
+    path: power
+    title: Electricity
