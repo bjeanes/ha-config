@@ -40,6 +40,7 @@ config:
         type: entity
       - content: "{{ \n  \"{:,}\".format(\n    (states('sensor.bo_s_desk_plug_power')\
           \ | float(default=0)\n     +\n     states('sensor.bo_s_office_plug_power')\
+          \ | float(default=0)\n     +\n     states('sensor.bo_s_office_heater_power')\
           \ | float(default=0)\n    ) | round\n  )\n}} W"
         icon: mdi:flash
         type: template
