@@ -32,4 +32,5 @@ tts/
 aircast.xml
 airsonos.xml
 config/solcast.sync-conflict*
+config/solcast.json
 .ssh
