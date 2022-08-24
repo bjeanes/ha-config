@@ -28,6 +28,13 @@
 #           hub: SungrowSHx
 #     mode: single
 
+input_boolean:
+  inverter_charging_schedule_enabled:
+    initial: true
+    name: Inverter charging schedule enabled
+  inverter_charging_schedule_2_enabled:
+    initial: true
+    name: Inverter charging schedule 2 enabled
 input_datetime:
   inverter_charging_schedule_start:
     has_time: true
@@ -36,13 +43,29 @@ input_datetime:
   inverter_charging_schedule_end:
     has_time: true
     name: Inverter charging schedule end
-    initial: "14:59:00"
+    initial: "15:00:00"
+  inverter_charging_schedule_2_start:
+    has_time: true
+    name: Inverter charging schedule 2 start
+    initial: "00:00:00"
+  inverter_charging_schedule_2_end:
+    has_time: true
+    name: Inverter charging schedule 2 end
+    initial: "00:00:00"
 input_number:
   inverter_charging_schedule_target_soc:
-    name: Inverter charging target state of charge
+    name: Inverter charging schedule target state of charge
     min: 0
     max: 100
     unit_of_measurement: "%"
+    initial: 85
+    mode: box
+  inverter_charging_schedule_2_target_soc:
+    name: Inverter charging schedule 2 target state of charge
+    min: 0
+    max: 100
+    unit_of_measurement: "%"
+    initial: 0
     mode: box
   inverter_battery_reserve:
     name: Inverter battery reserve
@@ -59,21 +82,74 @@ automation:
     trigger:
       - platform: state
         entity_id:
+          # Explicit enables
+          - input_boolean.inverter_charging_schedule_enabled
+          - input_boolean.inverter_charging_schedule_2_enabled
+
+          # Schedule 1 details
           - input_datetime.inverter_charging_schedule_start
           - input_datetime.inverter_charging_schedule_end
           - input_number.inverter_charging_schedule_target_soc
+
+          # Schedule 2 details
+          - input_datetime.inverter_charging_schedule_2_start
+          - input_datetime.inverter_charging_schedule_2_end
+          - input_number.inverter_charging_schedule_2_target_soc
         not_from:
           - unknown
           - unavailable
         not_to:
           - unknown
           - unavailable
+
+      # I have a theory that being in a schedule window prevents the battery from discharging, EVEN IF the SoC is above
+      # the target. As such, this automation will also run when the battery level crosses any threshold here and the
+      # `enabled_1` and `enabled_2` variables below will take this into consideration. In other words, the schedules
+      # will be automatically turned off when the charge level reaches target, and switched back on if it falls below.
+      - platform: numeric_state
+        entity_id: sensor.inverter_battery_level
+        above: input_number.inverter_charging_schedule_target_soc
+      - platform: numeric_state
+        entity_id: sensor.inverter_battery_level
+        above: input_number.inverter_charging_schedule_2_target_soc
+      - platform: numeric_state
+        entity_id: sensor.inverter_battery_level
+        below: input_number.inverter_charging_schedule_target_soc
+      - platform: numeric_state
+        entity_id: sensor.inverter_battery_level
+        below: input_number.inverter_charging_schedule_2_target_soc
+    variables:
+      enabled_1: |
+        {{ is_state('input_boolean.inverter_charging_schedule_enabled', 'on') and
+            states('input_number.inverter_charging_schedule_target_soc') | float(default = 0) > states('sensor.inverter_battery_level') | float(default = 0) and
+            not is_state('input_datetime.inverter_charging_schedule_start', 'unknown') and
+            not is_state('input_datetime.inverter_charging_schedule_end', 'unknown')
+        }}
+      enabled_2: |
+        {{ is_state('input_boolean.inverter_charging_schedule_2_enabled', 'on') and
+            states('input_number.inverter_charging_schedule_2_target_soc') | float(default = 0) > states('sensor.inverter_battery_level') | float(default = 0) and
+            not is_state('input_datetime.inverter_charging_schedule_start', 'unknown') and
+            not is_state('input_datetime.inverter_charging_schedule_end', 'unknown')
+        }}
     action:
       - service: script.apply_charging_schedule
         data_template:
-          soc_1: "{{ states('input_number.inverter_charging_schedule_target_soc') | int }}"
-          start_time_1: "{{ states('input_datetime.inverter_charging_schedule_start') }}"
-          end_time_1: "{{ states('input_datetime.inverter_charging_schedule_end') }}"
+          soc_1: |
+            {% if enabled_1 %}
+              {{ states('input_number.inverter_charging_schedule_target_soc') | int }}
+            {% else %}
+              0
+            {% endif %}
+          start_time_1: "{{ states('input_datetime.inverter_charging_schedule_start') | replace('unknown','00:00') }}"
+          end_time_1: "{{ states('input_datetime.inverter_charging_schedule_end') | replace('unknown','00:00') }}"
+          soc_2: |
+            {% if enabled_2 %}
+              {{ states('input_number.inverter_charging_schedule_2_target_soc') | int }}
+            {% else %}
+              0
+            {% endif %}
+          start_time_2: "{{ states('input_datetime.inverter_charging_2_schedule_start') | replace('unknown','00:00') }}"
+          end_time_2: "{{ states('input_datetime.inverter_charging_2_schedule_end') | replace('unknown','00:00') }}"
 
   - id: 7b93d325bfe632a4e890
     alias: Inverter - update battery reserve

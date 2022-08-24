@@ -332,14 +332,62 @@ config:
   - badges: []
     cards:
     - entities:
-      - label: Charge schedule
+      - label: Charge schedule 1
         type: section
-      - entity: input_datetime.inverter_charging_schedule_start
-        name: Start charging at
-      - entity: input_datetime.inverter_charging_schedule_end
-        name: Finish charging at
-      - entity: input_number.inverter_charging_schedule_target_soc
-        name: Charge until
+      - entity: input_boolean.inverter_charging_schedule_enabled
+        name: Enable
+      - conditions:
+        - entity: input_boolean.inverter_charging_schedule_enabled
+          state: 'on'
+        row:
+          entity: input_datetime.inverter_charging_schedule_start
+          icon: mdi:calendar-start
+          name: Start charging at
+        type: conditional
+      - conditions:
+        - entity: input_boolean.inverter_charging_schedule_enabled
+          state: 'on'
+        row:
+          entity: input_datetime.inverter_charging_schedule_end
+          icon: mdi:calendar-end
+          name: Finish charging at
+        type: conditional
+      - conditions:
+        - entity: input_boolean.inverter_charging_schedule_enabled
+          state: 'on'
+        row:
+          entity: input_number.inverter_charging_schedule_target_soc
+          icon: mdi:battery-arrow-up
+          name: Charge until
+        type: conditional
+      - label: Charge schedule 2
+        type: section
+      - entity: input_boolean.inverter_charging_schedule_2_enabled
+        name: Enable
+      - conditions:
+        - entity: input_boolean.inverter_charging_schedule_2_enabled
+          state: 'on'
+        row:
+          entity: input_datetime.inverter_charging_schedule_2_start
+          icon: mdi:calendar-start
+          name: Start charging at
+        type: conditional
+      - conditions:
+        - entity: input_boolean.inverter_charging_schedule_2_enabled
+          state: 'on'
+        row:
+          entity: input_datetime.inverter_charging_schedule_2_end
+          icon: mdi:calendar-end
+          name: Finish charging at
+        type: conditional
+      - conditions:
+        - entity: input_boolean.inverter_charging_schedule_2_enabled
+          state: 'on'
+        row:
+          entity: input_number.inverter_charging_schedule_2_target_soc
+          icon: mdi:battery-arrow-up
+          name: Charge until
+        type: conditional
       - label: Misc
         type: section
       - entity: input_number.inverter_battery_reserve
