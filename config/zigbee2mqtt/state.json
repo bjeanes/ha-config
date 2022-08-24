@@ -9,8 +9,8 @@
     },
     "0x00158d0008091c32": {
         "contact": false,
-        "voltage": 2995,
-        "battery": 41,
+        "voltage": 3005,
+        "battery": 44,
         "temperature": 19,
         "linkquality": 255,
         "device_temperature": 18,
@@ -45,8 +45,8 @@
     },
     "0x00158d0007e4c4f2": {
         "contact": true,
-        "voltage": 2985,
-        "battery": 39,
+        "voltage": 2975,
+        "battery": 36,
         "temperature": 21,
         "linkquality": 255,
         "device_temperature": 21,
