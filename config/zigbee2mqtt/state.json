@@ -68,10 +68,10 @@
     },
     "0xa4c138fda4db2c5e": {
         "occupancy": false,
-        "battery": 100,
+        "battery": 50,
         "sensitivity": "high",
         "keep_time": "120",
-        "illuminance": 11,
+        "illuminance": 658,
         "linkquality": 127
     },
     "0x84b4dbfffe850fda": {
