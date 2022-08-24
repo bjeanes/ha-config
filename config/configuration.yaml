@@ -22,6 +22,7 @@ recorder:
 http:
   use_x_forwarded_for: true
   trusted_proxies:
+    - !secret docker_subnet
     - !secret lan_subnet
     - !secret iot_subnet
     - !secret not_subnet
@@ -33,6 +34,7 @@ logger:
   default: warning
   logs:
     homeassistant.loader: error
+    custom_components.magic_areas: debug
 
 ffmpeg:
 

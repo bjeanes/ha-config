@@ -26,31 +26,31 @@ binary_sensor:
       number: GPIO4
       inverted: false
       mode: INPUT_PULLUP
-    filters:
-      # Takes advantage of the fact that gate movement causes this GPIO pin to
-      # flicker (probably due to wire moving). We can use that initial change
-      # in state as a signal to set the cover operation. Later, when the final
-      # value settles (after debounces) we can set it back to idle.
-      - lambda: |-
-          if(id(gate).current_operation == CoverOperation::COVER_OPERATION_IDLE) {
-            id(gate).current_operation = (x ? COVER_OPERATION_CLOSING : COVER_OPERATION_OPENING);
-            id(gate).publish_state();
-          }
-          return x;
+    # filters:
+    #   # Takes advantage of the fact that gate movement causes this GPIO pin to
+    #   # flicker (probably due to wire moving). We can use that initial change
+    #   # in state as a signal to set the cover operation. Later, when the final
+    #   # value settles (after debounces) we can set it back to idle.
+    #   - lambda: |-
+    #       if(id(gate).current_operation == CoverOperation::COVER_OPERATION_IDLE) {
+    #         id(gate).current_operation = (x ? COVER_OPERATION_CLOSING : COVER_OPERATION_OPENING);
+    #         id(gate).publish_state();
+    #       }
+    #       return x;
 
-      # during gate movement, the wire movement seems to cause the state to rapidly flicker
-      - delayed_on_off: 5000ms
+    #   # during gate movement, the wire movement seems to cause the state to rapidly flicker
+    #   - delayed_on_off: 5000ms
 
-      - lambda: |-
-          id(gate).current_operation = COVER_OPERATION_IDLE;
-          id(gate).publish_state();
-          return x;
+    #   - lambda: |-
+    #       id(gate).current_operation = COVER_OPERATION_IDLE;
+    #       id(gate).publish_state();
+    #       return x;
 
-    on_state:
-      then:
-        - cover.template.publish:
-            id: gate
-            current_operation: IDLE
+    # on_state:
+    #   then:
+    #     - cover.template.publish:
+    #         id: gate
+    #         current_operation: IDLE
 
   - platform: gpio
     pin:

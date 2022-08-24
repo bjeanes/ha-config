@@ -1,3 +1,23 @@
+Add-On Repository for Cloudflare:
+  maintainer: Tobia Brenner <https://github.com/brenner-tobias/>
+  slug: 9074a9fa
+  source: https://github.com/brenner-tobias/ha-addons
+Alex's Add-ons Shack:
+  maintainer: Alex van den Hoogen <homeassistant@alxx.nl>
+  slug: 2ca71ec5
+  source: https://github.com/alex3305/home-assistant-addons
+B Tasker HomeAssistant Addons:
+  maintainer: B Tasker
+  slug: 93f0ddc5
+  source: https://github.com/bentasker/HomeAssistantAddons
+EMHASS Add-on Energy Management for Home Assistant:
+  maintainer: David HERNANDEZ <davidusb@gmail.com>
+  slug: 5b918bf2
+  source: https://github.com/davidusb-geek/emhass-add-on
+ESPHome:
+  maintainer: ESPHome <esphome@nabucasa.com>
+  slug: 5c53de3b
+  source: https://github.com/esphome/home-assistant-addon
 Expaso Home Assistant Add-Ons:
   maintainer: Hans van Essen <hans@expaso.nl>
   slug: 77b2833f
@@ -6,10 +26,6 @@ Frigate hass.io addons:
   maintainer: blakeblackshear
   slug: ccab4aaf
   source: https://github.com/blakeblackshear/frigate-hass-addons
-HA Add-ons by alexbelgium:
-  maintainer: alexbelgium
-  slug: db21ed7f
-  source: https://github.com/alexbelgium/hassio-addons
 Hass.io add-ons by Nicolai:
   maintainer: Nicolai Bjerre Pedersen
   slug: 0844df1a
@@ -26,35 +42,23 @@ Home Assistant Google Drive Backup Repository:
   maintainer: Stephen Beechen <stephen@beechens.com>
   slug: cebe7a76
   source: https://github.com/sabeechen/hassio-google-drive-backup
-Local add-ons:
-  maintainer: you
-  slug: local
-  source: local
 MickMake Hass.io Add-ons:
   maintainer: MickMake <embed@mickmake.com>
   slug: ba22da74
   source: https://github.com/MickMake/HomeAssistantAddons
-Official add-ons:
-  maintainer: Home Assistant
-  slug: core
-  source: core
 Poeschl Home Assistant Add-ons:
   maintainer: Poeschl <Poeschl@users.noreply.github.com>
   slug: 243ffc37
   source: https://github.com/Poeschl/Hassio-Addons
-Sanderdw's add-on repository:
-  maintainer: Sander de Wildt <sanderdw@gmail.com>
-  slug: 0826754b
-  source: https://github.com/sanderdw/hassio-addons
-Tom's Home Assistant Add-ons:
-  maintainer: Thomas Mauerer
-  slug: 15d21743
-  source: https://github.com/thomasmauerer/hassio-addons
+Shortumations:
+  maintainer: Ari Sosnovsky <ariel@sosnovsky.ca>
+  slug: 04377e81
+  source: https://github.com/asosnovsky/Shortumation
+TenySmart Hass.io Add-ons:
+  maintainer: TTVTien <ttvtien@gmail.com>
+  slug: 4ee6ccd4
+  source: https://github.com/TenySmart/HassioAddon
 bjeanes Home Assistant add-on repository:
   maintainer: Bo Jeanes <hassio@bjeanes.com>
   slug: 9c51689a
   source: https://github.com/bjeanes/hassio-addons
-bjeanes' fork of Poeschl Home Assistant Add-ons:
-  maintainer: bjeanes <bjeanes@users.noreply.github.com>
-  slug: 61c150fb
-  source: https://github.com/bjeanes/Poeschl-Hassio-Addons

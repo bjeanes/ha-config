@@ -12,3 +12,7 @@ packages:
 
 wifi:
   use_address: 10.10.30.120
+
+web_server:
+  version: 2
+  include_internal: true

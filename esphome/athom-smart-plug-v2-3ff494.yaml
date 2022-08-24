@@ -1,7 +1,7 @@
 substitutions:
   device_name: athom-smart-plug-v2-3ff494
   name: athom-smart-plug-v2-3ff494
-  friendly_name: Bo's Desk Plug
+  friendly_name: Bo's Office Heater
 packages:
   athom.smart-plug-v2: github://athom-tech/athom-configs/athom-smart-plug-v2.yaml
 esphome:

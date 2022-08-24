@@ -7,6 +7,8 @@ homeassistant:
             return 'mdi:bed';
           return 'mdi:bed-empty';
 
+magic_areas:
+
 proximity:
   bo_home:
     zone: home
@@ -38,6 +40,26 @@ group:
       - input_boolean.ri_in_bed
 
 automation:
+  - id: 29b7b074ebcbfa873522
+    alias: turn off lights when everyone is in bed
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.everyone_in_bed
+        from: "off"
+        to: "on"
+        for:
+          minutes: 1
+    action:
+      - service: light.turn_off
+        target:
+          entity_id: all
+      - service: light.turn_on
+        data:
+          color_temp: 462
+          brightness_pct: 10
+        target:
+          entity_id: light.sconce
+
   - id: not_in_bed
     alias: No longer in bed when phone leaves room
     trigger:
@@ -143,6 +165,7 @@ homekit:
         - switch.bo_s_office_plug
         - switch.bos_office_heater
         - switch.ri_s_desk_plug
+
       include_entity_globs:
         - binary_sensor.*_is_occupied
         - binary_sensor.*_motion
@@ -160,6 +183,7 @@ homekit:
         - "sensor.*freezer*"
         - "sensor.*cure*"
         - "sensor.*stash*"
+        - light.shelly_*
         - sensor.*garden*
         - sensor.*battery_temperature*
         - sensor.*forecast*
@@ -171,3 +195,9 @@ homekit:
       vacuum.robot_vacuum:
         linked_battery_sensor: sensor.robot_vacuum_battery_level
         linked_battery_charging_sensor: binary_sensor.robot_vacuum_charging
+
+  - name: shelly
+    port: 21225
+    filter:
+      include_entity_globs:
+        - light.shelly_*

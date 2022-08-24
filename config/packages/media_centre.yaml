@@ -183,6 +183,16 @@ media_player:
       device_class: sensor.current_living_room_media|device_class
 
 automation:
+  - id: sign_into_heos
+    trigger:
+      - platform: time_pattern
+        hours: "1"
+    action:
+      - service: heos.sign_in
+        data:
+          username: !secret heos_username
+          password: !secret heos_password
+
   - id: turn_on_apple_tv_on_source
     trigger:
       - platform: state
@@ -214,7 +224,7 @@ automation:
       - variables:
           current_volume_level: "{{ state_attr('media_player.denon_avr_x1600h', 'volume_level') }}"
 
-          # TODO model as a dictionary https://community.home-assistant.io/t/remember-volume-levels-of-each-source-for-a-media-player-to-automate-restoring/416749/6?u=bjeanes
+          # TODO model as a dictionary https://community.home-assistant.io/t/remember-volume-levels-of-each-source-for-a-media-player-to-automate-restoring/416749/6?u=bjeanes #!notsecret!#
           new_volume_level: >-
             {% set volumes = state_attr('sensor.living_room_media_player_source_volumes', 'volumes') or [] %}
             {% set specific_source = state_attr('media_player.living_room_media_player', 'source') %}

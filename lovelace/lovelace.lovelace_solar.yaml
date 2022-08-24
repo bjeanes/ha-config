@@ -3,142 +3,97 @@ config:
   - badges: []
     cards:
     - cards:
-      - content: "{%- set household_usage =\n  states('sensor.inverter_active_power')\
-          \ | float +\n  states('sensor.eagle_200_meter_power_demand_w') | float\n\
-          -%}\n**Household usage:** {{ household_usage }} W\n**PV+Bat:** {{ states('sensor.inverter_battery_power')\
-          \ | float + states('sensor.inverter_pv_power') | float }} W\n**Active (AC?):**\
-          \ {{ states('sensor.inverter_active_power') | float }} W\n**AC from PV:**\
-          \ {{ states('sensor.inverter_active_power') | float - states('sensor.inverter_battery_power')\
-          \ | float }} W\n**Inverter Load (claimed):** {{ states('sensor.inverter_load_power')\
-          \ | float }} W\n**Inverter Load (gap):** {{ states('sensor.inverter_load_power')\
-          \ | float - household_usage }} W\n**{Im,Ex}port:** {{ states('sensor.eagle_200_meter_power_demand_w')\
-          \ | float }} W\n"
-        type: markdown
-      title: Scratch
-      type: custom:stack-in-card
-    - cards:
       - entities:
           battery: sensor.inverter_battery_power
           battery_charge: sensor.inverter_battery_level
-          grid: sensor.eagle_200_meter_power_demand
+          grid: sensor.inverter_grid_power_demand
           solar: sensor.inverter_pv_power
         kw_decimals: 2
         type: custom:power-flow-card
         w_decimals: 0
         watt_threshold: 900
+      - link_dashboard: true
+        type: energy-distribution
       - entities:
         - entity: sensor.inverter_active_power
           name: Active (AC) power
           secondary_info: last-updated
-        - entity: sensor.inverter_reactive_power
-          name: Reactive power
+        type: entities
+      - entities:
+        - entity: sensor.inverter_active_power
+          name: Active power
           secondary_info: last-updated
-        - entity: sensor.inverter_power_factor
-          name: Power factor
-          secondary_info: last-updated
-        - entity: sensor.inverter_pv_power
-          name: PV Power
-          secondary_info: last-updated
-        - entity: sensor.inverter_load_power
-          name: Load power (inverter claimed)
-          secondary_info: last-updated
-        - entity: sensor.household_power_demand
-          name: Actual load
-          secondary_info: last-updated
+        hours_to_show: 6
+        type: history-graph
+      type: custom:stack-in-card
+    - entities:
+      - label: Today
+        type: section
+      - entity: sensor.solcast_forecast_today
+        name: Total
+        secondary_info: last-updated
+      - entity: sensor.solcast_forecast_remaining_today
+        name: Remaining
+        secondary_info: last-updated
+      - entity: sensor.solcast_forecast_this_hour
+        format: kilo
+        name: Current hour
+        secondary_info: last-updated
+        type: custom:multiple-entity-row
+        unit: kWh
+      - entity: sensor.solcast_forecast_next_hour
+        format: kilo
+        name: Next hour
+        secondary_info: last-updated
+        type: custom:multiple-entity-row
+        unit: kWh
+      - label: Tomorrow
+        type: section
+      - entity: sensor.solcast_forecast_tomorrow
+        name: Total
+        secondary_info: last-updated
+      - label: Peak hour
+        type: section
+      - entities:
+        - entity: sensor.solcast_peak_time_today
+          format: time
+          name: ' '
+        entity: sensor.solcast_peak_forecast_today
+        format: kilo
+        name: Today
+        type: custom:multiple-entity-row
+        unit: kWh
+      - entities:
+        - entity: sensor.solcast_peak_time_tomorrow
+          format: time
+          name: ' '
+        entity: sensor.solcast_peak_forecast_tomorrow
+        format: kilo
+        name: Tomorrow
+        type: custom:multiple-entity-row
+        unit: kWh
+      title: Forecast
+      type: entities
+    - cards:
+      - entities:
+        - entity: sensor.inverter_battery_level
+          name: Charge
         - entity: sensor.inverter_battery_power
-          name: Battery power
-          secondary_info: last-updated
-        - entity: sensor.inverter_grid_power_demand
-          name: Grid demand (inverter)
-          secondary_info: last-updated
-        - entity: sensor.eagle_200_meter_power_demand_w
-          name: Grid demand (meter)
-          secondary_info: last-updated
+          name: Power
+        type: history-graph
+      - entities:
+        - entity: sensor.inverter_battery_power
+          name: Power
+        - entity: sensor.inverter_battery_level
+          name: Level
+        - entity: sensor.inverter_battery_health
+          name: Health
+        - entity: sensor.inverter_battery_charge_today
+          name: Total daily charge
+        - entity: sensor.inverter_battery_discharge_today
+          name: Total daily discharge
         type: entities
-      - entities:
-        - entity: sensor.inverter_grid_power_demand
-          name: Grid demand (inverter)
-          secondary_info: last-updated
-        - entity: sensor.eagle_200_meter_power_demand_w
-          name: Grid demand (meter)
-          secondary_info: last-updated
-        hours_to_show: 6
-        type: history-graph
-      - entities:
-        - entity: sensor.inverter_load_power
-          name: Inverter's claimed load power
-        - entity: sensor.household_power_demand
-          name: Actual household power demand
-        hours_to_show: 6
-        type: history-graph
-      - entities:
-        - entity: sensor.inverter_load_gap
-          name: Load gap
-        - entity: sensor.inverter_demand_gap
-          name: Demand gap
-        hours_to_show: 6
-        type: history-graph
-      title: Power
-      type: custom:stack-in-card
-    - cards:
-      - link_dashboard: false
-        type: energy-distribution
-      title: Energy (today)
-      type: custom:stack-in-card
-    - entities:
-      - entity: sensor.inverter_pv_power
-        name: PV Power
-      - entity: sensor.inverter_active_power
-        name: Active Power
-      - entity: sensor.inverter_load_power
-        name: Load power
-      type: history-graph
-    - entities:
-      - entity: sensor.inverter_battery_level
-        name: Charge
-      - entity: sensor.inverter_battery_power
-        name: Power
       title: Battery
-      type: history-graph
-    - card:
-        type: entities
-      filter:
-        exclude:
-        - state: unavailable
-        include:
-        - entity_id: sensor.eagle_200_meter_power_demand
-        - entity_id: /sensor.inverter_/
-      type: custom:auto-entities
-    - card:
-        title: Actions
-        type: entities
-      filter:
-        exclude: []
-        include:
-        - domain: /script|automation/
-          entity_id: /\.inverter_/
-      type: custom:auto-entities
-    - cards:
-      - entities:
-        - entity: sensor.inverter_grid_frequency
-          name: Frequency
-          secondary_info: last-updated
-        - entity: sensor.inverter_phase_a_voltage
-          name: Voltage
-          secondary_info: last-updated
-        - entity: sensor.inverter_phase_a_current
-          name: Current
-          secondary_info: last-updated
-        type: entities
-      - entities:
-        - entity: sensor.inverter_grid_frequency
-          name: Frequency
-        - entity: sensor.inverter_phase_a_voltage
-          name: Voltage
-        - entity: sensor.inverter_phase_a_current
-          name: Current
-        type: history-graph
-      title: Grid
       type: custom:stack-in-card
     icon: mdi:solar-power-variant
     theme: Backend-selected
@@ -374,3 +329,176 @@ config:
     icon: hass:lightning-bolt
     path: power
     title: Electricity
+  - badges: []
+    cards:
+    - entities:
+      - label: Charge schedule
+        type: section
+      - entity: input_datetime.inverter_charging_schedule_start
+        name: Start charging at
+      - entity: input_datetime.inverter_charging_schedule_end
+        name: Finish charging at
+      - entity: input_number.inverter_charging_schedule_target_soc
+        name: Charge until
+      - label: Misc
+        type: section
+      - entity: input_number.inverter_battery_reserve
+        icon: mdi:battery-lock
+        name: Reserve battery
+        secondary_info: last-changed
+      title: Settings
+      type: entities
+    - entities:
+      - action_name: Set
+        entity: script.inverter_self_consumption
+        icon: mdi:recycle-variant
+        name: Self-consumption
+      - action_name: Set
+        entity: script.inverter_force_battery_charge
+        icon: mdi:import
+        name: Force charge
+      - action_name: Set
+        entity: script.inverter_force_battery_discharge
+        icon: mdi:export
+        name: Force discharge
+      - action_name: Set
+        entity: script.inverter_force_battery_stop
+        icon: mdi:stop
+        name: Stop
+      title: Battery mode
+      type: entities
+    - entities:
+      - entity: automation.inverter_apply_charging_schedule
+        icon: mdi:calendar-import
+        name: Apply charging schedule
+        secondary_info: last-triggered
+        toggle: true
+        type: custom:multiple-entity-row
+      - entity: automation.inverter_update_battery_reserve
+        icon: mdi:battery-sync-outline
+        name: Apply battery reserve
+        secondary_info: last-triggered
+        toggle: true
+        type: custom:multiple-entity-row
+      - entity: automation.update_pvoutput
+        icon: mdi:solar-power-variant-outline
+        name: Send to PVOutput
+        secondary_info: last-triggered
+      title: Automations
+      type: entities
+    - card:
+        hours_to_show: 1
+        type: logbook
+      filter:
+        exclude: []
+        include:
+        - domain: automation
+          name: /[Ii]nverter/
+        - domain: script
+          name: /[Ii]nverter/
+      type: custom:auto-entities
+    icon: mdi:wrench
+    path: configure
+    theme: Backend-selected
+    title: Configure
+  - badges: []
+    cards:
+    - cards:
+      - entities:
+        - entity: sensor.inverter_active_power
+          name: Active (AC) power
+          secondary_info: last-updated
+        - entity: sensor.inverter_pv_power
+          name: PV Power
+          secondary_info: last-updated
+        - entity: sensor.inverter_load_power
+          name: Load power (inverter claimed)
+          secondary_info: last-updated
+        - entity: sensor.household_power_demand
+          name: Actual load
+          secondary_info: last-updated
+        - entity: sensor.inverter_battery_power
+          name: Battery power
+          secondary_info: last-updated
+        - entity: sensor.inverter_grid_power_demand
+          name: Grid demand (inverter)
+          secondary_info: last-updated
+        - entity: sensor.eagle_200_meter_power_demand_w
+          name: Grid demand (meter)
+          secondary_info: last-updated
+        type: entities
+      - entities:
+        - entity: sensor.inverter_grid_power_demand
+          name: Grid demand (inverter)
+          secondary_info: last-updated
+        - entity: sensor.eagle_200_meter_power_demand_w
+          name: Grid demand (meter)
+          secondary_info: last-updated
+        hours_to_show: 6
+        type: history-graph
+      title: Power
+      type: custom:stack-in-card
+    - cards:
+      - entities:
+        - entity: sensor.inverter_battery_level
+          name: Charge
+        - entity: sensor.inverter_battery_power
+          name: Power
+        type: history-graph
+      - entities:
+        - sensor.inverter_battery_power
+        - sensor.inverter_battery_level
+        - sensor.inverter_battery_current
+        - sensor.inverter_battery_voltage
+        - sensor.inverter_battery_temperature
+        - sensor.inverter_battery_health
+        - sensor.inverter_battery_charge_today
+        - sensor.inverter_battery_discharge_today
+        type: entities
+      title: Battery
+      type: custom:stack-in-card
+    - entities:
+      - entity: sensor.inverter_output_energy_today
+        name: Output energy (5003)
+      - entity: sensor.inverter_pv_generation_today
+        name: PV generation (13002)
+      - entity: sensor.inverter_battery_charge_today
+        name: Battery charge (13040)
+      - entity: sensor.inverter_battery_charge_from_pv_today
+        name: Battery charge from PV (13012)
+      - entity: sensor.inverter_battery_discharge_today
+        name: Battery discharge (13026)
+      - entity: sensor.inverter_imported_energy_today
+        name: Imported (13036)
+      - entity: sensor.inverter_exported_energy_today
+        name: Exported (13045)
+      - entity: sensor.inverter_exported_energy_from_pv_today
+        name: Exported from PV (13005)
+      - entity: sensor.inverter_direct_energy_consumption_today
+        name: Direct consumption (13017)
+      title: Energy
+      type: entities
+    - cards:
+      - entities:
+        - entity: sensor.inverter_grid_frequency
+          name: Frequency (5036)
+          secondary_info: last-updated
+        - entity: sensor.inverter_phase_a_voltage
+          name: Voltage (5019)
+          secondary_info: last-updated
+        - entity: sensor.inverter_phase_a_current
+          name: Current (13031)
+          secondary_info: last-updated
+        type: entities
+      - entities:
+        - entity: sensor.inverter_export_power
+          name: Export power (Inverter - 13010)
+        - entity: sensor.eagle_200_meter_power_demand_w
+          name: Import power (Eagle-200)
+        type: history-graph
+      title: Grid
+      type: custom:stack-in-card
+    icon: mdi:bug-outline
+    path: debug
+    theme: Backend-selected
+    title: Debug

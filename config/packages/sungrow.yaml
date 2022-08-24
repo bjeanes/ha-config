@@ -27,9 +27,142 @@
 #           {% else %} 204 {% endif %}"
 #           hub: SungrowSHx
 #     mode: single
+
+input_datetime:
+  inverter_charging_schedule_start:
+    has_time: true
+    name: Inverter charging schedule start
+    initial: "13:30:00"
+  inverter_charging_schedule_end:
+    has_time: true
+    name: Inverter charging schedule end
+    initial: "14:59:00"
+input_number:
+  inverter_charging_schedule_target_soc:
+    name: Inverter charging target state of charge
+    min: 0
+    max: 100
+    unit_of_measurement: "%"
+    mode: box
+  inverter_battery_reserve:
+    name: Inverter battery reserve
+    min: 0
+    max: 100
+    initial: 5
+    unit_of_measurement: "%"
+    mode: box
+
+automation:
+  - id: e7df7dc23815acacdd8c
+    alias: Inverter - apply charging schedule
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - input_datetime.inverter_charging_schedule_start
+          - input_datetime.inverter_charging_schedule_end
+          - input_number.inverter_charging_schedule_target_soc
+        not_from:
+          - unknown
+          - unavailable
+        not_to:
+          - unknown
+          - unavailable
+    action:
+      - service: script.apply_charging_schedule
+        data_template:
+          soc_1: "{{ states('input_number.inverter_charging_schedule_target_soc') | int }}"
+          start_time_1: "{{ states('input_datetime.inverter_charging_schedule_start') }}"
+          end_time_1: "{{ states('input_datetime.inverter_charging_schedule_end') }}"
+
+  - id: 7b93d325bfe632a4e890
+    alias: Inverter - update battery reserve
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - input_number.inverter_battery_reserve
+        not_from:
+          - unknown
+          - unavailable
+        not_to:
+          - unknown
+          - unavailable
+    action:
+      - service: script.inverter_set_battery_reserve
+        data_template:
+          reserved_percentage: >-
+            {{ states('input_number.inverter_battery_reserve') | int }}
+
 script:
+  inverter_set_battery_reserve:
+    alias: "Set inverter battery reserve"
+    mode: restart
+    fields:
+      reserved_percentage:
+        name: "Percentage"
+        description: "Percentage of battery reserved for emergency power supply"
+        required: true
+        selector:
+          number:
+            min: 0
+            max: 100
+            step: 1
+            unit_of_measurement: "%"
+    sequence:
+      - service: modbus.write_register
+        data_template:
+          address: 13099 # 13100
+          slave: 1
+          value: "{{ [ reserved_percentage | int ] }}"
+          hub: SungrowSHx
+
+  # inverter_set_battery_mode:
+  #   alias: Set inverter battery mode
+  #   fields:
+  #     battery_power:
+  #       name: "Charge/discharge power"
+  #       description: "Charge/discharge power"
+  #       required: false
+  #       selector:
+  #         number:
+  #           min: 0
+  #           max: 6600
+  #           step: 1
+  #           unit_of_measurement: "W"
+
+  #     battery_mode:
+  #       name: "Battery mode"
+  #       description: "Battery mode"
+  #       required: true
+  #       selector:
+  #         select:
+  #           options:
+  #             - label: Self-consumption
+  #               value: [0, 0xCC]
+  #             - label: Force charge
+  #               value: [2, 0xAA]
+  #             - label: Force discharge
+  #               value: [2, 0xBB]
+  #             - label: Stop
+  #               value: [2, 0xCC]
+  #   sequence:
+  #     - service: modbus.write_register
+  #       data_template:
+  #         address: 13049 # 13050-13051
+  #         slave: 1
+  #         # value: "{{ battery_mode }}"
+  #         value: |
+  #           {% if battery_power %}
+  #             {{ battery_mode + [battery_power|int] }}
+  #           {% else %}
+  #             {{ battery_mode }}
+  #           {% endif %}
+  #         hub: SungrowSHx
+
   inverter_force_battery_charge:
     alias: "Inverter - force battery charge"
+    mode: restart
     sequence:
       - service: modbus.write_register
         data_template:
@@ -39,6 +172,7 @@ script:
           hub: SungrowSHx
   inverter_force_battery_discharge:
     alias: "Inverter - force battery discharge"
+    mode: restart
     sequence:
       - service: modbus.write_register
         data_template:
@@ -48,6 +182,7 @@ script:
           hub: SungrowSHx
   inverter_force_battery_stop:
     alias: "Inverter - force battery stop"
+    mode: restart
     sequence:
       - service: modbus.write_register
         data_template:
@@ -57,12 +192,100 @@ script:
           hub: SungrowSHx
   inverter_self_consumption:
     alias: "Inverter - self consumption"
+    mode: restart
     sequence:
       - service: modbus.write_register
         data_template:
           address: 13049 # 13050-13051
           slave: 1
           value: [0, 0xCC]
+          hub: SungrowSHx
+
+  # https://github.com/bohdan-s/SunGather/pull/63#issuecomment-1195049341
+  apply_charging_schedule:
+    alias: "Inverter - apply charging schedule"
+
+    # Q: is this evaluated _after_ field values are captured or before?
+    variables:
+      enable_value: 0xAA
+      disable_value: 0x55
+      every_day_value: 1
+      is_enabled: "{{ (soc_1 is defined and soc_1 | int > 0) or (soc_2 is defined and soc_2 | int > 0) }}"
+      sched_1: >
+        {% if soc_1 is defined and soc_1 | int > 0 %}
+          {{ [
+            today_at(start_time_1).hour,
+            today_at(start_time_1).minute,
+            today_at(end_time_1).hour,
+            today_at(end_time_1).minute,
+            soc_1
+          ] }}
+        {% else %}
+          {{ [0, 0, 0, 0, 0] }}
+        {% endif %}
+      sched_2: >
+        {% if soc_2 is defined and soc_2 | int > 0 %}
+          {{ [
+            today_at(start_time_2).hour,
+            today_at(start_time_2).minute,
+            today_at(end_time_2).hour,
+            today_at(end_time_2).minute,
+            soc_2
+          ] }}
+        {% else %}
+          {{ [0, 0, 0, 0, 0] }}
+        {% endif %}
+      bytes: >
+        {% if is_enabled %}
+          {{ [enable_value, every_day_value] + sched_1 + sched_2 }}
+        {% else %}
+          {{ [disable_value] }}
+        {% endif %}
+
+    fields:
+      start_time_1:
+        name: Schedule 1 Start Time
+        default: "13:30:00"
+        selector:
+          time:
+      end_time_1:
+        name: Schedule 1 End Time
+        default: "14:59:00" # 3PM is on-peak charging
+        selector:
+          time:
+      soc_1:
+        name: Schedule 1 Target State-of-Charge
+        default: 85
+        selector:
+          number:
+            min: 0
+            max: 100
+            unit_of_measurement: "%"
+      start_time_2:
+        name: Schedule 2 Start Time
+        default: "0:00:00"
+        selector:
+          time:
+      end_time_2:
+        name: Schedule 2 End Time
+        default: "00:00:00"
+        selector:
+          time:
+      soc_2:
+        name: Schedule 2 Target State-of-Charge
+        default: 0
+        selector:
+          number:
+            min: 0
+            max: 100
+            unit_of_measurement: "%"
+
+    sequence:
+      - service: modbus.write_register
+        data_template:
+          address: 33207 # 33208 - ...
+          slave: 1
+          value: "{{ bytes | list }}"
           hub: SungrowSHx
 
 modbus:

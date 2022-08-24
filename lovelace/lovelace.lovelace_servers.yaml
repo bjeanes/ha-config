@@ -57,6 +57,10 @@ config:
         max: 100
         min: 0
         opposite: true
+    - entities:
+      - entity: switch.nas
+      - entity: switch.tumtum
+      type: entities
     icon: mdi:wardrobe-outline
     path: server-closet
     theme: Backend-selected

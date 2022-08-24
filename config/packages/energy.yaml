@@ -1,8 +1,138 @@
 # See also sungrow.yaml
 
+utility_meter:
+  monthly_energy_import:
+    source: sensor.eagle_200_total_meter_energy_delivered
+    name: Energy imported
+    cycle: monthly
+    tariffs:
+      - peak
+      - offpeak
+
+  daily_energy_import:
+    source: sensor.eagle_200_total_meter_energy_delivered
+    name: Energy imported
+    cycle: daily
+    tariffs:
+      - peak
+      - offpeak
+
+  monthly_energy_export:
+    source: sensor.eagle_200_total_meter_energy_received
+    name: Energy exported
+    cycle: monthly
+
+  daily_energy_export:
+    source: sensor.eagle_200_total_meter_energy_received
+    name: Energy exported
+    cycle: daily
+
+automation:
+  - id: b508954f792ff8483254
+    alias: Change electricity tariff
+    mode: single
+    trigger:
+      - platform: time
+        at: "15:00:00"
+        variables:
+          tariff: peak
+      - platform: time
+        at: "21:00:00"
+        variables:
+          tariff: offpeak
+    action:
+      - service: select.select_option
+        target:
+          entity_id:
+            - select.monthly_energy_import
+            - select.daily_energy_import
+        data:
+          option: "{{ tariff }}"
+
+  - id: 4f863af550147e9b3170
+    alias: update pvoutput
+    trigger:
+      platform: time_pattern
+      minutes: /5
+    action:
+      service: rest_command.update_pvoutput
+      data: {}
+    mode: single
+
+rest_command:
+  # https://pvoutput.org/help/api_specification.html#id1
+  update_pvoutput:
+    url: https://pvoutput.org/service/r2/addstatus.jsp
+    method: post
+    headers:
+      Host: pvoutput.org
+      User-Agent: HomeAssistant
+      X-Pvoutput-Apikey: !secret pvoutput_api_key
+      X-Pvoutput-SystemId: !secret pvoutput_system_id
+    payload: >-
+      d={{now().strftime("%Y%m%d")}}                                    {#- date -#}
+      &t={{now().strftime("%H:%M")}}                                    {#- time -#}
+      &c1=2                                                             {#- cumulative mode -#}
+      &v1={{(states('sensor.inverter_pv_generation_today')|float * 1000)|round(0) }}
+                                                                        {#- energy generation (Wh) -#}
+      &v2={{states('sensor.inverter_active_power')|float|round(0)}}     {#- power generation (W) -#}
+      &v3=                                                              {#- energy consumption (Wh) -#}
+      &v4={{states('sensor.household_power_demand')|float|round(0)}}    {#- power consumption (W) -#}
+      {#- &v5={{states('sensor.home_weather_temperature')|float|round(1)}}  {#- panel temperature? -#}
+      &v6={{states('sensor.inverter_phase_a_voltage')|float|round(1)}}  {#- voltage -#}
+    content_type: "application/x-www-form-urlencoded"
+
 sensor:
+  #   entity_id: sensor.inverter_grid_power_demand
+  #   state_characteristic: average_linear
+  #   max_age: "00:05"
+  # - platform: statistics
+  #   name: "Eagle-200 meter power demand (smooth)"
+  #   unique_id: 5596672fba54c89c2131
+  #   entity_id: sensor.eagle_200_meter_power_demand_w
+  #   state_characteristic: average_linear
+  #   max_age: "00:05"
+
+  # - platform: filter
+  #   name: "Inverter grid power demand (smooth)"
+  #   unique_id: 88bfc3a211f1540c90cf
+  #   entity_id: sensor.inverter_grid_power_demand
+  #   filters:
+  #     - filter: lowpass
+  #       time_constant: 30
+  #     - filter: time_simple_moving_average
+  #       window_size: "00:02"
+
+  # - platform: filter
+  #   name: "Eagle-200 meter power demand (smooth)"
+  #   unique_id: 5596672fba54c89c2131
+  #   entity_id: sensor.eagle_200_meter_power_demand_w
+  #   filters:
+  #     - filter: lowpass
+  #       time_constant: 30
+  #     - filter: time_simple_moving_average
+  #       window_size: "00:02"
+
   - platform: template
     sensors:
+      # energy_import_price:
+      #   unique_id: 2b80f57455c84e873952
+      #   friendly_name: Energy import price
+      #   value_template: >-
+      #     {%- if is_state('select.daily_energy_import', 'peak') -%}
+      #       0.23320
+      #     {%- else -%}
+      #       0.15235
+      #     {%- endif -%}
+      #   unit_of_measurement: AUD
+      #   device_class: monetary
+      # energy_export_price:
+      #   unique_id: a661839f99fbc85e23d9
+      #   friendly_name: Energy export price
+      #   value_template: "0.067"
+      #   unit_of_measurement: AUD
+      #   device_class: monetary
+
       eagle_200_meter_power_demand_w:
         unique_id: 528a94ffdd069f6f5dcd
         friendly_name: Eagle-200 Meter Power Demand (W)
@@ -47,6 +177,20 @@ sensor:
              (-1 * states('sensor.inverter_export_power') | float) }}
         unit_of_measurement: W
         device_class: power
+
+      inverter_demand_gap_perc:
+        unique_id: 12b4d474286fab17319d
+        friendly_name: Inverter demand gap %
+        value_template: >-
+          {{ 100 * (-1 * states('sensor.inverter_export_power') | float) / (states('sensor.eagle_200_meter_power_demand_w') | float) }}
+        unit_of_measurement: "%"
+
+      # inverter_demand_gap_perc_smooth:
+      #   unique_id: ad811b463d9a0a332c62
+      #   friendly_name: Inverter demand gap % (smooth)
+      #   value_template: >-
+      #     {{ 100 * states('sensor.inverter_grid_power_demand_smooth') | float / states('sensor.eagle_200_meter_power_demand_smooth') | float }}
+      #   unit_of_measurement: "%"
 
       current_electricity_cost:
         unique_id: current_electricity_cost

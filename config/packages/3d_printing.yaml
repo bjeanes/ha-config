@@ -1,5 +1,5 @@
 switch:
-  - platform: command_line
+  - platform: command_line # TODO: turn this into https://www.home-assistant.io/integrations/switch.rest/
     switches:
       3d_printer_connection:
         # 3d_printer_command_on: /usr/bin/curl -m 10 -d '{"command":"connect"}' -H 'Content-Type: application/json' -H 'X-Api-Key: REDACTED' http://REDACTED/api/connection

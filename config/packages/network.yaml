@@ -21,3 +21,114 @@ switch:
     mac: !secret tumtum_mac
     host: !secret tumtum_ip
     broadcast_address: !secret lan_broadcast
+    turn_off:
+      - service: shell_command.shutdown_host
+        data:
+          host: !secret tumtum_ip
+
+  - platform: wake_on_lan
+    name: NAS
+    mac: !secret nas_mac
+    host: !secret nas_ip
+    broadcast_address: !secret lan_broadcast
+    turn_off:
+      service: button.press
+      target:
+        entity_id: button.nas_shutdown
+
+automation:
+  - id: 964db306d8b009f8f640
+    alias: Power NAS/Tumtum according to sleep
+    trigger:
+      - platform: template
+        value_template: |
+          {{
+            is_state('sensor.everyone_in_bed', 'on') and
+            is_state('sensor.plex_tumtum_tree', '0')
+          }}
+        for:
+          minutes: 15
+        variables:
+          service: switch.turn_off
+      - platform: template
+        value_template: |
+          {{ is_state('sensor.everyone_in_bed', 'off') }}
+        for:
+          minutes: 15
+        variables:
+          service: switch.turn_on
+    action:
+      - service: "{{ service }}"
+        target:
+          entity_id:
+            - switch.nas
+            - switch.tumtum
+
+  - id: 8bec9ab03377b5202cad
+    alias: Power NAS/Tumtum according to UPS
+    mode: restart # so we only do latest
+    trigger: # https://www.home-assistant.io/docs/automation/trigger/#event-trigger
+      - platform: event
+        event_type: nut.ups_event
+        event_data:
+          notify_type: ONBATT # on battery
+        variables:
+          direction: "off"
+          seconds: 120
+      - platform: event
+        event_type: nut.ups_event
+        event_data:
+          notify_type: LOWBAT # low battery
+        variables:
+          direction: "off"
+          seconds: 10
+      - platform: event
+        event_type: nut.ups_event
+        event_data:
+          notify_type: FSD # forced shutdown
+        variables:
+          direction: "off"
+          seconds: 3
+      - platform: event
+        event_type: nut.ups_event
+        event_data:
+          notify_type: SHUTDOWN # system is shutting down
+        variables:
+          direction: "off"
+          seconds: 0
+      - platform: event
+        event_type: nut.ups_event
+        event_data:
+          notify_type: ONLINE # system is (back) online
+        variables:
+          direction: "on"
+          seconds: 120
+    action:
+      - delay: "{{ seconds }}"
+      - service: "switch.turn_{{ direction }}"
+        target:
+          entity_id:
+            - switch.nas
+            - switch.tumtum
+
+  - id: 0300364ca8c814c4c325
+    alias: "Notify on UPS state change"
+    trigger:
+      - platform: event
+        event_type: nut.ups_event
+    action:
+      - service: notify.mobile_app_bos_iphone
+        data_template:
+          title: "UPS changed state"
+          message: "{{ trigger.event.data.notify_msg }}"
+          data:
+            push:
+              interruption-level: time-sensitive
+
+shell_command:
+  # NOTE: make sure connecting user can execute specified sudo command without password on remote host
+  # See https://askubuntu.com/questions/168879/shutdown-from-terminal-without-entering-password, https://wiki.archlinux.org/title/allow_users_to_shutdown, https://toroid.org/sudoers-syntax
+  reboot_host: >
+    ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' -l {% if user is defined %}{{user}}{%else%}homeassistant{% endif %} {{host}} -- 'sudo reboot'
+  shutdown_host: >
+    ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' -l {% if user is defined %}{{user}}{%else%}homeassistant{% endif %} {{host}} -- 'sudo poweroff'

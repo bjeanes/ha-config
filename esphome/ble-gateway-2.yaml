@@ -9,6 +9,10 @@ esphome:
 packages:
   base: !include common/base.yaml
   ble: !include common/ble-gateway.yaml
+  
+web_server:
+  version: 2
+  include_internal: true
 
 wifi:
   use_address: 10.10.30.82

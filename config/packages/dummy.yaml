@@ -1,0 +1,16 @@
+# This file just includes dummy entities for each integration which I use infrequently. It forces the integration to
+# load so that I can reload the YAML instead of having to restart HA in the case where I am adding/enabling the first
+# entity from that integration.
+
+sensor:
+  - platform: statistics # Force statistics integration to be loaded (even if no other sensors) so I can reload without restarting HA
+    name: "dummy_statistics"
+    unique_id: dummy
+    entity_id: sensor.energy_production_tomorrow
+
+  - platform: filter # Force filter integration to be loaded (even if no other sensors) so I can reload without restarting HA
+    name: "dummy_filter"
+    unique_id: dummy
+    entity_id: sensor.energy_production_tomorrow
+    filters:
+      - filter: lowpass

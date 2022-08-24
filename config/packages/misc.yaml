@@ -32,6 +32,8 @@ anniversaries:
       date: "1987-02-17"
     - name: Jordon's Birthday
       date: "02-19"
+    - name: Skye's Birthday
+      date: "07-30"
     - name: Kate's Birthday
       date: "03-20"
     - name: Nick's Birthday
@@ -58,3 +60,5 @@ anniversaries:
       date: "05-05"
     - name: Alex Charry's Birthday
       date: "08-06"
+    - name: Em Cheesman's Birthday
+      date: "07-20"

@@ -3,7 +3,7 @@ calendar:
     calendars:
       - name: "On-call"
         url: !secret oncall_schedule_url
-        includeAllDay: true
+        include_all_day: true
         days: 30
 
 automation:
@@ -12,16 +12,14 @@ automation:
       - platform: state
         entity_id: cover.front_gate
         from: "closed"
-        to: "open"
-      - platform: state
-        entity_id: cover.front_gate
-        from: "closed"
-        to: "opening"
-      - platform: event
-        event_type: homekit_state_change
-        event_data:
-          entity_id: cover.front_gate
-          service: open_cover
+        to:
+          - open
+          - opening
+      # - platform: event
+      #   event_type: homekit_state_change
+      #   event_data:
+      #     entity_id: cover.front_gate
+      #     service: open_cover
     condition: >-
       {{ is_state('calendar.on_call', 'on') or is_state('calendar.ical_on_call', 'on') }}
     action:

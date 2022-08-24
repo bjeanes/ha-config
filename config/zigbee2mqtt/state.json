@@ -1,1 +1,90 @@
-{}
+{
+    "0x804b50fffe100ed4": {
+        "battery": 100,
+        "update": {
+            "state": "available"
+        },
+        "update_available": true,
+        "linkquality": 215
+    },
+    "0x00158d0008091c32": {
+        "contact": false,
+        "voltage": 2995,
+        "battery": 41,
+        "temperature": 19,
+        "linkquality": 255,
+        "device_temperature": 21,
+        "power_outage_count": 8
+    },
+    "0x00158d00080915bd": {
+        "contact": true,
+        "voltage": 3005,
+        "battery": 44,
+        "temperature": 17,
+        "linkquality": 255,
+        "device_temperature": 16,
+        "power_outage_count": 7
+    },
+    "0x00158d0007e7725b": {
+        "contact": true,
+        "voltage": 2975,
+        "battery": 36,
+        "temperature": 18,
+        "linkquality": 255,
+        "device_temperature": 18,
+        "power_outage_count": 8
+    },
+    "0x00158d0008091b58": {
+        "contact": false,
+        "voltage": 3025,
+        "battery": 50,
+        "temperature": 12,
+        "linkquality": 255,
+        "device_temperature": 15,
+        "power_outage_count": 13
+    },
+    "0x00158d0007e4c4f2": {
+        "contact": true,
+        "voltage": 2975,
+        "battery": 36,
+        "temperature": 21,
+        "linkquality": 255,
+        "device_temperature": 21,
+        "power_outage_count": 41
+    },
+    "0x5c0272fffee93bae": {
+        "occupancy": false,
+        "tamper": false,
+        "battery_low": false,
+        "linkquality": 255
+    },
+    "0x00124b002359ed4c": {
+        "voltage": 3000,
+        "battery": 100,
+        "occupancy": false,
+        "tamper": false,
+        "battery_low": false,
+        "linkquality": 191
+    },
+    "0xa4c138fda4db2c5e": {
+        "occupancy": true,
+        "battery": 50,
+        "sensitivity": "high",
+        "keep_time": "120",
+        "illuminance": 898,
+        "linkquality": 127
+    },
+    "0x84b4dbfffe850fda": {
+        "target_distance": 0,
+        "presence": false,
+        "maximum_range": 3,
+        "radar_sensitivity": 2,
+        "minimum_range": 0,
+        "self_test": "check_success",
+        "detection_delay": 0.1,
+        "fading_time": 5,
+        "cli": " ",
+        "illuminance_lux": 0,
+        "linkquality": 255
+    }
+}
