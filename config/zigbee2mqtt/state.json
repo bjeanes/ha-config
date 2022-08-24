@@ -13,7 +13,7 @@
         "battery": 44,
         "temperature": 19,
         "linkquality": 255,
-        "device_temperature": 21,
+        "device_temperature": 20,
         "power_outage_count": 8
     },
     "0x00158d00080915bd": {
@@ -31,7 +31,7 @@
         "battery": 36,
         "temperature": 18,
         "linkquality": 255,
-        "device_temperature": 19,
+        "device_temperature": 18,
         "power_outage_count": 8
     },
     "0x00158d0008091b58": {
@@ -40,7 +40,7 @@
         "battery": 50,
         "temperature": 12,
         "linkquality": 255,
-        "device_temperature": 15,
+        "device_temperature": 13,
         "power_outage_count": 13
     },
     "0x00158d0007e4c4f2": {
@@ -49,7 +49,7 @@
         "battery": 39,
         "temperature": 21,
         "linkquality": 255,
-        "device_temperature": 23,
+        "device_temperature": 21,
         "power_outage_count": 41
     },
     "0x5c0272fffee93bae": {
