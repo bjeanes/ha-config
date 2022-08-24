@@ -9,8 +9,8 @@
     },
     "0x00158d0008091c32": {
         "contact": false,
-        "voltage": 2995,
-        "battery": 41,
+        "voltage": 3005,
+        "battery": 44,
         "temperature": 19,
         "linkquality": 255,
         "device_temperature": 18,
@@ -71,7 +71,7 @@
         "battery": 50,
         "sensitivity": "high",
         "keep_time": "120",
-        "illuminance": 562,
+        "illuminance": 634,
         "linkquality": 127
     },
     "0x84b4dbfffe850fda": {
