@@ -1,6 +1,7 @@
 Living Room
-http://.*bjeanes
 bjeanes\.com
 Home Assistant
 : 80
 github\.com
+username: bjeanes
+!notsecret!
