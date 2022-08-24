@@ -9,8 +9,8 @@
     },
     "0x00158d0008091c32": {
         "contact": false,
-        "voltage": 2995,
-        "battery": 41,
+        "voltage": 3005,
+        "battery": 44,
         "temperature": 19,
         "linkquality": 255,
         "device_temperature": 21,
