@@ -119,6 +119,10 @@ automation:
         entity_id: sensor.inverter_battery_level
         below: input_number.inverter_charging_schedule_2_target_soc
     variables:
+      # Enable each schedule only if battery level is below target, it is explicitly enabled, and the dates have values.
+      # NOTE: It would be better to take into consideration if the schedule is active (timewise) but in effect disabling
+      #       it unconditionally when battery level is higher doesn't matter, since we also trigger when it is lower and
+      #       it will become re-enabled again.
       enabled_1: |
         {{ is_state('input_boolean.inverter_charging_schedule_enabled', 'on') and
             states('input_number.inverter_charging_schedule_target_soc') | float(default = 0) > states('sensor.inverter_battery_level') | float(default = 0) and
@@ -128,8 +132,8 @@ automation:
       enabled_2: |
         {{ is_state('input_boolean.inverter_charging_schedule_2_enabled', 'on') and
             states('input_number.inverter_charging_schedule_2_target_soc') | float(default = 0) > states('sensor.inverter_battery_level') | float(default = 0) and
-            not is_state('input_datetime.inverter_charging_schedule_start', 'unknown') and
-            not is_state('input_datetime.inverter_charging_schedule_end', 'unknown')
+            not is_state('input_datetime.inverter_charging_schedule_2_start', 'unknown') and
+            not is_state('input_datetime.inverter_charging_schedule_2_end', 'unknown')
         }}
     action:
       - service: script.apply_charging_schedule
@@ -148,8 +152,8 @@ automation:
             {% else %}
               0
             {% endif %}
-          start_time_2: "{{ states('input_datetime.inverter_charging_2_schedule_start') | replace('unknown','00:00') }}"
-          end_time_2: "{{ states('input_datetime.inverter_charging_2_schedule_end') | replace('unknown','00:00') }}"
+          start_time_2: "{{ states('input_datetime.inverter_charging_schedule_2_start') | replace('unknown','00:00') }}"
+          end_time_2: "{{ states('input_datetime.inverter_charging_schedule_2_end') | replace('unknown','00:00') }}"
 
   - id: 7b93d325bfe632a4e890
     alias: Inverter - update battery reserve

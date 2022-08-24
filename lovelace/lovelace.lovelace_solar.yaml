@@ -217,18 +217,6 @@ config:
         secondary_info: last-changed
       - entity: sensor.electricity_general_forecast
       type: entities
-    - content: "{% set wattage = states.sensor\n   | rejectattr('state', 'in', ['unknown',\
-        \ 'unavailable'])\n   | selectattr('attributes.device_class', 'defined')\n\
-        \   | selectattr('attributes.device_class', 'eq', 'power')\n   | selectattr('attributes.unit_of_measurement',\
-        \ 'defined')\n   | selectattr('attributes.unit_of_measurement', 'eq', \"W\"\
-        )\n   | rejectattr('name', 'search', 'Estimate')\n   | rejectattr('name',\
-        \ 'search', 'Inverter')\n   | list\n   %}\n\n{% set total = wattage|map(attribute='state')|map('float')|list|sum\
-        \ / 1000.0|round(3) %}\n{% set meter = (states('sensor.inverter_load_power')|float/1000.0\
-        \ + states('sensor.eagle_200_meter_power_demand')|float) |round(3) %}\n**TOTAL:**\
-        \ {{ total }} kW\n**METER:** {{ meter }} kW\n**Unaccounted:** {{ (meter -\
-        \ total) | round(2) }} kW\n\n{% for s in wattage|sort(attribute='state') %}\n\
-        - {{ s.name}}: {{s.state}} W\n{% endfor %}"
-      type: markdown
     - cards:
       - entity: sensor.eagle_200_meter_power_demand
         max: 5
@@ -337,6 +325,19 @@ config:
       - entity: input_boolean.inverter_charging_schedule_enabled
         name: Enable
       - conditions:
+        - entity: input_boolean.inverter_charging_schedule_2_enabled
+          state: 'on'
+        row:
+          name: Active
+          state: "{{ is_state('input_boolean.inverter_charging_schedule_enabled',\
+            \ 'on') and\n    states('input_number.inverter_charging_schedule_target_soc')\
+            \ | float(default = 0) > states('sensor.inverter_battery_level') | float(default\
+            \ = 0) and\n    not is_state('input_datetime.inverter_charging_schedule_start',\
+            \ 'unknown') and\n    not is_state('input_datetime.inverter_charging_schedule_end',\
+            \ 'unknown')\n}}\n"
+          type: custom:template-entity-row
+        type: conditional
+      - conditions:
         - entity: input_boolean.inverter_charging_schedule_enabled
           state: 'on'
         row:
@@ -364,6 +365,19 @@ config:
         type: section
       - entity: input_boolean.inverter_charging_schedule_2_enabled
         name: Enable
+      - conditions:
+        - entity: input_boolean.inverter_charging_schedule_2_enabled
+          state: 'on'
+        row:
+          name: Active
+          state: "{{ is_state('input_boolean.inverter_charging_schedule_2_enabled',\
+            \ 'on') and\n    states('input_number.inverter_charging_schedule_2_target_soc')\
+            \ | float(default = 0) > states('sensor.inverter_battery_level') | float(default\
+            \ = 0) and\n    not is_state('input_datetime.inverter_charging_schedule_2_start',\
+            \ 'unknown') and\n    not is_state('input_datetime.inverter_charging_schedule_2_end',\
+            \ 'unknown')\n}}\n"
+          type: custom:template-entity-row
+        type: conditional
       - conditions:
         - entity: input_boolean.inverter_charging_schedule_2_enabled
           state: 'on'
