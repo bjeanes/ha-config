@@ -549,7 +549,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 10
+        scan_interval: 1
 
       - name: Inverter active power
         unique_id: a3ee41f78c6c55377c00
@@ -564,7 +564,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 10
+        scan_interval: 1
 
       - name: Inverter reactive power
         unique_id: 5a58fe975877eec6d37c
@@ -611,27 +611,28 @@ modbus:
       #         scale: 100
       #         scan_interval: 10
 
-      #       - name: System state
-      #         slave: 1
-      #         address: 12999
-      #         input_type: input
-      #         count: 1
-      #         data_type: uint16
-      #         swap: word
-      #         precision: 0
-      #         scale: 1
-      #         scan_interval: 10
+      - name: Inverter system state (raw)
+        slave: 1
+        address: 12999
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 0
+        scale: 1
+        scan_interval: 1
 
-      #       - name: Running state
-      #         slave: 1
-      #         address: 13000
-      #         input_type: input
-      #         count: 1
-      #         data_type: uint16
-      #         swap: word
-      #         precision: 0
-      #         scale: 1
-      #         scan_interval: 10
+      # Currently this only ever returns 0x00 over Modbus :/
+      - name: Inverter running state (raw)
+        slave: 1
+        address: 13000
+        input_type: input
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 0
+        scale: 1
+        scan_interval: 1
 
       - name: Inverter PV generation today
         unique_id: 27953d57c315260a7983
@@ -706,7 +707,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 10
+        scan_interval: 1
 
       - name: Inverter export power
         unique_id: 4c3bac29a87561796c06
@@ -721,7 +722,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 10
+        scan_interval: 1
 
       - name: Inverter battery charge from PV today
         unique_id: d496459e40e0d49f5c11
@@ -814,7 +815,7 @@ modbus:
         device_class: current
         state_class: measurement
         scale: 0.1
-        scan_interval: 10
+        scan_interval: 1
 
       - name: Inverter battery power (raw)
         unique_id: 4f7dacbf06d004b547d9
@@ -829,7 +830,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 10
+        scan_interval: 1
 
       - name: Inverter battery level
         unique_id: 61e9d0508f0e75a3f25c
@@ -902,6 +903,7 @@ modbus:
         scale: 0.1
         scan_interval: 10
 
+      # NOTE: this is broken over modbus and only ever returns 0x00
       #       - name: Grid state raw
       #         slave: 1
       #         address: 13029
@@ -1031,52 +1033,52 @@ modbus:
       #   precision: 0
       #   scan_interval: 60
 
-#       - name: Battery Charge Discharge Power
-#         slave: 1
-#         address: 13051 # 13052
-#         input_type: holding
-#         count: 1
-#         data_type: uint16
-#         swap: word
-#         precision: 0
-#         # datasheet says:
-#         # 0 to 5000 W for SH*K-*
-#         # 0 to 100 % for SH*.0RT
-#         # for my SH10RT it is set in W...
-#         unit_of_measurement: W
-#         device_class: power
-#         state_class: measurement
-#         scan_interval: 10
+      - name: Inverter battery forced charge/discharge power
+        slave: 1
+        address: 13051 # 13052
+        input_type: holding
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 0
+        # datasheet says:
+        # 0 to 5000 W for SH*K-*
+        # 0 to 100 % for SH*.0RT
+        # for my SH10RT it is set in W...
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+        scan_interval: 10
 
-# - name: Inverter max SoC
-#   unique_id: c602a1446bddc9d6fa7a
-#   slave: 1
-#   address: 13057 # 13058
-#   input_type: holding
-#   count: 1
-#   data_type: uint16
-#   swap: word
-#   precision: 1
-#   unit_of_measurement: "%"
-#   device_class: battery
-#   state_class: measurement
-#   scale: 0.1
-#   scan_interval: 60
+      - name: Inverter max SoC
+        unique_id: c602a1446bddc9d6fa7a
+        slave: 1
+        address: 13057 # 13058
+        input_type: holding
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 60
 
-# - name: Inverter min SoC
-#   unique_id: 61a08ee663d37248f372
-#   slave: 1
-#   address: 13058 # 13059
-#   input_type: holding
-#   count: 1
-#   data_type: uint16
-#   swap: word
-#   precision: 1
-#   unit_of_measurement: "%"
-#   device_class: battery
-#   state_class: measurement
-#   scale: 0.1
-#   scan_interval: 60
+      - name: Inverter min SoC
+        unique_id: 61a08ee663d37248f372
+        slave: 1
+        address: 13058 # 13059
+        input_type: holding
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 1
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        scale: 0.1
+        scan_interval: 60
 
 # binary_sensor:
 #   - platform: template
@@ -1109,6 +1111,8 @@ sensor:
           {% set power = states('sensor.inverter_battery_power_raw') %}
           {% if 'unavailable' in [current, power] %}
             unavailable
+          {% elif 'unknown' in [current, power] %}
+            unknown
           {% elif current|float < 0.0 and power|float > 0.0 %}
             {{ -1 * power | float }}
           {% else %}
@@ -1116,35 +1120,37 @@ sensor:
           {% endif %}
         unit_of_measurement: W
         device_class: power
-#       sungrow_inverter_state:
-#         # Inverter States from modbus reference manual
-#         friendly_name: "Sungrow Inverter State"
-#         value_template: >-
-#           {% if ((states('sensor.system_state') | int(default=0)) == 0x0002) %}
-#             Stop
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0008) %}
-#             Standby
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0010) %}
-#             Initial Standby
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0020) %}
-#             Startup
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0040) %}
-#             Running
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0100) %}
-#             Fault
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0400) %}
-#             Maintain mode
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x0800) %}
-#             Forced mode
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x1000) %}
-#             Off-grid mode
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x2501) %}
-#             Restarting
-#           {% elif ((states('sensor.system_state') | int(default=0)) == 0x4000) %}
-#             External EMS mode
-#           {% else %}
-#             Unknown - should not see me!
-#           {% endif %}
+      inverter_state:
+        # Inverter States from modbus reference manual
+        friendly_name: "Inverter state"
+        value_template: >-
+          {% if ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x0002) %}
+            Stop
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x0008) %}
+            Standby
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x0010) %}
+            Initial Standby
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x0020) %}
+            Startup
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x0040) %}
+            Running
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x0100) %}
+            Fault
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x0400) %}
+            Maintain mode
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x0800) %}
+            Forced mode
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x8200) %}
+            Dispatch running {# what even is this? #}
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x1000) %}
+            Off-grid mode
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x2501) %}
+            Restarting
+          {% elif ((states('sensor.inverter_system_state_raw') | int(default=0)) == 0x4000) %}
+            External EMS mode
+          {% else %}
+            unknown {#- should not see this #}
+          {% endif %}
 
 #       sungrow_grid_state:
 #         friendly_name: "Sungrow Grid State"

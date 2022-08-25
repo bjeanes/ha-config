@@ -95,6 +95,10 @@ config:
         type: entities
       title: Battery
       type: custom:stack-in-card
+    - entities:
+      - entity: sensor.inverter_state
+      - entity: sensor.inverter_system_state_raw
+      type: entities
     icon: mdi:solar-power-variant
     theme: Backend-selected
     title: Solar

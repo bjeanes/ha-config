@@ -39,17 +39,18 @@ switch:
 automation:
   - id: 964db306d8b009f8f640
     alias: Power NAS/Tumtum according to sleep
+    mode: restart # so we only do latest
     trigger:
       - platform: template
         value_template: |
-          {{ is_state('sensor.everyone_in_bed', 'on') and states('sensor.plex_tumtum_tree') | int(default=0) == 0 }}
+          {{ is_state('group.everyone_in_bed', 'on') and states('sensor.plex_tumtum_tree') | int(default=0) == 0 }}
         for:
           minutes: 15
         variables:
           service: switch.turn_off
       - platform: template
         value_template: |
-          {{ is_state('sensor.everyone_in_bed', 'off') }}
+          {{ is_state('group.everyone_in_bed', 'off') }}
         for:
           minutes: 15
         variables:
