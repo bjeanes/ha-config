@@ -29,22 +29,26 @@ config:
     - entities:
       - label: Today
         type: section
-      - entity: sensor.solcast_forecast_today
-        name: Total
-        secondary_info: last-updated
-      - entity: sensor.solcast_forecast_remaining_today
-        name: Remaining
-        secondary_info: last-updated
-      - entity: sensor.solcast_forecast_this_hour
-        format: kilo
-        name: Current hour
-        secondary_info: last-updated
+      - entities:
+        - entity: sensor.solcast_forecast_remaining_today
+          name: remaining
+          secondary_info: last-updated
+        entity: sensor.solcast_forecast_today
+        name: All day
+        state_header: total
         type: custom:multiple-entity-row
-        unit: kWh
-      - entity: sensor.solcast_forecast_next_hour
+      - entities:
+        - entity: sensor.solcast_forecast_this_hour
+          format: kilo
+          name: current
+          secondary_info: last-updated
+          type: custom:multiple-entity-row
+          unit: kWh
+        entity: sensor.solcast_forecast_next_hour
         format: kilo
-        name: Next hour
+        name: Hourly
         secondary_info: last-updated
+        state_header: next
         type: custom:multiple-entity-row
         unit: kWh
       - label: Tomorrow
@@ -88,10 +92,22 @@ config:
           name: Level
         - entity: sensor.inverter_battery_health
           name: Health
-        - entity: sensor.inverter_battery_charge_today
-          name: Total daily charge
-        - entity: sensor.inverter_battery_discharge_today
-          name: Total daily discharge
+        - label: Energy
+          type: section
+        - entities:
+          - entity: sensor.inverter_battery_charge_today
+            name: charged
+          entity: sensor.inverter_battery_discharge_today
+          name: Today
+          state_header: disharged
+          type: custom:multiple-entity-row
+        - entities:
+          - entity: sensor.inverter_battery_charge_total
+            name: charged
+          entity: sensor.inverter_battery_discharge_total
+          name: All time
+          state_header: disharged
+          type: custom:multiple-entity-row
         type: entities
       title: Battery
       type: custom:stack-in-card
@@ -329,7 +345,7 @@ config:
       - entity: input_boolean.inverter_charging_schedule_enabled
         name: Enable
       - conditions:
-        - entity: input_boolean.inverter_charging_schedule_2_enabled
+        - entity: input_boolean.inverter_charging_schedule_enabled
           state: 'on'
         row:
           name: Active

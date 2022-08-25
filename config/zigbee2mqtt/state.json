@@ -8,7 +8,7 @@
         "linkquality": 215
     },
     "0x00158d0008091c32": {
-        "contact": false,
+        "contact": true,
         "voltage": 2995,
         "battery": 41,
         "temperature": 19,
