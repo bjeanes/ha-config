@@ -198,6 +198,7 @@ config:
         - state: unavailable
         - state: unknown
         - entity_id: /vacuum.*attached/
+        - entity_id: /inverter_.*_soc/
         include:
         - attributes:
             device_class: moisture
@@ -264,6 +265,8 @@ config:
           state: '> 70'
         - attributes:
             device_class: update
+          not:
+            entity_id: /ikea_remote/
           state: 'on'
         - domain: update
           state: 'on'

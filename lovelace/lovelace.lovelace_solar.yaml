@@ -32,7 +32,6 @@ config:
       - entities:
         - entity: sensor.solcast_forecast_remaining_today
           name: remaining
-          secondary_info: last-updated
         entity: sensor.solcast_forecast_today
         name: All day
         state_header: total
@@ -41,13 +40,11 @@ config:
         - entity: sensor.solcast_forecast_this_hour
           format: kilo
           name: current
-          secondary_info: last-updated
           type: custom:multiple-entity-row
           unit: kWh
         entity: sensor.solcast_forecast_next_hour
         format: kilo
         name: Hourly
-        secondary_info: last-updated
         state_header: next
         type: custom:multiple-entity-row
         unit: kWh
@@ -55,7 +52,6 @@ config:
         type: section
       - entity: sensor.solcast_forecast_tomorrow
         name: Total
-        secondary_info: last-updated
       - label: Peak hour
         type: section
       - entities:
