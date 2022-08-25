@@ -115,6 +115,25 @@ config:
       - entity: sensor.inverter_state
       - entity: sensor.inverter_system_state_raw
       type: entities
+    - entities:
+      - entity: sensor.inverter_state
+        name: State
+      - entity: binary_sensor.inverter_inverter_load_active
+        name: Load active
+      - entity: binary_sensor.inverter_inverter_generating_pv
+        name: Generating PV
+      - entity: binary_sensor.inverter_inverter_battery_charging
+        name: Charging
+      - entity: binary_sensor.inverter_inverter_battery_discharging
+        name: Discharging
+      - entity: binary_sensor.inverter_inverter_charging_from_grid
+        name: Grid -> battery
+      - entity: binary_sensor.inverter_inverter_feeding_into_grid
+        name: Importing
+      - entity: binary_sensor.inverter_inverter_importing_from_grid
+        name: Exporting
+      hours_to_show: 3
+      type: history-graph
     icon: mdi:solar-power-variant
     theme: Backend-selected
     title: Solar
