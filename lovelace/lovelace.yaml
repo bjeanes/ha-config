@@ -640,6 +640,16 @@ config:
       show_zoom: true
       type: custom:bom-radar-card
       zoom_level: 8
+    - entities:
+      - entity: sun.sun
+      - entity: weather.home_weather
+      - entity: sensor.home_weather_condition
+      - entity: sensor.home_weather_forecast_condition
+      - entity: weather.home
+      - entity: weather.home_hourly
+      - entity: sensor.home_weather_cloud_coverage
+      - entity: sensor.home_weather_forecast_cloud_coverage
+      type: history-graph
     icon: hass:thermometer
     path: climate
     title: Climate

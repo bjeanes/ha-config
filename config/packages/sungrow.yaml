@@ -174,6 +174,59 @@ automation:
           reserved_percentage: >-
             {{ states('input_number.inverter_battery_reserve') | int }}
 
+  # The inverter can only generate 5kW of AC power. IFF the battery is not-full, it can generate 5kW of AC _and_ charge
+  # battery at up to 6.6kW, which saturates our 8.46 kW of PV
+  #
+  # So, preventing the battery from getting full too early on a sunny day will increase our overall yield, because the
+  # inverter won't have to derate the PV power to 5kW.
+  #
+  # Possible approaches:
+  #
+  # 1. Set general charge/discharge limits or start power for charging from PV[1][2]
+  #    Unfortunately, it seems like these registers don't work on my inverter SH5.0RS, so this avenue is out.
+  # 2. When PV is >5.0kW and battery is not full (but not too low), set forced charging mode and set the charging power
+  #    to be `PV power - 5.0kW` to maintain 5kW of AC constantly. Unfortunately, forced charge/discharge power register
+  #    (13052) can't be set over Modbus (just ignored). So this option is out _at least until_ this is fixed or I have a
+  #    way to programmatically set this using the SunGather HTTP method (i.e. WiNet-S)
+  # 3. Set battery mode to Stop when all of:
+  #     * Cloud cover is low / weather is sunny
+  #     * PV power is higher than household demand (by some margin, like 1.5x to minimise grid buying)
+  #     * battery is not too low nor full
+  #     * the forecast has enough remaining in the day to fill battery AND cover remaining household usage (or a proxy
+  #       for this like, `forecast > 2*kWh_till_battery_full`)
+  #
+  # [1]: https://discord.com/channels/936031869001158666/1008992991643455529
+  # [2]: https://discord.com/channels/936031869001158666/936031869001158669/1011882768021590036
+  - id: 05bdc8eb58714c26c2fe
+    alias: Inverter - maximise output
+    mode: restart
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.inverter_pv_power
+        above: 4900
+        for:
+          minutes: 1
+      - platform: numeric_state
+        entity_id:
+          - sensor.inverter_battery_level
+          - sensor.inverter_active_power
+          - sensor.home_weather_cloud_coverage
+          - sensor.home_weather_forecast_cloud_coverage
+          - sensor.solcast_forecast_remaining_today
+      - platform: state
+        entity_id:
+          - sensor.home_weather_forecast_condition
+          - sensor.home_weather_condition
+          - weather.home
+          - weather.home_hourly
+          - weather.home_weather
+    variables:
+      kwh_until_full: >
+        {{ 12.8 * (1.0/(100 - states('sensor.inverter_battery_level') | float)) }}
+    condition:
+      - "{{ }}"
+    action: []
+
 script:
   inverter_set_battery_reserve:
     alias: "Set inverter battery reserve"
