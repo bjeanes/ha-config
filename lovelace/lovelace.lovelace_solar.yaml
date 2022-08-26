@@ -493,7 +493,8 @@ config:
         hours_to_show: 1
         type: logbook
       filter:
-        exclude: []
+        exclude:
+        - entity_id: /maximise_output/
         include:
         - domain: automation
           name: /[Ii]nverter/

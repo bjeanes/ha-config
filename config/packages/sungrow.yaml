@@ -230,15 +230,17 @@ automation:
       should_slow_battery: >
         {{ states('sensor.inverter_pv_power')     | float > 5100 and
            states('sensor.inverter_active_power') | float < 4200 }}
+      enough_in_day: >
+        {{2*kwh_until_full < states('sensor.solcast_forecast_remaining_today') | float}}
     condition: []
     action:
       - choose:
           - conditions:
-              - "{{ should_slow_battery and not sunsetting and 2*kwh_until_full < states('sensor.solcast_forecast_remaining_today') | float }}"
+              - "{{ should_slow_battery and not sunsetting and enough_in_day }}"
             sequence:
-              - service: script.inverter_force_battery_charge
+              - service: script.inverter_force_battery_charge # with low charge rate -- which i have to manually set for now
           - conditions:
-              - "{{ states('sensor.inverter_pv_power') | float < 4900 }}"
+              - "{{ states('sensor.inverter_pv_power') | float < 4900 or not enough_in_day or sunsetting }}"
             sequence:
               - service: script.inverter_self_consumption
         default: []
