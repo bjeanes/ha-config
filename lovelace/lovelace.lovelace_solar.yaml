@@ -305,6 +305,8 @@ config:
         - name: /Eagle-200/
         - name: /Estimated Power Production/
         - state: unavailable
+        - entity_id: /inverter/
+        - entity_id: /demand/
         include:
         - attributes:
             device_class: power
@@ -347,12 +349,35 @@ config:
         - entity_id: /battery/
         - entity_id: /dht/
         - entity_id: /ble_voltage/
+        - entity_id: /mppt/
         include:
         - entity_id: /voltage/
       type: custom:auto-entities
     - entities:
       - sensor.co2_intensity
       type: history-graph
+    - card:
+        type: entities
+      filter:
+        exclude:
+        - name: /UPS/
+        - name: /Eagle-200/
+        - name: /Estimated Power Production/
+        - state: unavailable
+        - entity_id: /inverter/
+        - entity_id: /demand/
+        include:
+        - attributes:
+            device_class: power
+        - attributes:
+            unit_of_measurement: kW
+        - attributes:
+            unit_of_measurement: W
+      sort:
+        method: state
+        reverse: true
+      type: custom:auto-entities
+      unique: true
     icon: hass:lightning-bolt
     path: power
     title: Electricity
