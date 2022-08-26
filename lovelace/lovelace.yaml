@@ -747,3 +747,24 @@ config:
     path: bathroom
     theme: Backend-selected
     title: Bathroom
+  - badges: []
+    cards:
+    - card:
+        type: entities
+      filter:
+        exclude: []
+        include:
+        - entity_id: /teyes/
+        - device: /Teyes/
+      type: custom:auto-entities
+      unique: true
+    - aspect_ratio: '16:9'
+      auto_fit: true
+      entities:
+      - entity: device_tracker.teyes_cc3
+      hours_to_show: 12
+      type: map
+    icon: mdi:car
+    path: car
+    theme: Backend-selected
+    title: Car
