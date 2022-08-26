@@ -477,6 +477,12 @@ config:
         secondary_info: last-triggered
         toggle: true
         type: custom:multiple-entity-row
+      - entity: automation.inverter_maximise_output
+        icon: mdi:arrow-up-box
+        name: Maximise output
+        secondary_info: last-triggered
+        toggle: true
+        type: custom:multiple-entity-row
       - entity: automation.update_pvoutput
         icon: mdi:solar-power-variant-outline
         name: Send to PVOutput
@@ -494,6 +500,15 @@ config:
         - domain: script
           name: /[Ii]nverter/
       type: custom:auto-entities
+    - entities:
+        battery: sensor.inverter_battery_power
+        battery_charge: sensor.inverter_battery_level
+        grid: sensor.inverter_grid_power_demand
+        solar: sensor.inverter_pv_power
+      kw_decimals: 2
+      type: custom:power-flow-card
+      w_decimals: 0
+      watt_threshold: 900
     icon: mdi:wrench
     path: configure
     theme: Backend-selected

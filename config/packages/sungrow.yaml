@@ -206,26 +206,42 @@ automation:
         above: 4900
         for:
           minutes: 1
-      - platform: numeric_state
+      - platform: state
         entity_id:
           - sensor.inverter_battery_level
           - sensor.inverter_active_power
           - sensor.home_weather_cloud_coverage
           - sensor.home_weather_forecast_cloud_coverage
           - sensor.solcast_forecast_remaining_today
-      - platform: state
-        entity_id:
-          - sensor.home_weather_forecast_condition
-          - sensor.home_weather_condition
-          - weather.home
-          - weather.home_hourly
-          - weather.home_weather
+          # - sensor.home_weather_forecast_condition
+          # - sensor.home_weather_condition
+          # - weather.home
+          - weather.home_hourly # can use attributes on this one to make decisions about the coming hours
+          # - weather.home_weather
+          - sun.sun # use `next_setting` attribute to ensure battery is online at least an hour before sunset
+        not_to:
+          - unavailable
+          - unknown
     variables:
       kwh_until_full: >
-        {{ 12.8 * (1.0/(100 - states('sensor.inverter_battery_level') | float)) }}
-    condition:
-      - "{{ }}"
-    action: []
+        {{ 12.8 * ((100 - states('sensor.inverter_battery_level') | float)/100) }}
+      sunsetting: >
+        {{ now() + timedelta(hours = 1) > state_attr('sun.sun', 'next_setting')| as_datetime }}
+      should_slow_battery: >
+        {{ states('sensor.inverter_pv_power')     | float > 5100 and
+           states('sensor.inverter_active_power') | float < 4200 }}
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - "{{ should_slow_battery and not sunsetting and 2*kwh_until_full < states('sensor.solcast_forecast_remaining_today') | float }}"
+            sequence:
+              - service: script.inverter_force_battery_charge
+          - conditions:
+              - "{{ states('sensor.inverter_pv_power') | float < 4900 }}"
+            sequence:
+              - service: script.inverter_self_consumption
+        default: []
 
 script:
   inverter_set_battery_reserve:
@@ -602,7 +618,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 1
+        scan_interval: 5
 
       - name: Inverter active power
         unique_id: a3ee41f78c6c55377c00
@@ -617,7 +633,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 1
+        scan_interval: 5
 
       - name: Inverter reactive power
         unique_id: 5a58fe975877eec6d37c
@@ -673,7 +689,7 @@ modbus:
         swap: word
         precision: 0
         scale: 1
-        scan_interval: 1
+        scan_interval: 5
 
       # Currently this only ever returns 0x00 over Modbus :/
       - name: Inverter running state (raw)
@@ -685,7 +701,7 @@ modbus:
         swap: word
         precision: 0
         scale: 1
-        scan_interval: 1
+        scan_interval: 5
 
       - name: Inverter PV generation today
         unique_id: 27953d57c315260a7983
@@ -760,7 +776,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 1
+        scan_interval: 5
 
       - name: Inverter export power
         unique_id: 4c3bac29a87561796c06
@@ -775,7 +791,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 1
+        scan_interval: 5
 
       - name: Inverter battery charge from PV today
         unique_id: d496459e40e0d49f5c11
@@ -868,7 +884,7 @@ modbus:
         device_class: current
         state_class: measurement
         scale: 0.1
-        scan_interval: 1
+        scan_interval: 5
 
       - name: Inverter battery power (raw)
         unique_id: 4f7dacbf06d004b547d9
@@ -883,7 +899,7 @@ modbus:
         device_class: power
         state_class: measurement
         scale: 1
-        scan_interval: 1
+        scan_interval: 5
 
       - name: Inverter battery level
         unique_id: 61e9d0508f0e75a3f25c
