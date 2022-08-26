@@ -2,6 +2,7 @@
 
 utility_meter:
   monthly_energy_import:
+    unique_id: 45592bcec26dce9610a2
     source: sensor.eagle_200_total_meter_energy_delivered
     name: Energy imported
     cycle: monthly
@@ -10,6 +11,7 @@ utility_meter:
       - offpeak
 
   daily_energy_import:
+    unique_id: 369a60ac77147745dc93
     source: sensor.eagle_200_total_meter_energy_delivered
     name: Energy imported
     cycle: daily
@@ -18,11 +20,13 @@ utility_meter:
       - offpeak
 
   monthly_energy_export:
+    unique_id: f1ad1161d984e5318715
     source: sensor.eagle_200_total_meter_energy_received
     name: Energy exported
     cycle: monthly
 
   daily_energy_export:
+    unique_id: 327f806728f2d087e8e5
     source: sensor.eagle_200_total_meter_energy_received
     name: Energy exported
     cycle: daily
@@ -83,36 +87,6 @@ rest_command:
     content_type: "application/x-www-form-urlencoded"
 
 sensor:
-  #   entity_id: sensor.inverter_grid_power_demand
-  #   state_characteristic: average_linear
-  #   max_age: "00:05"
-  # - platform: statistics
-  #   name: "Eagle-200 meter power demand (smooth)"
-  #   unique_id: 5596672fba54c89c2131
-  #   entity_id: sensor.eagle_200_meter_power_demand_w
-  #   state_characteristic: average_linear
-  #   max_age: "00:05"
-
-  # - platform: filter
-  #   name: "Inverter grid power demand (smooth)"
-  #   unique_id: 88bfc3a211f1540c90cf
-  #   entity_id: sensor.inverter_grid_power_demand
-  #   filters:
-  #     - filter: lowpass
-  #       time_constant: 30
-  #     - filter: time_simple_moving_average
-  #       window_size: "00:02"
-
-  # - platform: filter
-  #   name: "Eagle-200 meter power demand (smooth)"
-  #   unique_id: 5596672fba54c89c2131
-  #   entity_id: sensor.eagle_200_meter_power_demand_w
-  #   filters:
-  #     - filter: lowpass
-  #       time_constant: 30
-  #     - filter: time_simple_moving_average
-  #       window_size: "00:02"
-
   - platform: template
     sensors:
       # energy_import_price:
@@ -148,49 +122,6 @@ sensor:
           {{ iif(states('sensor.inverter_export_power') | float == 0, 0, -1 * states('sensor.inverter_export_power') | float) }}
         unit_of_measurement: W
         device_class: power
-
-      household_power_demand:
-        unique_id: c596e6b17b53069d1e9f
-        friendly_name: Household power demand
-        unit_of_measurement: W
-        device_class: power
-        value_template: >-
-          {{ states('sensor.inverter_active_power') | float +
-               states('sensor.eagle_200_meter_power_demand_w') | float }}
-
-      inverter_load_gap:
-        unique_id: c6a037b515944aeb1b67
-        friendly_name: Inverter load gap
-        value_template: >-
-          {{ states('sensor.inverter_load_power') | float - (
-                states('sensor.inverter_active_power') | float +
-                states('sensor.eagle_200_meter_power_demand_w') | float
-              ) }}
-        unit_of_measurement: W
-        device_class: power
-
-      inverter_demand_gap:
-        unique_id: 534503cd38944c345a6a
-        friendly_name: Inverter demand gap
-        value_template: >-
-          {{ (states('sensor.eagle_200_meter_power_demand_w') | float) -
-             (-1 * states('sensor.inverter_export_power') | float) }}
-        unit_of_measurement: W
-        device_class: power
-
-      inverter_demand_gap_perc:
-        unique_id: 12b4d474286fab17319d
-        friendly_name: Inverter demand gap %
-        value_template: >-
-          {{ 100 * (-1 * states('sensor.inverter_export_power') | float) / (states('sensor.eagle_200_meter_power_demand_w') | float) }}
-        unit_of_measurement: "%"
-
-      # inverter_demand_gap_perc_smooth:
-      #   unique_id: ad811b463d9a0a332c62
-      #   friendly_name: Inverter demand gap % (smooth)
-      #   value_template: >-
-      #     {{ 100 * states('sensor.inverter_grid_power_demand_smooth') | float / states('sensor.eagle_200_meter_power_demand_smooth') | float }}
-      #   unit_of_measurement: "%"
 
       current_electricity_cost:
         unique_id: current_electricity_cost

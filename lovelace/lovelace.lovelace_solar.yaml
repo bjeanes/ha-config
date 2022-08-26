@@ -65,6 +65,42 @@ config:
         unit: kWh
       title: Forecast
       type: entities
+    - entities:
+      - entities:
+        - entity: sensor.daily_energy_export
+          format: precision1
+          name: export
+        - entity: sensor.daily_energy_import_peak
+          format: precision1
+          name: peak
+        entity: sensor.daily_energy_import_offpeak
+        format: precision1
+        name: Today
+        state_header: offpeak
+        type: custom:multiple-entity-row
+      - entities:
+        - entity: sensor.monthly_energy_export
+          format: precision1
+          name: export
+        - entity: sensor.monthly_energy_import_peak
+          format: precision1
+          name: peak
+        entity: sensor.monthly_energy_import_offpeak
+        format: precision1
+        name: Cycle
+        state_header: offpeak
+        type: custom:multiple-entity-row
+      - entities:
+        - entity: sensor.eagle_200_total_meter_energy_received
+          format: precision1
+          name: exported
+        entity: sensor.eagle_200_total_meter_energy_delivered
+        format: precision1
+        name: Eagle-200 (all time)
+        state_header: imported
+        type: custom:multiple-entity-row
+      title: Trading
+      type: entities
     - cards:
       - entities:
         - entity: sensor.inverter_battery_level
