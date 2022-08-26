@@ -14,17 +14,8 @@ config:
         watt_threshold: 900
       - link_dashboard: true
         type: energy-distribution
-      - entities:
-        - entity: sensor.inverter_active_power
-          name: Active (AC) power
-          secondary_info: last-updated
+      - entities: []
         type: entities
-      - entities:
-        - entity: sensor.inverter_active_power
-          name: Active power
-          secondary_info: last-updated
-        hours_to_show: 6
-        type: history-graph
       type: custom:stack-in-card
     - entities:
       - label: Today
@@ -107,29 +98,6 @@ config:
         type: entities
       title: Battery
       type: custom:stack-in-card
-    - entities:
-      - entity: sensor.inverter_state
-      - entity: sensor.inverter_system_state_raw
-      type: entities
-    - entities:
-      - entity: sensor.inverter_state
-        name: State
-      - entity: binary_sensor.inverter_inverter_load_active
-        name: Load active
-      - entity: binary_sensor.inverter_inverter_generating_pv
-        name: Generating PV
-      - entity: binary_sensor.inverter_inverter_battery_charging
-        name: Charging
-      - entity: binary_sensor.inverter_inverter_battery_discharging
-        name: Discharging
-      - entity: binary_sensor.inverter_inverter_charging_from_grid
-        name: Grid -> battery
-      - entity: binary_sensor.inverter_inverter_feeding_into_grid
-        name: Importing
-      - entity: binary_sensor.inverter_inverter_importing_from_grid
-        name: Exporting
-      hours_to_show: 3
-      type: history-graph
     icon: mdi:solar-power-variant
     theme: Backend-selected
     title: Solar
@@ -501,15 +469,20 @@ config:
         - domain: script
           name: /[Ii]nverter/
       type: custom:auto-entities
-    - entities:
-        battery: sensor.inverter_battery_power
-        battery_charge: sensor.inverter_battery_level
-        grid: sensor.inverter_grid_power_demand
-        solar: sensor.inverter_pv_power
-      kw_decimals: 2
-      type: custom:power-flow-card
-      w_decimals: 0
-      watt_threshold: 900
+    - cards:
+      - entities:
+          battery: sensor.inverter_battery_power
+          battery_charge: sensor.inverter_battery_level
+          grid: sensor.inverter_grid_power_demand
+          solar: sensor.inverter_pv_power
+        kw_decimals: 2
+        type: custom:power-flow-card
+        w_decimals: 0
+        watt_threshold: 900
+      - entities:
+        - sensor.inverter_active_power
+        type: entities
+      type: custom:stack-in-card
     icon: mdi:wrench
     path: configure
     theme: Backend-selected
@@ -525,20 +498,18 @@ config:
           name: PV Power
           secondary_info: last-updated
         - entity: sensor.inverter_load_power
-          name: Load power (inverter claimed)
-          secondary_info: last-updated
-        - entity: sensor.household_power_demand
-          name: Actual load
+          name: Load power
           secondary_info: last-updated
         - entity: sensor.inverter_battery_power
           name: Battery power
           secondary_info: last-updated
-        - entity: sensor.inverter_grid_power_demand
-          name: Grid demand (inverter)
-          secondary_info: last-updated
-        - entity: sensor.eagle_200_meter_power_demand_w
-          name: Grid demand (meter)
-          secondary_info: last-updated
+        - entities:
+          - entity: sensor.eagle_200_meter_power_demand_w
+            name: meter
+          entity: sensor.inverter_grid_power_demand
+          name: Grid demand
+          state_header: inverter
+          type: custom:multiple-entity-row
         type: entities
       - entities:
         - entity: sensor.inverter_grid_power_demand
@@ -559,14 +530,30 @@ config:
           name: Power
         type: history-graph
       - entities:
-        - sensor.inverter_battery_power
-        - sensor.inverter_battery_level
-        - sensor.inverter_battery_current
-        - sensor.inverter_battery_voltage
-        - sensor.inverter_battery_temperature
-        - sensor.inverter_battery_health
-        - sensor.inverter_battery_charge_today
-        - sensor.inverter_battery_discharge_today
+        - entities:
+          - entity: sensor.inverter_battery_current
+            name: current
+          - entity: sensor.inverter_battery_voltage
+            name: voltage
+          entity: sensor.inverter_battery_power
+          format: kilo
+          name: Power
+          state_header: wattage
+          type: custom:multiple-entity-row
+          unit: kW
+        - entity: sensor.inverter_battery_level
+          name: Level
+        - entity: sensor.inverter_battery_temperature
+          name: Temperature
+        - entity: sensor.inverter_battery_health
+          name: Health
+        - entities:
+          - entity: sensor.inverter_battery_charge_today
+            name: charged
+          entity: sensor.inverter_battery_discharge_today
+          name: Total today
+          state_header: discharged
+          type: custom:multiple-entity-row
         type: entities
       title: Battery
       type: custom:stack-in-card
@@ -611,6 +598,46 @@ config:
         type: history-graph
       title: Grid
       type: custom:stack-in-card
+    - cards:
+      - entities:
+        - entity: sensor.inverter_pv_power
+          name: PV Power
+        - entities:
+          - entity: sensor.inverter_mppt1_voltage
+            name: Voltage
+          entity: sensor.inverter_mppt1_current
+          name: MPPT1
+          state_header: Current
+          type: custom:multiple-entity-row
+        - entities:
+          - entity: sensor.inverter_mppt2_voltage
+            name: Voltage
+          entity: sensor.inverter_mppt2_current
+          name: MPPT1
+          state_header: Current
+          type: custom:multiple-entity-row
+        type: entities
+      title: Panels
+      type: custom:stack-in-card
+    - entities:
+      - entity: sensor.inverter_state
+        name: State
+      - entity: binary_sensor.inverter_inverter_load_active
+        name: Load active
+      - entity: binary_sensor.inverter_inverter_generating_pv
+        name: Generating PV
+      - entity: binary_sensor.inverter_inverter_battery_charging
+        name: Charging
+      - entity: binary_sensor.inverter_inverter_battery_discharging
+        name: Discharging
+      - entity: binary_sensor.inverter_inverter_charging_from_grid
+        name: Grid -> battery
+      - entity: binary_sensor.inverter_inverter_importing_from_grid
+        name: Importing
+      - entity: binary_sensor.inverter_inverter_feeding_into_grid
+        name: Exporting
+      hours_to_show: 3
+      type: history-graph
     icon: mdi:bug-outline
     path: debug
     theme: Backend-selected
