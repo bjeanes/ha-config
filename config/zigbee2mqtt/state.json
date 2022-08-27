@@ -31,7 +31,7 @@
         "battery": 36,
         "temperature": 18,
         "linkquality": 255,
-        "device_temperature": 23,
+        "device_temperature": 25,
         "power_outage_count": 8
     },
     "0x00158d0008091b58": {
@@ -71,7 +71,7 @@
         "battery": 100,
         "sensitivity": "high",
         "keep_time": "120",
-        "illuminance": 304,
+        "illuminance": 8,
         "linkquality": 127
     },
     "0x84b4dbfffe850fda": {
