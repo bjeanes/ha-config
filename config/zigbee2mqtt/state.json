@@ -71,7 +71,7 @@
         "battery": 100,
         "sensitivity": "high",
         "keep_time": "120",
-        "illuminance": 124,
+        "illuminance": 10,
         "linkquality": 127
     },
     "0x84b4dbfffe850fda": {
