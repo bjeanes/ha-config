@@ -26,7 +26,7 @@
         "power_outage_count": 7
     },
     "0x00158d0007e7725b": {
-        "contact": true,
+        "contact": false,
         "voltage": 2975,
         "battery": 36,
         "temperature": 18,
@@ -71,7 +71,7 @@
         "battery": 100,
         "sensitivity": "high",
         "keep_time": "120",
-        "illuminance": 388,
+        "illuminance": 490,
         "linkquality": 127
     },
     "0x84b4dbfffe850fda": {
