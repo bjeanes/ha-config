@@ -18,11 +18,11 @@
     },
     "0x00158d00080915bd": {
         "contact": true,
-        "voltage": 3005,
-        "battery": 44,
+        "voltage": 3015,
+        "battery": 47,
         "temperature": 17,
         "linkquality": 255,
-        "device_temperature": 21,
+        "device_temperature": 20,
         "power_outage_count": 7
     },
     "0x00158d0007e7725b": {
@@ -40,7 +40,7 @@
         "battery": 53,
         "temperature": 12,
         "linkquality": 255,
-        "device_temperature": 20,
+        "device_temperature": 19,
         "power_outage_count": 13
     },
     "0x00158d0007e4c4f2": {
