@@ -40,13 +40,13 @@
         "battery": 50,
         "temperature": 12,
         "linkquality": 255,
-        "device_temperature": 17,
+        "device_temperature": 18,
         "power_outage_count": 13
     },
     "0x00158d0007e4c4f2": {
         "contact": true,
-        "voltage": 2975,
-        "battery": 36,
+        "voltage": 2985,
+        "battery": 39,
         "temperature": 21,
         "linkquality": 255,
         "device_temperature": 25,
@@ -71,7 +71,7 @@
         "battery": 50,
         "sensitivity": "high",
         "keep_time": "120",
-        "illuminance": 376,
+        "illuminance": 634,
         "linkquality": 127
     },
     "0x84b4dbfffe850fda": {
