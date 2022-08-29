@@ -351,7 +351,7 @@ sensor:
     refresh: "5:00:00"
     default_state: "off"
     events:
-      - state: ABC Jazz (Jazz Music) # Default background music
+      - state: PBS # Default background music
         start: "8:00:00"
         end: "21:00:00"
 
