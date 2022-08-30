@@ -23,6 +23,13 @@ sensor:
     away_timeout: 120
 
   - platform: mqtt_room
+    device_id: !secret bos_phone_irk
+    name: Room > Bo > iPhone IRK
+    state_topic: "espresense/rooms"
+    timeout: 30
+    away_timeout: 120
+
+  - platform: mqtt_room
     device_id: "roomAssistant:95397a15-89d3-44f9-be0a-a30e7b2e4381"
     name: Room > Ri > Room Assistant
     state_topic: "espresense/rooms"
@@ -49,6 +56,7 @@ group:
       - sensor.room_bo_room_assistant
       - sensor.room_bo_apple
       - sensor.room_bo_apple_expanded
+      - sensor.room_bo_iphone_irk
   room_ri_phone:
     entities:
       - sensor.room_ri_room_assistant
