@@ -50,6 +50,13 @@ sensor:
     timeout: 30
     away_timeout: 120
 
+  - platform: mqtt_room
+    device_id: !secret ris_phone_irk
+    name: Room > Ri > iPhone (IRK)
+    state_topic: "espresense/rooms"
+    timeout: 30
+    away_timeout: 120
+
 group:
   room_bo_phone:
     entities:
@@ -62,6 +69,7 @@ group:
       - sensor.room_ri_room_assistant
       - sensor.room_ri_apple
       - sensor.room_ri_apple_expanded
+      - sensor.room_ri_iphone_irk
   room_phones:
     entities:
       - sensor.room_bo_phone
