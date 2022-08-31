@@ -13,7 +13,7 @@
         "battery": 44,
         "temperature": 19,
         "linkquality": 255,
-        "device_temperature": 20,
+        "device_temperature": 18,
         "power_outage_count": 8
     },
     "0x00158d00080915bd": {
@@ -40,7 +40,7 @@
         "battery": 50,
         "temperature": 12,
         "linkquality": 255,
-        "device_temperature": 15,
+        "device_temperature": 14,
         "power_outage_count": 13
     },
     "0x00158d0007e4c4f2": {
