@@ -75,6 +75,15 @@ input_number:
     unit_of_measurement: "%"
     mode: box
 
+  inverter_forced_mode_battery_power:
+    name: Inverter forced mode battery power
+    min: 10
+    max: 6600
+    step: 10
+    initial: 2000
+    mode: box
+    unit_of_measurement: "W"
+
 automation:
   - id: e7df7dc23815acacdd8c
     alias: Inverter - apply charging schedule
@@ -173,6 +182,59 @@ automation:
         data_template:
           reserved_percentage: >-
             {{ states('input_number.inverter_battery_reserve') | int }}
+
+  - id: 647fd6b77b7f72f0bf75
+    alias: Inverter - set forced mode battery power
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - input_number.inverter_forced_mode_battery_power
+        not_from:
+          - unknown
+          - unavailable
+        not_to:
+          - unknown
+          - unavailable
+    variables:
+      current_power: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int }}"
+      target_power: "{{ states('input_number.inverter_forced_mode_battery_power') | int }}"
+      target_power_value: "{{ target_power / 10 }}" # undocumented register is in multiples of 10W
+    condition:
+      - "{{ current_power != target_power }}"
+    action:
+      - service: modbus.write_register
+        data_template:
+          # Documented modbus address 13051 is readable but won't write.
+          # address: 13050 # 13051
+
+          # However, there is an undocumented register 33148 which takes a number in multiples of 10W which works.
+          address: 33147 # 33148
+
+          slave: 1
+          value: "{{ [target_power_value] }}"
+          hub: SungrowSHx
+
+  - id: 31fd5a1552832c9a14c9
+    alias: Inverter - update forced mode battery power
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.inverter_battery_forced_charge_discharge_power
+        not_from:
+          - unknown
+          - unavailable
+        not_to:
+          - unknown
+          - unavailable
+    action:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.inverter_forced_mode_battery_power
+        data_template:
+          value: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int }}"
+          hub: SungrowSHx
 
   # The inverter can only generate 5kW of AC power. IFF the battery is not-full, it can generate 5kW of AC _and_ charge
   # battery at up to 6.6kW, which saturates our 8.46 kW of PV

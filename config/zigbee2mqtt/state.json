@@ -9,15 +9,15 @@
     },
     "0x00158d0008091c32": {
         "contact": true,
-        "voltage": 3005,
-        "battery": 44,
+        "voltage": 2995,
+        "battery": 41,
         "temperature": 19,
         "linkquality": 255,
-        "device_temperature": 18,
+        "device_temperature": 21,
         "power_outage_count": 8
     },
     "0x00158d00080915bd": {
-        "contact": true,
+        "contact": false,
         "voltage": 3005,
         "battery": 44,
         "temperature": 17,
@@ -53,7 +53,7 @@
         "power_outage_count": 41
     },
     "0x5c0272fffee93bae": {
-        "occupancy": true,
+        "occupancy": false,
         "tamper": false,
         "battery_low": false,
         "linkquality": 255
@@ -67,11 +67,11 @@
         "linkquality": 191
     },
     "0xa4c138fda4db2c5e": {
-        "occupancy": false,
+        "occupancy": true,
         "battery": 100,
         "sensitivity": "high",
         "keep_time": "120",
-        "illuminance": 874,
+        "illuminance": 826,
         "linkquality": 127
     },
     "0x84b4dbfffe850fda": {
