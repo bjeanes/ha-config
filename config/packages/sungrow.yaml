@@ -234,7 +234,6 @@ automation:
           entity_id: input_number.inverter_forced_mode_battery_power
         data_template:
           value: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int }}"
-          hub: SungrowSHx
 
   # The inverter can only generate 5kW of AC power. IFF the battery is not-full, it can generate 5kW of AC _and_ charge
   # battery at up to 6.6kW, which saturates our 8.46 kW of PV
@@ -263,13 +262,9 @@ automation:
     alias: Inverter - maximise output
     mode: restart
     trigger:
-      - platform: numeric_state
-        entity_id: sensor.inverter_pv_power
-        above: 4900
-        for:
-          minutes: 1
       - platform: state
         entity_id:
+          - sensor.inverter_pv_power
           - sensor.inverter_battery_level
           - sensor.inverter_active_power
           - sensor.home_weather_cloud_coverage
@@ -285,17 +280,48 @@ automation:
           - unavailable
           - unknown
     variables:
+      # Magic numbers
+      ems_self_consume: 0
+      ems_forced: 2
+      battery_charge: 0xAA
+      battery_discharge: 0xBB
+      battery_stop: 0xCC
+      active_power_limit: 4999 # W
+      active_power_buffer: 200 # W - how much below limit we want to sit
+      battery_lower_limit: 50 # %
+      battery_capacity: 12.8 # kWh
+
+      # Shorthands
+      current_active_power: "{{ states('sensor.inverter_active_power') | int }}"
+      current_pv_power: "{{ states('sensor.inverter_pv_power') | int }}"
+      current_ems_mode: "{{ states('sensor.inverter_ems_mode_raw') | int(default=-1) }}"
+      current_battery_mode: "{{ states('sensor.inverter_forced_battery_mode_raw') | int(default=0)  }}"
+      battery_level: "{{ states('sensor.inverter_battery_level') | float }}"
+      forced_battery_power: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int }}"
+      forecast_remaining: "{{ states('sensor.solcast_forecast_remaining_today') | float }}"
+
+      target_active_power: "{{ active_power_limit - active_power_buffer }}"
+      desired_forced_battery_power: 2000
+      is_forced_charging: >
+        {{ current_ems_mode == ems_forced and current_battery_mode == battery_charge }}
+      is_self_consuming: >
+        {{ current_ems_mode == ems_self_consume }}
       kwh_until_full: >
-        {{ 12.8 * ((100 - states('sensor.inverter_battery_level') | float)/100) }}
+        {{ battery_capacity * ((100 - battery_level)/100) }}
+      enough_in_day: >
+        {{2*kwh_until_full < forecast_remaining}}
+      battery_high_enough: "{{ battery_level > battery_lower_limit }}"
       sunsetting: >
         {{ now() + timedelta(hours = 1) > state_attr('sun.sun', 'next_setting')| as_datetime }}
       should_slow_battery: >
         {{ states('sensor.inverter_pv_power')     | float > 5100 and
            states('sensor.inverter_active_power') | float < 4200 }}
-      enough_in_day: >
-        {{2*kwh_until_full < states('sensor.solcast_forecast_remaining_today') | float}}
-    condition: []
     action:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.inverter_forced_mode_battery_power
+        data_template:
+          value: "{{ desired_forced_battery_power }}"
       - choose:
           - conditions:
               - "{{ should_slow_battery and not sunsetting and enough_in_day }}"
@@ -1147,24 +1173,26 @@ modbus:
       #         swap: word
       #         precision: 0
       #         scan_interval: 10
-      #       - name: EMS Mode Selection raw
-      #         slave: 1
-      #         address: 13049 # 13050
-      #         input_type: holding
-      #         count: 1
-      #         data_type: uint16
-      #         swap: word
-      #         scan_interval: 10
-      # - name: Inverter charge command (raw)
-      #   unique_id: d1158bbfa40d73933a72
-      #   slave: 1
-      #   address: 13050 # 13051
-      #   input_type: holding
-      #   count: 1
-      #   data_type: uint16
-      #   swap: word
-      #   precision: 0
-      #   scan_interval: 60
+      - name: Inverter EMS mode (raw)
+        unique_id: e48a4229b845475df29e
+        slave: 1
+        address: 13049 # 13050
+        input_type: holding
+        count: 1
+        data_type: uint16
+        swap: word
+        scan_interval: 10
+
+      - name: Inverter forced battery mode (raw)
+        unique_id: d1158bbfa40d73933a72
+        slave: 1
+        address: 13050 # 13051
+        input_type: holding
+        count: 1
+        data_type: uint16
+        swap: word
+        precision: 0
+        scan_interval: 10
 
       - name: Inverter battery forced charge/discharge power
         slave: 1

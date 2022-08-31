@@ -491,6 +491,10 @@ config:
         entity: script.inverter_force_battery_stop
         icon: mdi:stop
         name: Stop
+      - entity: input_number.inverter_forced_mode_battery_power
+        name: Set forced power
+      - entity: sensor.inverter_battery_forced_charge_discharge_power
+        name: Current forced power
       title: Battery mode
       type: entities
     - entities:
