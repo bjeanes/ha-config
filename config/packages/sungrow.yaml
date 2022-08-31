@@ -241,21 +241,6 @@ automation:
   # So, preventing the battery from getting full too early on a sunny day will increase our overall yield, because the
   # inverter won't have to derate the PV power to 5kW.
   #
-  # Possible approaches:
-  #
-  # 1. Set general charge/discharge limits or start power for charging from PV[1][2]
-  #    Unfortunately, it seems like these registers don't work on my inverter SH5.0RS, so this avenue is out.
-  # 2. When PV is >5.0kW and battery is not full (but not too low), set forced charging mode and set the charging power
-  #    to be `PV power - 5.0kW` to maintain 5kW of AC constantly. Unfortunately, forced charge/discharge power register
-  #    (13052) can't be set over Modbus (just ignored). So this option is out _at least until_ this is fixed or I have a
-  #    way to programmatically set this using the SunGather HTTP method (i.e. WiNet-S)
-  # 3. Set battery mode to Stop when all of:
-  #     * Cloud cover is low / weather is sunny
-  #     * PV power is higher than household demand (by some margin, like 1.5x to minimise grid buying)
-  #     * battery is not too low nor full
-  #     * the forecast has enough remaining in the day to fill battery AND cover remaining household usage (or a proxy
-  #       for this like, `forecast > 2*kWh_till_battery_full`)
-  #
   # [1]: https://discord.com/channels/936031869001158666/1008992991643455529
   # [2]: https://discord.com/channels/936031869001158666/936031869001158669/1011882768021590036
   - id: 05bdc8eb58714c26c2fe
@@ -292,16 +277,21 @@ automation:
       battery_capacity: 12.8 # kWh
 
       # Shorthands
-      current_active_power: "{{ states('sensor.inverter_active_power') | int }}"
-      current_pv_power: "{{ states('sensor.inverter_pv_power') | int }}"
+      current_active_power: "{{ states('sensor.inverter_active_power') | int(default=active_power_limit) }}"
+      current_pv_power: "{{ states('sensor.inverter_pv_power') | int(default=0) }}"
       current_ems_mode: "{{ states('sensor.inverter_ems_mode_raw') | int(default=-1) }}"
       current_battery_mode: "{{ states('sensor.inverter_forced_battery_mode_raw') | int(default=0)  }}"
-      battery_level: "{{ states('sensor.inverter_battery_level') | float }}"
-      forced_battery_power: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int }}"
-      forecast_remaining: "{{ states('sensor.solcast_forecast_remaining_today') | float }}"
+      battery_level: "{{ states('sensor.inverter_battery_level') | float(default=0) }}"
+      forced_battery_power: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int(default=0) }}"
+      forecast_remaining: "{{ states('sensor.solcast_forecast_remaining_today') | float(default=0) }}"
 
       target_active_power: "{{ active_power_limit - active_power_buffer }}"
-      desired_forced_battery_power: 2000
+      desired_forced_battery_power: >
+        {% if current_pv_power > target_active_power %}
+          {{ current_pv_power - target_active_power }}
+        {% else %}
+          10
+        {% endif %}
       is_forced_charging: >
         {{ current_ems_mode == ems_forced and current_battery_mode == battery_charge }}
       is_self_consuming: >
@@ -309,26 +299,29 @@ automation:
       kwh_until_full: >
         {{ battery_capacity * ((100 - battery_level)/100) }}
       enough_in_day: >
-        {{2*kwh_until_full < forecast_remaining}}
+        {{ 2.5 * kwh_until_full < forecast_remaining }}
       battery_high_enough: "{{ battery_level > battery_lower_limit }}"
       sunsetting: >
-        {{ now() + timedelta(hours = 1) > state_attr('sun.sun', 'next_setting')| as_datetime }}
+        {{ now() + timedelta(hours = 1) > state_attr('sun.sun', 'next_setting') | as_datetime }}
       should_slow_battery: >
-        {{ states('sensor.inverter_pv_power')     | float > 5100 and
-           states('sensor.inverter_active_power') | float < 4200 }}
+        {{ not sunsetting and battery_high_enough and enough_in_day }}
     action:
-      - service: input_number.set_value
-        target:
-          entity_id: input_number.inverter_forced_mode_battery_power
-        data_template:
-          value: "{{ desired_forced_battery_power }}"
+      # TODO: discharge battery if too high and PV has dropped while forecast remains high
       - choose:
           - conditions:
-              - "{{ should_slow_battery and not sunsetting and enough_in_day }}"
+              - "{{ should_slow_battery }}"
             sequence:
-              - service: script.inverter_force_battery_charge # with low charge rate -- which i have to manually set for now
+              - service: input_number.set_value
+                target:
+                  entity_id: input_number.inverter_forced_mode_battery_power
+                data_template:
+                  value: "{{ desired_forced_battery_power }}"
+              - condition: "{{ is_self_consuming or not is_forced_charging }}"
+              - service: script.inverter_force_battery_charge
           - conditions:
-              - "{{ states('sensor.inverter_pv_power') | float < 4900 or not enough_in_day or sunsetting }}"
+              - not:
+                  - "{{ should_slow_battery }}"
+                  - "{{ is_self_consuming }}"
             sequence:
               - service: script.inverter_self_consumption
         default: []
