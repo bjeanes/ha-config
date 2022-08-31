@@ -34,3 +34,4 @@ airsonos.xml
 config/solcast.sync-conflict*
 config/solcast.json
 .ssh
+zigbee2mqtt/
