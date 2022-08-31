@@ -274,6 +274,7 @@ automation:
       active_power_limit: 4999 # W
       active_power_buffer: 200 # W - how much below limit we want to sit
       battery_lower_limit: 50 # %
+      battery_upper_limit: 98 # % - above this, let the BMS choose the charge rate
       battery_capacity: 12.8 # kWh
 
       # Shorthands
@@ -281,7 +282,7 @@ automation:
       current_pv_power: "{{ states('sensor.inverter_pv_power') | int(default=0) }}"
       current_ems_mode: "{{ states('sensor.inverter_ems_mode_raw') | int(default=-1) }}"
       current_battery_mode: "{{ states('sensor.inverter_forced_battery_mode_raw') | int(default=0)  }}"
-      battery_level: "{{ states('sensor.inverter_battery_level') | float(default=0) }}"
+      battery_level: "{{ states('sensor.inverter_battery_level') | float(default=100) }}"
       forced_battery_power: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int(default=0) }}"
       forecast_remaining: "{{ states('sensor.solcast_forecast_remaining_today') | float(default=0) }}"
 
@@ -301,10 +302,11 @@ automation:
       enough_in_day: >
         {{ 2.5 * kwh_until_full < forecast_remaining }}
       battery_high_enough: "{{ battery_level > battery_lower_limit }}"
+      battery_too_high: "{{ battery_level >= battery_upper_limit }}"
       sunsetting: >
         {{ now() + timedelta(hours = 1) > state_attr('sun.sun', 'next_setting') | as_datetime }}
       should_slow_battery: >
-        {{ not sunsetting and battery_high_enough and enough_in_day }}
+        {{ not sunsetting and battery_high_enough and enough_in_day and not battery_too_high }}
     action:
       # TODO: discharge battery if too high and PV has dropped while forecast remains high
       - choose:
@@ -320,7 +322,6 @@ automation:
               - service: script.inverter_force_battery_charge
           - conditions:
               - not:
-                  - "{{ should_slow_battery }}"
                   - "{{ is_self_consuming }}"
             sequence:
               - service: script.inverter_self_consumption
