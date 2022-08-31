@@ -44,7 +44,7 @@ automation:
     alias: turn off lights when everyone is in bed
     trigger:
       - platform: state
-        entity_id: binary_sensor.everyone_in_bed
+        entity_id: group.everyone_in_bed
         from: "off"
         to: "on"
         for:

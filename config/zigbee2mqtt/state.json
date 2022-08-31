@@ -26,7 +26,7 @@
         "power_outage_count": 7
     },
     "0x00158d0007e7725b": {
-        "contact": false,
+        "contact": true,
         "voltage": 2975,
         "battery": 36,
         "temperature": 18,
@@ -40,7 +40,7 @@
         "battery": 50,
         "temperature": 12,
         "linkquality": 255,
-        "device_temperature": 11,
+        "device_temperature": 15,
         "power_outage_count": 13
     },
     "0x00158d0007e4c4f2": {
@@ -49,7 +49,7 @@
         "battery": 39,
         "temperature": 21,
         "linkquality": 255,
-        "device_temperature": 22,
+        "device_temperature": 23,
         "power_outage_count": 41
     },
     "0x5c0272fffee93bae": {
