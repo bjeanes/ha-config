@@ -87,7 +87,7 @@ config:
           name: peak
         entity: sensor.monthly_energy_import_offpeak
         format: precision1
-        name: Cycle
+        name: Month
         state_header: offpeak
         type: custom:multiple-entity-row
       - entities:
@@ -475,6 +475,8 @@ config:
       title: Settings
       type: entities
     - entities:
+      - entity: sensor.inverter_battery_mode
+        name: Current
       - action_name: Set
         entity: script.inverter_self_consumption
         icon: mdi:recycle-variant
@@ -516,6 +518,10 @@ config:
         secondary_info: last-triggered
         toggle: true
         type: custom:multiple-entity-row
+      - entity: automation.inverter_maximise_output_new
+        icon: mdi:arrow-up-bold-box-outline
+        name: Maximise output (WIP)
+        secondary_info: last-triggered
       - entity: automation.update_pvoutput
         icon: mdi:solar-power-variant-outline
         name: Send to PVOutput
@@ -534,6 +540,16 @@ config:
         - domain: script
           name: /[Ii]nverter/
       type: custom:auto-entities
+    - card:
+        type: entities
+      filter:
+        include:
+        - entity_id: input_number.inverter_active_power_buffer
+          options:
+            name: Buffer
+        - attributes:
+            solar: 'true'
+      type: custom:auto-entities
     - cards:
       - entities:
           battery: sensor.inverter_battery_power
@@ -545,9 +561,17 @@ config:
         w_decimals: 0
         watt_threshold: 900
       - entities:
-        - sensor.inverter_active_power
+        - entity: sensor.inverter_active_power
+          name: Active Power
+        - entity: sensor.inverter_battery_power
+          name: Battery Power
         type: entities
       type: custom:stack-in-card
+    - entities:
+      - entity: sensor.inverter_target_battery_level
+      - entity: sensor.inverter_battery_level
+      hours_to_show: 6
+      type: history-graph
     icon: mdi:wrench
     path: configure
     theme: Backend-selected
@@ -682,6 +706,19 @@ config:
           state_header: Current
           type: custom:multiple-entity-row
         type: entities
+      - entities:
+        - entity: sensor.inverter_pv_power
+          name: PV Power
+        - entity: sensor.inverter_mppt1_current
+          name: MPPT1 Current
+        - entity: sensor.inverter_mppt2_current
+          name: MPPT2 Current
+        - entity: sensor.inverter_mppt1_voltage
+          name: MPPT1 Voltage
+        - entity: sensor.inverter_mppt2_voltage
+          name: MPPT2 Voltage
+        hours_to_show: 2
+        type: history-graph
       title: Panels
       type: custom:stack-in-card
     - entities:

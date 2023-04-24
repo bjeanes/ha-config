@@ -1,0 +1,359 @@
+automation:
+  # The inverter can only generate 5kW of AC power. IFF the battery is not-full, it can generate 5kW of AC _and_ charge
+  # battery at up to 6.6kW, which saturates our 8.46 kW of PV
+  #
+  # So, preventing the battery from getting full too early on a sunny day will increase our overall yield, because the
+  # inverter won't have to derate the PV power to 5kW.
+  #
+  # [1]: https://discord.com/channels/936031869001158666/1008992991643455529
+  # [2]: https://discord.com/channels/936031869001158666/936031869001158669/1011882768021590036
+  - id: 05bdc8eb58714c26c2fe
+    alias: Inverter - maximise output
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.inverter_pv_power
+          - sensor.inverter_battery_level
+          - sensor.inverter_active_power
+          - sensor.home_weather_cloud_coverage
+          - sensor.home_weather_forecast_cloud_coverage
+          - sensor.solcast_forecast_today
+          - sensor.solcast_forecast_this_hour
+          - sensor.solcast_forecast_remaining_today
+          # - sensor.home_weather_forecast_condition
+          - sensor.home_weather_condition
+          # - weather.home
+          - weather.home_hourly # can use attributes on this one to make decisions about the coming hours
+          # - weather.home_weather
+          - sun.sun # use `next_setting` attribute to ensure battery is online at least an hour before sunset
+        not_to:
+          - unavailable
+          - unknown
+    variables:
+      # Magic numbers
+      ems_self_consume: 0
+      ems_forced: 2
+      battery_charge: 0xAA
+      battery_discharge: 0xBB
+      battery_stop: 0xCC
+      active_power_limit: 4999 # W
+      active_power_buffer: 400 # W - how much below limit we want to sit
+      battery_upper_limit: 99.5 # % - above this, let the BMS choose the charge rate
+      battery_capacity: 12.8 # kWh
+
+      # Shorthands
+      current_active_power: "{{ states('sensor.inverter_active_power') | int(default=active_power_limit) }}"
+      current_pv_power: "{{ states('sensor.inverter_pv_power') | int(default=0) }}"
+      current_load_power: "{{ states('sensor.inverter_load_power') | int(default=current_pv_power) }}"
+      current_ems_mode: "{{ states('sensor.inverter_ems_mode_raw') | int(default=-1) }}"
+      current_battery_mode: "{{ states('sensor.inverter_forced_battery_mode_raw') | int(default=0)  }}"
+      battery_level: "{{ states('sensor.inverter_battery_level') | float(default=100) }}"
+      forced_battery_power: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int(default=0) }}"
+      forecast_total: "{{ states('sensor.solcast_forecast_today') | float(default=0) }}"
+      forecast_remaining: "{{ states('sensor.solcast_forecast_remaining_today') | float(default=0) }}"
+      forecast_hour: "{{ states('sensor.solcast_forecast_this_hour') | float(default=0) / 1000.0 }}"
+      forecast_remaining_pessimistic: "{{ [0, forecast_remaining - forecast_hour] | max }}"
+      # battery_lower_limit: >
+      #   {% if is_state('sensor.home_weather_condition', 'sunny') %}
+      #     {{ 10 }}
+      #   {% elif is_state('sensor.home_weather_condition', 'partlycloudy') %}
+      #     {{ 20 }}
+      #   {% else %}
+      #     {{ 70 }}
+      #   {% endif %}
+      battery_lower_limit: 10 # ignoring above as weather forecast is too unreliable anyway
+      target_active_power: "{{ active_power_limit - active_power_buffer }}"
+      # TODO: make this scale proportionally to how far it is from target battery charge.
+      desired_forced_battery_power: >
+        {% if current_pv_power > target_active_power %}
+          {{ current_pv_power - target_active_power }}
+        {% else %}
+          10
+        {% endif %}
+      is_forced_charging: >
+        {{ current_ems_mode == ems_forced and current_battery_mode == battery_charge }}
+      is_forced_discharging: >
+        {{ current_ems_mode == ems_forced and current_battery_mode == battery_discharge }}
+      is_self_consuming: >
+        {{ current_ems_mode == ems_self_consume }}
+      kwh_until_full: >
+        {{ battery_capacity * ((100 - battery_level)/100) }}
+      enough_in_day: >
+        {{ 2.5 * kwh_until_full < forecast_remaining_pessimistic }}
+      generating_more_than_usage: >
+        {{ current_pv_power > (1.5 * current_load_power) }}
+      # target_battery_level: >
+      #   {{ [[battery_lower_limit, 100.0 * (1.0 - (forecast_remaining_pessimistic/forecast_total)) | round(2)] | max, 100] | min }}
+      target_battery_level: >
+        {% if enough_in_day %}
+          {{ [battery_level - 10, states('input_number.inverter_battery_reserve') | int + 5] | max }}
+        {% else %}
+          {{ [battery_level, states('input_number.inverter_battery_reserve') | int + 5] | max }}
+        {% endif %}
+      battery_high_enough: "{{ battery_level >= target_battery_level }}"
+      battery_too_high: "{{ battery_level >= battery_upper_limit }}"
+      sunsetting: >
+        {{ now() + timedelta(hours = 2) > state_attr('sun.sun', 'next_setting') | as_datetime }}
+      should_slow_battery: >
+        {{
+          not sunsetting
+            and enough_in_day
+            and generating_more_than_usage
+            and battery_high_enough
+            and not battery_too_high
+        }}
+      should_discharge_battery: >
+        {{ should_slow_battery
+          and current_pv_power < (target_active_power - 500)
+          and battery_level < 92
+        }}
+      target_discharge_power: >
+        {{ [10, ((target_active_power - 500) - current_pv_power) | int] | max }}
+    action:
+      # TODO: discharge battery if too high and PV has dropped while forecast remains high
+      - choose:
+          - conditions:
+              - "{{ should_discharge_battery }}"
+            sequence:
+              - service: input_number.set_value
+                target:
+                  entity_id: input_number.inverter_forced_mode_battery_power
+                data_template:
+                  value: "{{ target_discharge_power }}"
+              - condition: "{{ not is_forced_discharging }}"
+              - service: script.inverter_force_battery_discharge
+          - conditions:
+              - "{{ should_slow_battery }}"
+            sequence:
+              - service: input_number.set_value
+                target:
+                  entity_id: input_number.inverter_forced_mode_battery_power
+                data_template:
+                  value: "{{ desired_forced_battery_power }}"
+              - condition: "{{ not is_forced_charging }}"
+              - service: script.inverter_force_battery_charge
+          - conditions:
+              - not:
+                  - "{{ is_self_consuming }}"
+            sequence:
+              - service: script.inverter_self_consumption
+        default: []
+
+  - id: d5fa94e6-772a-4903-882a-4ed8cfd7854e
+    alias: Inverter - maximise output (new)
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.inverter_pv_power
+          - sensor.inverter_battery_level
+          - sensor.inverter_active_power
+          - sensor.home_weather_cloud_coverage
+          - sensor.home_weather_forecast_cloud_coverage
+          - sensor.solcast_forecast_today
+          - sensor.solcast_forecast_this_hour
+          - sensor.solcast_forecast_remaining_today
+          # - sensor.home_weather_forecast_condition
+          - sensor.home_weather_condition
+          # - weather.home
+          - weather.home_hourly # can use attributes on this one to make decisions about the coming hours
+          # - weather.home_weather
+          - sun.sun # use `next_setting` attribute to ensure battery is online at least an hour before sunset
+        not_to:
+          - unavailable
+          - unknown
+    variables:
+      # Magic numbers
+      ems_self_consume: 0
+      ems_forced: 2
+      battery_charge: 0xAA
+      battery_discharge: 0xBB
+      battery_stop: 0xCC
+      active_power_limit: 4999 # W
+      active_power_buffer: 400 # W - how much below limit we want to sit
+      battery_upper_limit: 99.5 # % - above this, let the BMS choose the charge rate
+      battery_capacity: 12.8 # kWh
+
+      # Shorthands
+      current_active_power: "{{ states('sensor.inverter_active_power') | int(default=active_power_limit) }}"
+      current_pv_power: "{{ states('sensor.inverter_pv_power') | int(default=0) }}"
+      current_load_power: "{{ states('sensor.inverter_load_power') | int(default=current_pv_power) }}"
+      current_ems_mode: "{{ states('sensor.inverter_ems_mode_raw') | int(default=-1) }}"
+      current_battery_mode: "{{ states('sensor.inverter_forced_battery_mode_raw') | int(default=0)  }}"
+      battery_level: "{{ states('sensor.inverter_battery_level') | float(default=100) }}"
+      forced_battery_power: "{{ states('sensor.inverter_battery_forced_charge_discharge_power') | int(default=0) }}"
+      forecast_total: "{{ states('sensor.solcast_forecast_today') | float(default=0) }}"
+      forecast_remaining: "{{ states('sensor.solcast_forecast_remaining_today') | float(default=0) }}"
+      forecast_hour: "{{ states('sensor.solcast_forecast_this_hour') | float(default=0) / 1000.0 }}"
+      forecast_remaining_pessimistic: "{{ [0, forecast_remaining - forecast_hour] | max }}"
+      # battery_lower_limit: >
+      #   {% if is_state('sensor.home_weather_condition', 'sunny') %}
+      #     {{ 10 }}
+      #   {% elif is_state('sensor.home_weather_condition', 'partlycloudy') %}
+      #     {{ 20 }}
+      #   {% else %}
+      #     {{ 70 }}
+      #   {% endif %}
+      battery_lower_limit: 10 # ignoring above as weather forecast is too unreliable anyway
+      target_active_power: "{{ active_power_limit - active_power_buffer }}"
+      # TODO: make this scale proportionally to how far it is from target battery charge.
+      desired_forced_battery_power: >
+        {% if current_pv_power > target_active_power %}
+          {{ current_pv_power - target_active_power }}
+        {% else %}
+          10
+        {% endif %}
+      is_forced_charging: >
+        {{ current_ems_mode == ems_forced and current_battery_mode == battery_charge }}
+      is_forced_discharging: >
+        {{ current_ems_mode == ems_forced and current_battery_mode == battery_discharge }}
+      is_self_consuming: >
+        {{ current_ems_mode == ems_self_consume }}
+      kwh_until_full: >
+        {{ battery_capacity * ((100 - battery_level)/100) }}
+      enough_in_day: >
+        {{ 2.5 * kwh_until_full < forecast_remaining_pessimistic }}
+      generating_more_than_usage: >
+        {{ current_pv_power > (1.5 * current_load_power) }}
+      # target_battery_level: >
+      #   {{ [[battery_lower_limit, 100.0 * (1.0 - (forecast_remaining_pessimistic/forecast_total)) | round(2)] | max, 100] | min }}
+      target_battery_level: >
+        {% if enough_in_day %}
+          {{ battery_level - 10 }}
+        {% else %}
+          {{ battery_level }}
+        {% endif %}
+      battery_high_enough: "{{ battery_level >= target_battery_level }}"
+      battery_too_high: "{{ battery_level >= battery_upper_limit }}"
+      sunsetting: >
+        {{ now() + timedelta(hours = 2) > state_attr('sun.sun', 'next_setting') | as_datetime }}
+      should_slow_battery: >
+        {{
+          not sunsetting
+            and enough_in_day
+            and generating_more_than_usage
+            and battery_high_enough
+            and not battery_too_high
+        }}
+      target_discharge_power: >
+        {% if (battery_level - target_battery_level) > 1 %}
+          {{ [6000, (battery_level - target_battery_level) * 1000 | int] | min }}
+        {% else %}
+          100
+        {% endif %}
+    action:
+      # TODO: discharge battery if too high and PV has dropped while forecast remains high
+      - choose:
+          - conditions:
+              - "{{ should_slow_battery }}"
+            sequence:
+              - service: input_number.set_value
+                target:
+                  entity_id: input_number.inverter_forced_mode_battery_power
+                data_template:
+                  value: "{{ target_discharge_power }}"
+              - condition: "{{ not is_forced_discharging }}"
+              - service: script.inverter_force_battery_discharge
+          - conditions:
+              - not:
+                  - "{{ is_self_consuming }}"
+            sequence:
+              - service: script.inverter_self_consumption
+        default: []
+
+template:
+  - sensor:
+      - unique_id: e1152f05-57d8-4821-b8fc-d6bca771a3b5
+        name: Inverter target active power
+        unit_of_measurement: W
+        state_class: measurement
+        device_class: power
+        attributes:
+          solar: "true"
+        state: >-
+          {{ 4999 - states('input_number.inverter_active_power_buffer') | int(default=400) }}
+
+      - unique_id: a59d08fc-92bb-47c6-b015-8ed0e475f2e5
+        name: Inverter desired forced battery power
+        unit_of_measurement: W
+        state_class: measurement
+        device_class: power
+        attributes:
+          solar: "true"
+        state: >-
+          {% set current_pv_power = states('sensor.inverter_pv_power') | int(default=0) %}
+          {% set target_active_power = states('sensor.inverter_target_active_power') | int %}
+
+          {% if current_pv_power > target_active_power %}
+            {{ current_pv_power - target_active_power }}
+          {% else %}
+            10
+          {% endif %}
+
+      - unique_id: d257272c-3ac0-4d93-9ef7-00717757cef3
+        name: Solar forecast remaining pessimistic
+        state_class: measurement
+        device_class: energy
+        unit_of_measurement: kWh
+        attributes:
+          solar: "true"
+        state: >-
+          {% set forecast_remaining =  states('sensor.solcast_forecast_remaining_today') | float(default=0) %}
+          {% set forecast_hour = states('sensor.solcast_forecast_this_hour') | float(default=0) / 1000.0 %}
+          {{ [0, forecast_remaining - forecast_hour] | max }}
+
+      - unique_id: 6bf7ad20-cf6a-4689-8214-13cd63de80a9
+        name: Inverter target battery level
+        state_class: measurement
+        unit_of_measurement: "%"
+        attributes:
+          solar: "true"
+        state: >-
+          {% set battery_lower_limit = states('input_number.inverter_battery_reserve') | int + 5 %}
+          {% set forecast_remaining_pessimistic = states('sensor.solar_forecast_remaining_pessimistic') | float(default=0) %}
+          {% set forecast_total = states('sensor.solcast_forecast_today') | float(default=0) %}
+          {{ [[battery_lower_limit, 100.0 * (1.0 - (forecast_remaining_pessimistic/forecast_total)) | round(2)] | max, 100] | min }}
+
+      - unique_id: f603d8f8-92ce-4e77-b271-048110394658
+        name: Inverter battery mode
+        attributes:
+          solar: "true"
+        icon: >-
+          {% if this.state == 'self-consumption' %}
+            mdi:battery-sync
+          {% elif this.state == 'forced charging' %}
+            mdi:battery-arrow-down
+          {% elif this.state == 'forced discharging' %}
+            mdi:battery-arrow-up
+          {% elif this.state == 'forced stop' %}
+            mdi:battery-off
+          {% endif %}
+
+        state: >-
+          {% set ems = states('sensor.inverter_ems_mode_raw') | int(default=-1) %}
+          {% set mode = states('sensor.inverter_forced_battery_mode_raw') | int(default=0) %}
+          {% if ems == 0 %}
+            self-consumption
+          {% elif ems == 2 %}
+            {% if mode == 0xAA %}
+              forced charging
+            {% elif mode == 0xBB %}
+              forced discharging
+            {% elif mode == 0xCC %}
+              forced stop
+            {% else %}
+              unknown
+            {% endif %}
+          {% else %}
+            unknown
+          {% endif %}
+
+input_number:
+  inverter_active_power_buffer:
+    name: Inverter active power buffer
+    min: 100
+    max: 1000
+    step: 1
+    unit_of_measurement: W
+    mode: box

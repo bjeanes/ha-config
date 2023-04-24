@@ -11,6 +11,8 @@ automation:
     trigger:
       - platform: state
         entity_id: cover.front_gate
+        for:
+          seconds: 2
         from: "closed"
         to:
           - open

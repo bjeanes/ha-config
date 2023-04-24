@@ -10,9 +10,11 @@ config:
         - state: unavailable
         - area: Garden Shed
         - entity_id: /human_readable/
+        - entity_id: /garden_shed/
         include:
         - name: /[gG]arden/
-        - name: /[tT]ent/
+          options:
+            secondary_info: last-updated
       type: custom:auto-entities
     - card:
         type: history-graph
@@ -24,12 +26,20 @@ config:
         - state: unavailable
         - area: Garden Shed
         - entity_id: /human_readable/
+        - entity_id: /garden_shed/
         include:
         - name: /[gG]arden/
         - name: /[tT]ent/
         - entity_id: sensor.home_weather_temperature
         - entity_id: sensor.home_weather_forecast_temperature
       type: custom:auto-entities
+    - entities:
+      - entity: sensor.ble_humidity_greenhouse_a4c1381cb175
+        secondary_info: last-changed
+      - entity: sensor.ble_temperature_greenhouse_a4c1381cb175
+        secondary_info: last-changed
+      title: Greenhouse (A4C1381CB175)
+      type: entities
     icon: mdi:flower
     path: garden
     title: Garden
@@ -52,12 +62,6 @@ config:
         - entity: switch.tent_cam_focus
           show_state: true
         - entity: switch.tent_cam_night_vision
-          show_state: true
-        - entity: sensor.tent_cam_battery_level
-          show_state: true
-        - entity: sensor.tent_cam_battery_temperature
-          show_state: true
-        - entity: sensor.tent_cam_light_level
           show_state: true
         type: picture-glance
         view_layout:
@@ -107,7 +111,7 @@ config:
           state_color: true
           tap_action:
             action: toggle
-        entity: switch.tent_power_plug
+        entity: sensor.tent_wattage
         name: Power
         secondary_info:
           entity: sensor.tent_wattage
@@ -127,27 +131,13 @@ config:
         position: sidebar
     - entities:
       - entities:
-        - entity: sensor.tent_humidity
+        - entity: sensor.ble_humidity_tent_a4c1385ec751
           format: precision1
           name: Humidity
-        entity: sensor.tent_temperature
+        entity: sensor.ble_temperature_tent_a4c1385ec751
         format: precision1
         icon: mdi:tent
         name: Tent
-        state_header: Temperature
-        type: custom:multiple-entity-row
-      - entities:
-        - entity: sensor.tent_reservoir_ec_us
-          format: kilo
-          name: EC
-          unit: false
-        - entity: sensor.tent_reservoir_ph
-          name: pH
-          unit: false
-        entity: sensor.tent_reservoir_temperature
-        format: precision1
-        icon: mdi:cup-water
-        name: Reservoir
         state_header: Temperature
         type: custom:multiple-entity-row
       show_header_toggle: false
@@ -264,10 +254,10 @@ config:
           show_state: false
           type: custom:multiple-entity-row
         - entities:
-          - hide_if_template: '{% set v = states(''sensor.tent_humidity'') %} {% set
-              min = states(''input_number.minimum_tent_humidity'') %} {% set max =
-              states(''input_number.maximum_tent_humidity'') %} {{ iif(v < max and
-              v > min, v, -1 * v) }}'
+          - hide_if_template: '{% set v = states(''sensor.ble_humidity_tent_a4c1385ec751'')
+              %} {% set min = states(''input_number.minimum_tent_humidity'') %} {%
+              set max = states(''input_number.maximum_tent_humidity'') %} {{ iif(v
+              < max and v > min, v, -1 * v) }}'
             icon: mdi:alert-decagram
             styles:
               --paper-item-icon-color: red
@@ -311,18 +301,18 @@ config:
               service: input_number.increment
               service_data:
                 entity_id: input_number.maximum_tent_humidity
-          entity: sensor.tent_humidity
+          entity: sensor.ble_humidity_tent_a4c1385ec751
           name: Humidity
           secondary_info:
-            entity: sensor.tent_humidity
+            entity: sensor.ble_humidity_tent_a4c1385ec751
             name: false
           show_state: false
           type: custom:multiple-entity-row
         - entities:
-          - hide_if_template: '{% set v = states(''sensor.tent_temperature'') %} {%
-              set min = states(''input_number.minimum_tent_temperature'') %} {% set
-              max = states(''input_number.maximum_tent_temperature'') %} {{ iif(v
-              < max and v > min, v, -1 * v) }}'
+          - hide_if_template: '{% set v = states(''sensor.ble_temperature_tent_a4c1385ec751'')
+              %} {% set min = states(''input_number.minimum_tent_temperature'') %}
+              {% set max = states(''input_number.maximum_tent_temperature'') %} {{
+              iif(v < max and v > min, v, -1 * v) }}'
             icon: mdi:alert-decagram
             styles:
               --paper-item-icon-color: red
@@ -366,11 +356,11 @@ config:
               service: input_number.increment
               service_data:
                 entity_id: input_number.maximum_tent_temperature
-          entity: sensor.tent_temperature
+          entity: sensor.ble_temperature_tent_a4c1385ec751
           icon: mdi:temperature-celsius
           name: Temperature
           secondary_info:
-            entity: sensor.tent_temperature
+            entity: sensor.ble_temperature_tent_a4c1385ec751
             name: false
           show_state: false
           type: custom:multiple-entity-row
@@ -388,8 +378,8 @@ config:
       entities:
       - sensor.tent_reservoir_ph
       - sensor.tent_vpd
-      - sensor.tent_humidity
-      - sensor.tent_temperature
+      - sensor.ble_humidity_tent_a4c1385ec751
+      - sensor.ble_temperature_tent_a4c1385ec751
       - input_number.minimum_ph
       - input_number.maximum_ph
       - input_number.minimum_tent_vpd
@@ -402,24 +392,43 @@ config:
       view_layout:
         position: sidebar
     - cards:
-      - days_to_show: 3
-        entities:
-        - entity: sensor.bendigo_temp
-        - entity: sensor.home_weather_temperature
-          name: Weather
-        - entity: sensor.tent_temperature
-          name: Tent
+      - cards:
+        - entities:
+          - entity: sensor.home_weather_temperature
+            name: Weather
+          - entity: sensor.ble_temperature_tent_a4c1385ec751
+            name: Tent
+          - attribute: current_temperature
+            entity: climate.garden_shed
+            icon: mdi:thermometer
+            name: Shed
+            suffix: "\xB0C"
+            type: attribute
+          type: entities
+        - days_to_show: 3
+          entities:
+          - entity: sensor.home_weather_temperature
+            name: Weather
+          - entity: sensor.ble_temperature_tent_a4c1385ec751
+            name: Tent
+          type: statistics-graph
         title: Air Temperatures
-        type: statistics-graph
+        type: custom:stack-in-card
       - days_to_show: 3
         entities:
-        - entity: sensor.bendigo_humidity
         - entity: sensor.home_weather_humidity
           name: Weather
-        - entity: sensor.tent_humidity
+        - entity: sensor.ble_humidity_tent_a4c1385ec751
           name: Tent
         title: Humidity
         type: statistics-graph
+      - air_rh: sensor.ble_humidity_tent_a4c1385ec751
+        air_temp: sensor.ble_temperature_tent_a4c1385ec751
+        crop: Cannabis
+        leaf_temp: sensor.ble_temperature_tent_a4c1385ec751
+        leaf_temp_offset: -2
+        title: Veg tent
+        type: custom:vpdchart-card
       - days_to_show: 3
         entities:
         - entity: sensor.tent_vpd
@@ -428,30 +437,9 @@ config:
         type: statistics-graph
       - days_to_show: 3
         entities:
-        - entity: sensor.tent_reservoir_temperature
-          name: "\xB0C"
-        refresh_interval: 120
-        title: Reservoir Temperature
-        type: statistics-graph
-      - days_to_show: 3
-        entities:
-        - entity: sensor.tent_reservoir_ec_us
-          name: EC
-        refresh_interval: 120
-        title: Reservoir EC
-        type: statistics-graph
-      - days_to_show: 3
-        entities:
-        - entity: sensor.tent_reservoir_ph
-          name: pH
-        refresh_interval: 120
-        title: Reservoir pH
-        type: statistics-graph
-      - days_to_show: 3
-        entities:
-        - entity: sensor.tent_hhcc_1_illuminance
+        - entity: sensor.ble_illuminance_tent_c47c8d6dd13f
           name: A
-        - entity: sensor.tent_hhcc_2_illuminance
+        - entity: sensor.ble_illuminance_tent_c47c8d6dd155
           name: B
         stat_types:
         - max
@@ -459,25 +447,25 @@ config:
         type: statistics-graph
       - days_to_show: 3
         entities:
-        - entity: sensor.tent_hhcc_1_moisture
+        - entity: sensor.ble_moisture_tent_c47c8d6dd13f
           name: A
-        - entity: sensor.tent_hhcc_2_moisture
+        - entity: sensor.ble_moisture_tent_c47c8d6dd155
           name: B
         title: Soil Moisture
         type: statistics-graph
       - days_to_show: 3
         entities:
-        - entity: sensor.tent_hhcc_1_temperature
+        - entity: sensor.ble_temperature_tent_c47c8d6dd13f
           name: A
-        - entity: sensor.tent_hhcc_2_temperature
+        - entity: sensor.ble_temperature_tent_c47c8d6dd155
           name: B
         title: Soil Temperatures
         type: statistics-graph
       - days_to_show: 3
         entities:
-        - entity: sensor.tent_hhcc_1_soil_conductivity
+        - entity: sensor.ble_conductivity_tent_c47c8d6dd13f
           name: A
-        - entity: sensor.tent_hhcc_2_soil_conductivity
+        - entity: sensor.ble_conductivity_tent_c47c8d6dd155
           name: B
         title: Soil EC
         type: statistics-graph
@@ -490,9 +478,7 @@ config:
         title: Automations
         type: entities
       filter:
-        exclude:
-        - name: /Snapshot|Restore/
-        - entity_id: /night_mode/
+        exclude: null
         include:
         - entity_id: script.refill_tent_humidifier
           options:
@@ -525,7 +511,8 @@ config:
         - domain: script
           or:
           - entity_id: /tent/
-          - area: Garden Shed
+          - area_id: /tent/
+          - area: /Tent/
           sort:
             entities:
             - hide_if: 'on'
@@ -543,7 +530,6 @@ config:
             method: last_triggered
             reverse: true
         - domain: automation
-          entity_id: /tent/
           options:
             entities:
             - icon: mdi:play
@@ -556,6 +542,11 @@ config:
             state_color: true
             toggle: true
             type: custom:multiple-entity-row
+          or:
+          - entity_id: /tent/
+          - entity_id: /grow_camera/
+          - area_id: /tent/
+          - area: /Tent/
           sort:
             method: last_triggered
             reverse: true
@@ -568,15 +559,11 @@ config:
       view_layout:
         position: sidebar
     - entities:
-      - entity: button.garden_shed_ble_relay_restart
+      - entity: button.garden_shed_ble_gateway_restart
         name: Restart
-      - entity: binary_sensor.garden_shed_ble_relay_status
-        name: Status
         secondary_info: last-changed
-      - entity: sensor.garden_shed_ble_relay_wifi_signal
+      - entity: sensor.garden_shed_ble_gateway_wifi_signal
         name: Wi-fi Signal
-      - entity: sensor.garden_shed_ble_relay_uptime_human_readable
-        name: Uptime
       title: Sensor Proxy
       type: entities
       view_layout:

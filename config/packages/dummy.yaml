@@ -6,6 +6,8 @@ sensor:
   - platform: statistics # Force statistics integration to be loaded (even if no other sensors) so I can reload without restarting HA
     name: "dummy_statistics"
     unique_id: dummy
+    sampling_size: 20
+    state_characteristic: mean
     entity_id: sensor.energy_production_tomorrow
 
   - platform: filter # Force filter integration to be loaded (even if no other sensors) so I can reload without restarting HA

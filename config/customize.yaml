@@ -1,8 +1,1 @@
-sensor.rtorrent_all_torrents:
-  unit_of_measurement: torrents
-sensor.rtorrent_active_torrents:
-  unit_of_measurement: torrents
-sensor.rtorrent_downloading_torrents:
-  unit_of_measurement: torrents
-sensor.rtorrent_uploading_torrents:
-  unit_of_measurement: torrents
+{}

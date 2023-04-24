@@ -31,6 +31,23 @@ utility_meter:
     name: Energy exported
     cycle: daily
 
+  # daily_supply_charge:
+  #   unique_id: 31887b27e2ecd837328b
+
+template:
+  - trigger:
+      - platform: time_pattern
+        hours: "*" # calculate hourly should be fine
+    sensor:
+      # Increases every day by 1W to fake a daily supply charge in energy dashboard.
+      - state: >-
+          {{ 0.001 * (now() - "2022-09-26" | as_datetime | as_local).days }}
+        unit_of_measurement: kWh
+        state_class: total_increasing
+        device_class: energy
+        unique_id: 3970c65019ebd336b074
+        name: "Days for daily supply charge"
+
 automation:
   - id: b508954f792ff8483254
     alias: Change electricity tariff
@@ -73,39 +90,23 @@ rest_command:
       User-Agent: HomeAssistant
       X-Pvoutput-Apikey: !secret pvoutput_api_key
       X-Pvoutput-SystemId: !secret pvoutput_system_id
-    payload: >-
-      d={{now().strftime("%Y%m%d")}}                                    {#- date -#}
-      &t={{now().strftime("%H:%M")}}                                    {#- time -#}
-      &c1=2                                                             {#- cumulative mode -#}
-      &v1={{(states('sensor.inverter_pv_generation_today')|float * 1000)|round(0) }}
-                                                                        {#- energy generation (Wh) -#}
-      &v2={{states('sensor.inverter_active_power')|float|round(0)}}     {#- power generation (W) -#}
-      &v3=                                                              {#- energy consumption (Wh) -#}
-      &v4={{states('sensor.household_power_demand')|float|round(0)}}    {#- power consumption (W) -#}
-      {#- &v5={{states('sensor.home_weather_temperature')|float|round(1)}}  {#- panel temperature? -#}
-      &v6={{states('sensor.inverter_phase_a_voltage')|float|round(1)}}  {#- voltage -#}
+    payload: "{{ states('sensor.pvoutput_payload') }}"
     content_type: "application/x-www-form-urlencoded"
 
 sensor:
   - platform: template
     sensors:
-      # energy_import_price:
-      #   unique_id: 2b80f57455c84e873952
-      #   friendly_name: Energy import price
-      #   value_template: >-
-      #     {%- if is_state('select.daily_energy_import', 'peak') -%}
-      #       0.23320
-      #     {%- else -%}
-      #       0.15235
-      #     {%- endif -%}
-      #   unit_of_measurement: AUD
-      #   device_class: monetary
-      # energy_export_price:
-      #   unique_id: a661839f99fbc85e23d9
-      #   friendly_name: Energy export price
-      #   value_template: "0.067"
-      #   unit_of_measurement: AUD
-      #   device_class: monetary
+      pvoutput_payload:
+        unique_id: pvoutput_payload
+        friendly_name: PVOutput payload
+        value_template: >-
+          d={{now().strftime("%Y%m%d")}}                                    {#- date -#}
+          &t={{now().strftime("%H:%M")}}                                    {#- time -#}
+          &c1=2                                                             {#- cumulative mode -#}
+          &v1={{states('sensor.inverter_pv_generation_today') | int * 1000 }} {#- energy generation -#}
+          &v2={{states('sensor.inverter_pv_power')|float|round(0)}}     {#- power generation (W) -#}
+          &v4={{states('sensor.inverter_load_power')|float|round(0)}}    {#- power consumption (W) -#}
+          &v6={{states('sensor.inverter_phase_a_voltage')|float|round(1)}}  {#- voltage -#}
 
       eagle_200_meter_power_demand_w:
         unique_id: 528a94ffdd069f6f5dcd
@@ -130,288 +131,3 @@ sensor:
         unit_of_measurement: $/hr
         device_class: monetary
         friendly_name: Current electricity cost
-#
-#
-#
-# SunGather (used internally by ModbusTCP2MQTT add-on) produces this payload, but doesn't create sensors for everything I want to monitor:
-# {
-#     "device_type_code": "SH5.0RS",
-#     "run_state": "OFF",
-#     "protocol_number": 1094856704,
-#     "protocol_version": 16781568,
-#     "arm_software_version": 16722,
-#     "dsp_software_version": 19780,
-#     "serial_number": 16690,
-#     "nominal_active_power": 5.0,
-#     "output_type": "2P",
-#     "daily_power_yields": 6.1,
-#     "total_power_yields": 0.0,
-#     "total_running_time": 0,
-#     "internal_temperature": 22.6,
-#     "total_apparent_power": 1234,
-#     "mppt_1_voltage": 433.4,
-#     "mppt_1_current": 1.2,
-#     "mppt_2_voltage": 213.8,
-#     "mppt_2_current": 0.7,
-#     "mppt_3_voltage": 0.0,
-#     "mppt_3_current": 0.0,
-#     "total_dc_power": 711,
-#     "phase_a_voltage": 243.7,
-#     "phase_b_voltage": 0.0,
-#     "phase_c_voltage": 0.0,
-#     "phase_a_current": 5.3,
-#     "phase_b_current": 0.0,
-#     "phase_c_current": 0.0,
-#     "total_active_power": 1084,
-#     "total_reactive_power": 509,
-#     "power_factor": 0.91,
-#     "grid_frequency": 49.97,
-#     "work_state_1": 0,
-#     "nominal_reactive_power": 3.0,
-#     "array_insulation_resistance": 1124,
-#     "active_power_regulation_setpoint": 0,
-#     "reactive_power_regulation_setpoint": 0,
-#     "work_state_2": 0,
-#     "meter_power": 0,
-#     "meter_a_phase_power": 0,
-#     "meter_b_phase_power": 80936959,
-#     "meter_c_phase_power": -65536,
-#     "load_power": 1084,
-#     "daily_export_energy": 0.1,
-#     "total_export_energy": 2.6,
-#     "daily_import_energy": 0.0,
-#     "total_import_energy": 192.3,
-#     "daily_direct_energy_consumption": 0.3,
-#     "total_direct_energy_consumption": 12.3,
-#     "daily_running_time": 0,
-#     "mppt_4_voltage": 0.0,
-#     "mppt_4_current": 0.0,
-#     "mppt_5_voltage": 0.0,
-#     "mppt_5_current": 0.0,
-#     "mppt_6_voltage": 0.0,
-#     "mppt_6_current": 0.0,
-#     "mppt_7_voltage": 0.0,
-#     "mppt_7_current": 0.0,
-#     "mppt_8_voltage": 0.0,
-#     "mppt_8_current": 0.0,
-#     "monthly_power_yields": 0.0,
-#     "mppt_9_voltage": 0.0,
-#     "mppt_9_current": 0.0,
-#     "mppt_10_voltage": 0.0,
-#     "mppt_10_current": 0.0,
-#     "mppt_11_voltage": 0.0,
-#     "mppt_11_current": 0.0,
-#     "mppt_12_voltage": 0.0,
-#     "mppt_12_current": 0.0,
-#     "negative_voltage_to_the_ground": 0.0,
-#     "bus_voltage": 458.0,
-#     "pid_work_state": 0,
-#     "pid_alarm_code": 0,
-#     "export_power": -7,
-#     "power_meter": 1090,
-#     "pv_power_of_today": 0,
-#     "daily_pv_energy_yields": 0.0,
-#     "monthly_pv_energy_yields": 0,
-#     "yearly_pv_energy_yields": 0.0,
-#     "direct_power_consumption_today_pv": 0,
-#     "direct_power_consumption_pv": 0.0,
-#     "direct_power_consumption_monthly_pv": 0.0,
-#     "direct_power_consumption_yearly_pv": 0.0,
-#     "export_power_from_pv_today": 0,
-#     "export_power_from_pv": 0.0,
-#     "export_power_from_pv_monthly": 0.0,
-#     "export_power_from_pv_yearly": 0.0,
-#     "battery_charge_power_from_pv_today": 0.0,
-#     "battery_charge_power_from_pv": 0.0,
-#     "battery_charge_power_from_pv_monthly": 0.0,
-#     "battery_charge_power_from_pv_yearly": 0.0,
-#     "string_1_current": 0.0,
-#     "string_2_current": 0.0,
-#     "string_3_current": 0.0,
-#     "string_4_current": 0.0,
-#     "string_5_current": 0.0,
-#     "string_6_current": 0.0,
-#     "string_7_current": 0.0,
-#     "string_8_current": 0.0,
-#     "string_9_current": 0.0,
-#     "string_10_current": 0.0,
-#     "string_11_current": 0.0,
-#     "string_12_current": 0.0,
-#     "string_13_current": 0.0,
-#     "string_14_current": 0.0,
-#     "string_15_current": 0.0,
-#     "string_16_current": 0.0,
-#     "string_17_current": 0.0,
-#     "string_18_current": 0.0,
-#     "string_19_current": 0.0,
-#     "string_20_current": 0.0,
-#     "string_21_current": 0.0,
-#     "string_22_current": 0.0,
-#     "string_23_current": 0.0,
-#     "string_24_current": 0.0,
-#     "system_state": 0,
-#     "running_state": 45,
-#     "daily_pv_generation": 0.3,
-#     "total_pv_generation": 38.5,
-#     "daily_pv_export": 0.0,
-#     "total_pv_export": 2.5,
-#     "load_power_hybrid": 1094,
-#     "export_power_hybrid": -10,
-#     "daily_battery_charge_from_pv": 0.0,
-#     "total_battery_charge_from_pv": 23.7,
-#     "co2_reduction": 26.9,
-#     "battery_voltage": 0.0,
-#     "battery_current": 0,
-#     "battery_power": 465,
-#     "battery_level": 5.8,
-#     "battery_state_of_healthy": 10.0,
-#     "battery_temperature": 10.8,
-#     "daily_battery_discharge_energy": 5.7,
-#     "total_battery_discharge_energy": 11.2,
-#     "self_consumption_of_day": 100.0,
-#     "grid_state": 0,
-#     "battery_capacity": 12.8,
-#     "daily_charge_energy": 0.0,
-#     "total_charge_energy": 10.3,
-#     "drm_state": 255,
-#     "inverter_alarm": 0.0,
-#     "grid-side_fault": 0.0,
-#     "system_fault1": 0.0,
-#     "system_fault2": 0.0,
-#     "dc-side_fault": 0.0,
-#     "permanent_fault": 0.0,
-#     "bdc-side_fault": 0.0,
-#     "bdc-side_permanent_fault": 0.0,
-#     "battery_fault": 0.0,
-#     "battery_alarm": 0.0,
-#     "bms_alarm": 0,
-#     "bms_protection": 0,
-#     "bms_fault1": 0,
-#     "bms_fault2": 0,
-#     "bms_alarm2": 0,
-#     "bms_status": 0,
-#     "max_charging_current": 0,
-#     "max_discharging_current": 0,
-#     "warning": 0,
-#     "protection": 0,
-#     "fault1": 0,
-#     "fault2": 0,
-#     "soc": 0,
-#     "soh": 0,
-#     "cycle_count": 0.0,
-#     "average_cell_voltage": 0,
-#     "max_cell_voltage": 0,
-#     "min_cell_voltage": 0,
-#     "battery_pack_voltage": 0,
-#     "average_cell_temp": 0,
-#     "max_cell_temp": 0,
-#     "min_cell_temp": 0,
-#     "start_stop": "Start",
-#     "power_limitation_switch": "Enable",
-#     "power_limitation_setting": 100.0,
-#     "export_power_limitation": 0,
-#     "export_power_limitation_value": 0,
-#     "current_transformer_output_current": 0,
-#     "current_transformer_range": 0,
-#     "current_transformer": 0,
-#     "export_power_limitation_percentage": 0.0,
-#     "installed_pv_power": 0.0,
-#     "power_factor_setting": 0.0,
-#     "night_svg_switch": 0,
-#     "reactive_power_adjustment_mode": "Enable Q(U)",
-#     "reactive_power_percentage_setting": 0.0,
-#     "power_limitation_adjustment": 0.0,
-#     "reactive_power_adjustment": 0.0,
-#     "pid_recovery": 0,
-#     "anti_pid": 0,
-#     "fullday_pid_suppression": 0,
-#     "export_to_grid": 0,
-#     "import_from_grid": 0,
-#     "timestamp": "2022-7-8 8:59:15"
-# }
-# mqtt:
-#   # https://github.com/bohdan-s/SunGather/blob/main/SunGather/registers-sungrow.yaml
-#   sensor:
-#     - &inverter_sensor
-#       state_topic: "inverter/SH50RS/registers"
-#       json_attributes_topic: "inverter/SH50RS/registers"
-#       unique_id: inverter_battery_level
-#       object_id: inverter_battery_level
-#       name: "Inverter battery level"
-#       value_template: "{{ value_json.battery_level }}"
-#       device_class: battery
-#       unit_of_measurement: "%"
-#       device: &inverter_device
-#         name: Solar Inverter
-#         manufacturer: Sungrow
-#         model: SH5.0RS
-#         via_device: 07bec9a1e7f11660c94ac9b707f6ea66
-#         connections:
-#           - - address
-#             - !secret solar_inverter_ip
-#     - <<: *inverter_sensor
-#       unique_id: inverter_battery_power
-#       object_id: inverter_battery_power
-#       name: Inverter battery power
-#       value_template: "{{ value_json.battery_power }}"
-#       device_class: power
-#       unit_of_measurement: W
-#     - <<: *inverter_sensor
-#       unique_id: inverter_grid_current
-#       object_id: inverter_grid_current
-#       name: Inverter grid current
-#       value_template: "{{ value_json.phase_a_current }}"
-#       device_class: current
-#       unit_of_measurement: A
-#     - <<: *inverter_sensor
-#       unique_id: inverter_grid_voltage
-#       object_id: inverter_grid_voltage
-#       name: Inverter grid voltage
-#       value_template: "{{ value_json.phase_a_voltage }}"
-#       device_class: voltage
-#       unit_of_measurement: V
-#     - <<: *inverter_sensor
-#       unique_id: inverter_grid_frequency
-#       object_id: inverter_grid_frequency
-#       name: Inverter grid frequency
-#       value_template: "{{ value_json.grid_frequency }}"
-#       unit_of_measurement: Hz
-#     - <<: *inverter_sensor
-#       unique_id: inverter_total_battery_discharge
-#       object_id: inverter_total_battery_discharge
-#       name: Inverter total battery discharge
-#       value_template: "{{ value_json.total_battery_discharge_energy }}"
-#       device_class: energy
-#       unit_of_measurement: kWh
-#       state_class: total_increasing
-#     - <<: *inverter_sensor
-#       unique_id: inverter_total_battery_charge
-#       object_id: inverter_total_battery_charge
-#       name: Inverter total battery charge
-#       value_template: "{{ value_json.total_battery_charge_from_pv }}"
-#       device_class: energy
-#       unit_of_measurement: kWh
-#       state_class: total_increasing
-#     - <<: *inverter_sensor
-#       unique_id: inverter_total_pv_generation
-#       object_id: inverter_total_pv_generation
-#       name: Inverter total PV generation
-#       value_template: "{{ value_json.total_pv_generation }}"
-#       device_class: energy
-#       unit_of_measurement: kWh
-#       state_class: total_increasing
-#     - <<: *inverter_sensor
-#       unique_id: inverter_total_pv_export
-#       object_id: inverter_total_pv_export
-#       name: Inverter total PV export
-#       value_template: "{{ value_json.total_pv_export }}"
-#       device_class: energy
-#       unit_of_measurement: kWh
-#       state_class: total_increasing
-# - <<: *inverter_sensor
-#   unique_id: inverter_pv_power
-#   object_id: inverter_pv_power
-#   name: Inverter PV power
-#   value_template: "{{ value_json.total_dc_power }}"
-#   device_class: power
-#   unit_of_measurement: W

@@ -59,6 +59,11 @@ config:
     - cards:
       - entities:
         - entity: automation.warm_up_bo_s_office
+          icon: mdi:heating-coil
+          name: Keep warm
+        - entity: input_number.bo_s_office_target_temperature
+          icon: mdi:temperature-celsius
+          name: Target
         type: entities
       - entities:
         - entity: sensor.ble_temperature_bos_office_a4c1380f0b98

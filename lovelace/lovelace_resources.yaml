@@ -4,7 +4,7 @@ items:
   url: /hacsfiles/mini-graph-card/mini-graph-card-bundle.js?hacstag=1512800620110
 - id: 286fca3cd80f4192b815b715ef5f999e
   type: module
-  url: /hacsfiles/vertical-stack-in-card/vertical-stack-in-card.js?hacstag=142051833042
+  url: /hacsfiles/vertical-stack-in-card/vertical-stack-in-card.js?hacstag=142051833044
 - id: 032c18f548ea467b8bce3884fe451d82
   type: module
   url: /hacsfiles/vacuum-card/vacuum-card.js?hacstag=261291295263
@@ -13,7 +13,7 @@ items:
   url: /hacsfiles/weather-card/weather-card.js
 - id: 69e31fab8ea64da890a5c68fc590320f
   type: module
-  url: /hacsfiles/lovelace-xiaomi-vacuum-map-card/xiaomi-vacuum-map-card.js?hacstag=1933720442011
+  url: /hacsfiles/lovelace-xiaomi-vacuum-map-card/xiaomi-vacuum-map-card.js?hacstag=193372044212
 - id: f2b643a296014c8292cbb3ba1b9af69b
   type: module
   url: /hacsfiles/kb-better-graph-colors/kb-better-graph-colors.js
@@ -22,10 +22,10 @@ items:
   url: /hacsfiles/purifier-card/purifier-card.js?hacstag=274738925223
 - id: c623d3fc8954431685d17cd75bf572bb
   type: module
-  url: /hacsfiles/apexcharts-card/apexcharts-card.js?hacstag=331701152201
+  url: /hacsfiles/apexcharts-card/apexcharts-card.js?hacstag=331701152202
 - id: 4cb20baf31e442e9830e4af74f089a0d
   type: module
-  url: /hacsfiles/lovelace-auto-entities/auto-entities.js?hacstag=1677445841110
+  url: /hacsfiles/lovelace-auto-entities/auto-entities.js?hacstag=1677445841121
 - id: 8468c5604c2d41d294fb0143cea43765
   type: module
   url: /hacsfiles/simple-thermostat/simple-thermostat.js?hacstag=158654878243
@@ -49,7 +49,7 @@ items:
   url: /hacsfiles/miflora-card/miflora-card.js?hacstag=197715418010
 - id: ddb6d1b21fc44ae692519ea38c9cf9cb
   type: module
-  url: /hacsfiles/bom-radar-card/bom-radar-card.js?hacstag=294609880206
+  url: /hacsfiles/bom-radar-card/bom-radar-card.js?hacstag=294609880210
 - id: edc63027be67460bab526d3dd3b4a8b2
   type: module
   url: /hacsfiles/secondaryinfo-entity-row/secondaryinfo-entity-row.js?hacstag=15971160550
@@ -91,7 +91,7 @@ items:
   url: /hacsfiles/lovelace-paper-buttons-row/paper-buttons-row.js?hacstag=244872232101
 - id: 78939a4781bd40f6accb3cba860a100f
   type: module
-  url: /hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375200
+  url: /hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375213
 - id: 4795f91c6d3a4fd3a5b1900f9990217e
   type: module
   url: /hacsfiles/stack-in-card/stack-in-card.js?hacstag=248954055020
@@ -109,7 +109,7 @@ items:
   url: /hacsfiles/lovelace-battery-entity-row/battery-entity-row.js?hacstag=303857065131
 - id: 867c82efa08d47a3a9ccbe9f5afb238a
   type: module
-  url: /hacsfiles/numberbox-card/numberbox-card.js?hacstag=304967918312
+  url: /hacsfiles/numberbox-card/numberbox-card.js?hacstag=30496791840
 - id: 6a72c3dfa03446ffae4b9d8093bb5b7a
   type: module
   url: /hacsfiles/custom-ui/custom-ui.js?hacstag=267558148202204191
@@ -119,15 +119,6 @@ items:
 - id: 8217392f44e24fe98b652c7f36ab302e
   type: module
   url: /hacsfiles/ha-sankey-chart/ha-sankey-chart.js?hacstag=4558460880110
-- id: 84ed6341c9b245aba7e66cbdc51e2ccb
-  type: module
-  url: /hacsfiles/state-attribute-element/state-attribute-element.js?hacstag=142038085040
-- id: a70f15c06c9544b7bf7ad3bcf9dc6325
-  type: module
-  url: /hacsfiles/state-element/state-element.js?hacstag=142344403002
-- id: ecebe38b38124fb1ba83b3ca1ee43e7d
-  type: module
-  url: /hacsfiles/text-element/text-element.js?hacstag=141897999002
 - id: 0afffa6b08dd44be820b7e45428e0e4c
   type: module
   url: /hacsfiles/radial-menu/radial-menu.js?hacstag=181124811160
@@ -140,3 +131,6 @@ items:
 - id: c6b759faf93a4e22ab9faa3ebcaa218b
   type: module
   url: /hacsfiles/button-card/button-card.js?hacstag=146194325342
+- id: 9675930fcc78426396cc7c66b614f74c
+  type: module
+  url: /hacsfiles/vpdchart-card/vpdchart-card.js?hacstag=540873855100

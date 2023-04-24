@@ -9,15 +9,3 @@ template:
           {% else %}
           {{ states('sensor.nzbget_speed') }}
           {% endif %}
-
-sensor:
-  - platform: rtorrent
-    url: !secret rtorrent_url
-    monitored_variables:
-      - "current_status"
-      - "download_speed"
-      - "upload_speed"
-      - "all_torrents"
-      - "uploading_torrents"
-      - "downloading_torrents"
-      - "active_torrents"

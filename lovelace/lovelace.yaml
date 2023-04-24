@@ -3,26 +3,6 @@ config:
   views:
   - badges: []
     cards:
-    - card:
-        type: custom:mushroom-chips-card
-      card_param: chips
-      filter:
-        exclude:
-        - entity_id: /tent/
-        - entity_id: '*double_lamp_*'
-        - area: Garden Shed
-        - name: /Purifier/
-        include:
-        - domain: light
-          options:
-            content_info: name
-            type: light
-            use_light_color: true
-          sort:
-            method: name
-      sort:
-        method: friendly_name
-      type: custom:auto-entities
     - cards:
       - card:
           chips:
@@ -147,6 +127,7 @@ config:
           - state: standby
           - entity_id: /spotify/
           - entity_id: /denon/
+          - entity_id: /global/
           - attributes:
               source: HEOS Music
           include:
@@ -199,6 +180,7 @@ config:
         - state: unknown
         - entity_id: /vacuum.*attached/
         - entity_id: /inverter_.*_soc/
+        - entity_id: /athom/
         include:
         - attributes:
             device_class: moisture
@@ -286,78 +268,191 @@ config:
       type: custom:power-flow-card
       w_decimals: 0
       watt_threshold: 900
-    - elements:
-      - attribute: mean
-        entity: sensor.ble_temperature_living_room_a4c1382a9b6e
-        style:
-          background: rgba(10,10,10,0.2)
-          left: 23%
-          padding: 3px
-          top: 22%
-        suffix: "\xB0C"
-        tap_action: more-info
-        type: custom:state-attribute-element
-      - attribute: mean
-        entity: sensor.ble_temperature_bos_office_a4c1380f0b98
-        style:
-          background: rgba(10,10,10,0.2)
-          left: 72%
-          padding: 3px
-          top: 80%
-        suffix: "\xB0C"
-        tap_action: more-info
-        type: custom:state-attribute-element
-      - attribute: mean
-        entity: sensor.ble_temperature_ris_office_a4c138e78afe
-        style:
-          background: rgba(10,10,10,0.2)
-          left: 88.8%
-          padding: 3px
-          top: 80%
-        suffix: "\xB0C"
-        tap_action: more-info
-        type: custom:state-attribute-element
-      - attribute: mean
-        entity: sensor.ble_temperature_analog_room_a4c138bcab08
-        style:
-          background: rgba(10,10,10,0.2)
-          left: 80%
-          padding: 3px
-          top: 47%
-        suffix: "\xB0C"
-        type: custom:state-attribute-element
-      - attribute: mean
-        entity: sensor.ble_temperature_kitchen_a4c1389485e3
-        style:
-          background: rgba(10,10,10,0.2)
-          left: 53.3%
-          padding: 3px
-          top: 20%
-        suffix: "\xB0C"
-        tap_action: more-info
-        type: custom:state-attribute-element
-      - attribute: mean
-        entity: sensor.ble_temperature_bedroom_a4c138feb60c
-        style:
-          background: rgba(10,10,10,0.2)
-          left: 29%
-          padding: 3px
-          top: 77%
-        suffix: "\xB0C"
-        tap_action: more-info
-        type: custom:state-attribute-element
-      - attribute: mean
-        entity: sensor.ble_temperature_spare_room_a4c138d8ef42
-        style:
-          background: rgba(10,10,10,0.2)
-          left: 53.3%
-          padding: 3px
-          top: 80%
-        suffix: "\xB0C"
-        tap_action: more-info
-        type: custom:state-attribute-element
-      image: /local/floorplan-top.jpg
-      type: picture-elements
+    - cards:
+      - collapsible_controls: false
+        entity: climate.living_room_a_c
+        fill_container: true
+        hvac_modes:
+        - auto
+        - dry
+        - heat
+        - cool
+        - 'off'
+        - heat_cool
+        icon: mdi:air-conditioner
+        layout: horizontal
+        primary_info: state
+        secondary_info: last-changed
+        show_temperature_control: true
+        type: custom:mushroom-climate-card
+      - card:
+          entities:
+          - switch.living_room_a_c_ionizer
+          type: entities
+        conditions:
+        - entity: climate.living_room_a_c
+          state_not: 'off'
+        type: conditional
+      - card:
+          entities:
+          - switch.living_room_a_c_jet_mode
+          type: entities
+        conditions:
+        - entity: switch.living_room_a_c_jet_mode
+          state_not: unavailable
+        type: conditional
+      - entities:
+        - entity: climate.living_room_a_c
+          name: A/C
+        - entity: sensor.ble_temperature_living_room_a4c1382a9b6e
+        - entity: sensor.area_temperature_degc_living_room
+          name: Average temperature
+        hours_to_show: 6
+        type: history-graph
+      type: custom:stack-in-card
+    icon: hass:home
+    panel: false
+    path: default_view
+    title: Home
+  - badges: []
+    cards:
+    - cards:
+      - cards:
+        - entity: person.bo_jeanes
+          fill_container: false
+          hide_name: false
+          hide_state: false
+          type: custom:mushroom-person-card
+          use_entity_picture: true
+        - double_tap_action:
+            action: none
+          entity: sensor.template_room_bo_phone
+          icon: "{% if is_state(entity, 'not_home') and is_state('person.bo_jeanes',\
+            \ 'home') %}\n  mdi:cellphone-off\n{% else %}\n  mdi:cellphone-marker\n\
+            {% endif %}"
+          secondary: "{% if is_state('person.bo_jeanes', 'not_home') %}\n   ~{{ states('proximity.bo_home')\
+            \ }}m from home\n{% elif is_state(entity, 'not_home') %}\n  Unknown\n\
+            {% else %}\n  {{ states(entity) | replace(\"_s_\",\"'s \") | replace(\"\
+            _\",\" \") | title }}\n  ~{{ state_attr(entity, 'distance') }}m\n{% endif\
+            \ %}"
+          tap_action:
+            action: more-info
+          type: custom:mushroom-template-card
+        type: vertical-stack
+      - cards:
+        - entity: person.ri_liu
+          fill_container: false
+          hide_name: false
+          hide_state: false
+          layout: horizontal
+          type: custom:mushroom-person-card
+          use_entity_picture: true
+        - double_tap_action:
+            action: none
+          entity: sensor.template_room_ri_phone
+          icon: "{% if is_state(entity, 'not_home') and is_state('person.ri_liu',\
+            \ 'home') %}\n  mdi:cellphone-off\n{% else %}\n  mdi:cellphone-marker\n\
+            {% endif %}"
+          secondary: "{% if is_state('person.ri_liu', 'not_home') %}\n   ~{{ states('proximity.ri_home')\
+            \ }}m from home\n{% elif is_state(entity, 'not_home') %}\n  Unknown\n\
+            {% else %}\n  {{ states(entity) | replace(\"_s_\",\"'s \") | replace(\"\
+            _\",\" \") | title }}\n  ~{{ state_attr(entity, 'distance') }}m\n{% endif\
+            \ %}"
+          tap_action:
+            action: more-info
+          type: custom:mushroom-template-card
+        type: vertical-stack
+      type: horizontal-stack
+    - aspect_ratio: '16:9'
+      auto_fit: true
+      entities:
+      - entity: person.bo_jeanes
+      - entity: person.ri_liu
+      hours_to_show: 12
+      type: map
+    icon: mdi:account-supervisor-circle
+    path: people
+    theme: Backend-selected
+    title: People
+  - badges: []
+    cards:
+    - entities:
+      - entity: binary_sensor.in_bed
+        name: Anyone In bed
+        secondary_info: last-updated
+      - entity: input_boolean.bo_in_bed
+      - entity: input_boolean.ri_in_bed
+      - entity: cover.bedroom_blinds
+      - entity: sensor.bedroom_blinds_motor_state
+      - entity: automation.in_bed_detection
+      - entity: automation.manage_bedroom_blinds
+      type: entities
+    - chips:
+      - entity: binary_sensor.in_bed
+        type: entity
+      type: custom:mushroom-chips-card
+    - double_tap_action:
+        action: toggle
+      entity: cover.bedroom_blinds
+      fill_container: false
+      primary_info: name
+      show_buttons_control: false
+      show_position_control: true
+      type: custom:mushroom-cover-card
+    icon: mdi:bed
+    path: bedroom
+    theme: Backend-selected
+    title: Bedroom
+  - badges: []
+    cards:
+    - entity: weather.home_weather
+      number_of_forecasts: '3'
+      type: custom:weather-card
+    - entities:
+      - entity: sun.sun
+      - entity: sensor.home_weather_condition
+      - entity: sensor.home_weather_temperature
+        name: "\xB0C Current"
+      - entity: sensor.home_weather_humidity
+        name: Humidity
+      - entity: sensor.home_weather_cloud_coverage
+        name: Cloud coverage
+      hours_to_show: 24
+      refresh_interval: 0
+      type: history-graph
+    - center_latitude: -36.7769283
+      center_longitude: 144.2634146
+      extra_labels: true
+      map_style: Voyager
+      marker_latitude: -36.7769283
+      marker_longitude: 144.2634146
+      show_marker: true
+      show_range: true
+      show_zoom: true
+      type: custom:bom-radar-card
+      zoom_level: 8
+    - entities:
+      - entity: sun.sun
+      - entity: weather.home_weather
+      - entity: sensor.home_weather_condition
+      - entity: sensor.home_weather_forecast_condition
+      - entity: weather.home
+      - entity: weather.home_hourly
+      - entity: sensor.home_weather_cloud_coverage
+      - entity: sensor.home_weather_forecast_cloud_coverage
+      type: history-graph
+    icon: hass:thermometer
+    path: climate
+    title: Climate
+  - badges: []
+    cards:
+    - calibration_source:
+        camera: true
+      entity: vacuum.robot_vacuum
+      map_source:
+        camera: camera.vacuum_map
+      type: custom:xiaomi-vacuum-map-card
+      vacuum_platform: default
     - calibration_source:
         camera: true
       entity: vacuum.dreame_p2028_4394_robot_cleaner
@@ -500,166 +595,6 @@ config:
       map_source:
         camera: camera.dreame_z10_pro_map
       two_finger_pan: true
-      type: custom:xiaomi-vacuum-map-card
-      vacuum_platform: default
-    icon: hass:home
-    panel: false
-    path: default_view
-    title: Home
-  - badges: []
-    cards:
-    - cards:
-      - cards:
-        - entity: person.bo_jeanes
-          fill_container: false
-          hide_name: false
-          hide_state: false
-          type: custom:mushroom-person-card
-          use_entity_picture: true
-        - double_tap_action:
-            action: none
-          entity: sensor.template_room_bo_phone
-          icon: "{% if is_state(entity, 'not_home') and is_state('person.bo_jeanes',\
-            \ 'home') %}\n  mdi:cellphone-off\n{% else %}\n  mdi:cellphone-marker\n\
-            {% endif %}"
-          secondary: "{% if is_state('person.bo_jeanes', 'not_home') %}\n   ~{{ states('proximity.bo_home')\
-            \ }}m from home\n{% elif is_state(entity, 'not_home') %}\n  Unknown\n\
-            {% else %}\n  {{ states(entity) | replace(\"_s_\",\"'s \") | replace(\"\
-            _\",\" \") | title }}\n  ~{{ state_attr(entity, 'distance') }}m\n{% endif\
-            \ %}"
-          tap_action:
-            action: more-info
-          type: custom:mushroom-template-card
-        type: vertical-stack
-      - cards:
-        - entity: person.ri_liu
-          fill_container: false
-          hide_name: false
-          hide_state: false
-          layout: horizontal
-          type: custom:mushroom-person-card
-          use_entity_picture: true
-        - double_tap_action:
-            action: none
-          entity: sensor.template_room_ri_phone
-          icon: "{% if is_state(entity, 'not_home') and is_state('person.ri_liu',\
-            \ 'home') %}\n  mdi:cellphone-off\n{% else %}\n  mdi:cellphone-marker\n\
-            {% endif %}"
-          secondary: "{% if is_state('person.ri_liu', 'not_home') %}\n   ~{{ states('proximity.ri_home')\
-            \ }}m from home\n{% elif is_state(entity, 'not_home') %}\n  Unknown\n\
-            {% else %}\n  {{ states(entity) | replace(\"_s_\",\"'s \") | replace(\"\
-            _\",\" \") | title }}\n  ~{{ state_attr(entity, 'distance') }}m\n{% endif\
-            \ %}"
-          tap_action:
-            action: more-info
-          type: custom:mushroom-template-card
-        type: vertical-stack
-      type: horizontal-stack
-    icon: mdi:account-supervisor-circle
-    path: people
-    theme: Backend-selected
-    title: People
-  - badges: []
-    cards:
-    - entities:
-      - entity: binary_sensor.in_bed
-        name: Anyone In bed
-        secondary_info: last-updated
-      - entity: input_boolean.bo_in_bed
-      - entity: input_boolean.ri_in_bed
-      type: entities
-    - aqi:
-        entity_id: sensor.bedroom_purifier_pm2_5
-        unit: "\xB5g/m\xB3"
-      compact_view: true
-      entity: fan.bedroom_purifier
-      shortcuts:
-      - icon: mdi:weather-night
-        name: Silent
-        preset_mode: Silent
-      - icon: mdi:circle-slice-2
-        name: 25%
-        percentage: 25
-      - icon: mdi:circle-slice-4
-        name: 50%
-        percentage: 50
-      - icon: mdi:circle-slice-6
-        name: 75%
-        percentage: 75
-      - icon: mdi:circle-slice-8
-        name: 100%
-        percentage: 100
-      - icon: mdi:brightness-auto
-        name: Auto
-        preset_mode: Auto
-      show_name: false
-      show_state: false
-      show_toolbar: true
-      stats:
-      - entity_id: sensor.bedroom_purifier_temperature
-        unit: "\xB0C"
-      - entity_id: sensor.bedroom_purifier_humidity
-        unit: '%'
-      - entity_id: sensor.bedroom_purifier_filter_life_remaining
-        subtitle: Filter Remaining
-        unit: '%'
-      type: custom:purifier-card
-    - chips:
-      - entity: binary_sensor.in_bed
-        type: entity
-      type: custom:mushroom-chips-card
-    icon: mdi:bed
-    path: bedroom
-    theme: Backend-selected
-    title: Bedroom
-  - badges: []
-    cards:
-    - entity: weather.home_weather
-      number_of_forecasts: '3'
-      type: custom:weather-card
-    - entities:
-      - entity: sun.sun
-      - entity: sensor.home_weather_condition
-      - entity: sensor.home_weather_temperature
-        name: "\xB0C Current"
-      - entity: sensor.home_weather_humidity
-        name: Humidity
-      - entity: sensor.home_weather_cloud_coverage
-        name: Cloud coverage
-      hours_to_show: 24
-      refresh_interval: 0
-      type: history-graph
-    - center_latitude: -36.7769283
-      center_longitude: 144.2634146
-      extra_labels: true
-      map_style: Voyager
-      marker_latitude: -36.7769283
-      marker_longitude: 144.2634146
-      show_marker: true
-      show_range: true
-      show_zoom: true
-      type: custom:bom-radar-card
-      zoom_level: 8
-    - entities:
-      - entity: sun.sun
-      - entity: weather.home_weather
-      - entity: sensor.home_weather_condition
-      - entity: sensor.home_weather_forecast_condition
-      - entity: weather.home
-      - entity: weather.home_hourly
-      - entity: sensor.home_weather_cloud_coverage
-      - entity: sensor.home_weather_forecast_cloud_coverage
-      type: history-graph
-    icon: hass:thermometer
-    path: climate
-    title: Climate
-  - badges: []
-    cards:
-    - calibration_source:
-        camera: true
-      entity: vacuum.robot_vacuum
-      map_source:
-        camera: camera.vacuum_map
       type: custom:xiaomi-vacuum-map-card
       vacuum_platform: default
     icon: ''

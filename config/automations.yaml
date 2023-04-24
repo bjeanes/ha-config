@@ -68,3 +68,44 @@
       before: sunset
   action:
     service: openuv.update_data
+- id: '1661989262917'
+  alias: Control Living Room Lights
+  description: ''
+  trigger:
+  - id: brightness
+    platform: state
+    entity_id:
+    - sensor.living_room_light_dimmer_action
+    to:
+    - brightness_move_down
+    - brightness_move_up
+    - brightness_stop
+  - id: toggle
+    platform: state
+    to: toggle
+    entity_id:
+    - sensor.living_room_light_dimmer_action
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''toggle'' }}'
+      sequence:
+      - service: light.toggle
+        target:
+          area_id: living_room
+        data:
+          transition: 1
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''brightness'' }}'
+      sequence:
+      - service: light.turn_on
+        data:
+          transition: 0.1
+          brightness: '{{ state_attr(''sensor.living_room_light_dimmer_action'', ''brightness'')
+            | int }}'
+        target:
+          area_id: living_room
+  mode: queued

@@ -1,3 +1,13 @@
+input_number:
+  bo_s_office_target_temperature:
+    name: Bo's Office target temperature
+    min: 18
+    max: 24
+    step: 0.2
+    unit_of_measurement: "°C"
+    initial: 21
+    mode: box
+
 # If door opens when sun is down, turn lights on
 # If sun sets and door is open or presense detected, turn lights on
 # If lights on but no presence for one hour, turn lights off
@@ -40,14 +50,14 @@ automation:
           {{ is_state('binary_sensor.bo_s_office_door_contact', 'off')
                and (is_state('binary_sensor.bo_s_office_motion', 'on')
                     or is_state('binary_sensor.bo_s_office_is_occupied', 'on'))
-               and states('sensor.ble_temperature_bos_office_a4c1380f0b98') | float < 19 }}
+               and states('sensor.ble_temperature_bos_office_a4c1380f0b98') | float < states('input_number.bo_s_office_target_temperature') | float }}
         variables:
           service: switch.turn_on
       - platform: template
         value_template: |
           {{ is_state('binary_sensor.bo_s_office_door_contact', 'on')
                or (is_state('binary_sensor.bo_s_office_motion', 'off') and is_state('binary_sensor.bo_s_office_is_occupied', 'off'))
-               or states('sensor.ble_temperature_bos_office_a4c1380f0b98') | float > 20 }}
+               or states('sensor.ble_temperature_bos_office_a4c1380f0b98') | float >= states('input_number.bo_s_office_target_temperature') | float }}
         variables:
           service: switch.turn_off
     action:

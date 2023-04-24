@@ -151,6 +151,9 @@ template:
             {{- sources | sort | unique | list -}}
 
 media_player:
+  - platform: denon
+    host: 10.10.20.77
+
   - platform: universal
     name: Living Room Spotify (bjeanes) # create a media player that is only "on"/"playing"/etc when it is playing in the living room
     children:
@@ -351,7 +354,7 @@ sensor:
     refresh: "5:00:00"
     default_state: "off"
     events:
-      - state: PBS # Default background music
+      - state: PBS 106.7FM Melbourne # Default background music
         start: "8:00:00"
         end: "21:00:00"
 
@@ -364,6 +367,13 @@ sensor:
 
       - state: Triple R # https://www.rrr.org.au/explore/programs/einstein-a-go-go
         start: "11:00:00"
+        end: "12:00:00"
+        condition:
+          condition: time
+          weekday: [sun]
+
+      - state: Ten FM # Dad's show
+        start: "9:00:00"
         end: "12:00:00"
         condition:
           condition: time
@@ -388,7 +398,7 @@ sensor:
           entity_id: sensor.rrr_now_playing
           state: "Stylin'"
 
-      - state: PBS
+      - state: PBS 106.7FM Melbourne
         condition:
           condition: state
           entity_id: sensor.pbs_now_playing

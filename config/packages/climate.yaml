@@ -1,0 +1,26 @@
+# TODO:
+#
+# * Turn on AC when: someone is home, weather outside is cold, and are out of bed or about to get out of bed
+#     - maybe can change the logic that manages the blinds using the sleep/wake logic to be backed by a schedule state that multiple things can key off?
+automation:
+  - alias: "Living Room AC Ionizer"
+    trigger:
+      platform: state
+      entity_id: climate.living_room_a_c
+      not_to:
+        - unavailable
+        - unknown
+      not_from:
+        - unavailable
+        - unknown
+    condition:
+      condition: template
+      value_template: '{{ trigger.to_state.state != "off" }}'
+    action:
+      - service: switch.turn_on
+        entity_id: switch.living_room_a_c_ionizer
+      - service: climate.set_fan_mode
+        data:
+          fan_mode: NATURE
+        target:
+          entity_id: climate.living_room_a_c

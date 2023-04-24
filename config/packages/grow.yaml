@@ -1,62 +1,54 @@
-android_ip_webcam:
-  - host: 10.10.10.112
-    name: Tent Cam
-    sensors:
-      - battery_level
-      - battery_temp
-      - light
-      - proximity
-    switches:
-      - exposure_lock
-      - ffc
-      - focus
-      - night_vision
-      - overlay
-
 camera:
   - platform: mjpeg_timelapse
     image_url: http://10.10.10.112:8080/shot.jpg
     name: Tent Timelapse
     fetch_interval: 3600
-    max_frames: 36
-    framerate: 10
+    max_frames: 1000
+    framerate: 5
     quality: 80
     loop: true
+  # - platform: mjpeg_timelapse
+  #   image_url: http://10.10.10.112:8080/shot.jpg
+  #   name: Tent Timelapse (Daily, )
+  #   fetch_interval:
+  #   max_frames: 365
+  #   framerate: 10
+  #   quality: 80
+  #   loop: true
+
+sensor:
+  - platform: schedule_state
+    name: Tent light schedule
 
 template:
   - binary_sensor:
       - unique_id: tent_lights_status
         name: Tent lights status
-        delay_on: "0:00:05"
-        delay_off: "0:00:05"
         state: |
-          {{ states('sensor.tent_wattage') | float > 150 }}
-        attributes:
-          device_class: power
+          {{ 500 < [states('sensor.ble_illuminance_tent_c47c8d6dd13f') | int(default=0), states('sensor.ble_illuminance_tent_c47c8d6dd155') | int(default=0)] | max }}
+  #   trigger:
+  #     - platform: numeric_state
+  #       entity_id:
+  #         # - sensor.ble_illuminance_tent_c47c8d6dd155
+  #         - sensor.ble_illuminance_tent_c47c8d6dd13f
+  #       below: 700
+  #       variables:
+  #         state: false
+  #     - platform: numeric_state
+  #       entity_id:
+  #         # - sensor.ble_illuminance_tent_c47c8d6dd155
+  #         - sensor.ble_illuminance_tent_c47c8d6dd13f
+  #       above: 700
+  #       variables:
+  #         state: true
   - sensor:
-      - unique_id: tent_temperature_cached
-        name: Tent Temperature (cached)
-        unit_of_measurement: °C
-        device_class: temperature
-        state_class: measurement
-        state: |
-          {{ float(states('sensor.tent_temperature'), default=states('sensor.tent_temperature_cached')) }}
-
-      - unique_id: tent_humidity_cached
-        name: Tent Humidity (cached)
-        unit_of_measurement: "%"
-        device_class: humidity
-        state_class: measurement
-        state: |
-          {{ float(states('sensor.tent_humidity'), default=states('tent_humidity_cached')) }}
-
       - unique_id: tent_svp
         name: "Tent SVP (Saturation Vapor Pressure)"
         unit_of_measurement: kPa
         device_class: pressure
         state_class: measurement
         state: |
-          {% set T = float(states('sensor.tent_temperature_cached')) %}
+          {% set T = float(states('sensor.ble_temperature_tent_a4c1385ec751')) %}
           {% if is_number(T) %}
           {{ (0.61078 * e ** (17.2694 * T / (T + 238.3))) | round(3) }}
           {% else %}
@@ -69,7 +61,7 @@ template:
         state_class: measurement
         state: |
           {% set SVP = float(states('sensor.tent_svp')) %}
-          {% set RH = float(states('sensor.tent_humidity_cached')) %}
+          {% set RH = float(states('sensor.ble_humidity_tent_a4c1385ec751')) %}
           {% if is_number(SVP) and is_number(RH) %}
           {{ (SVP * (RH/100.0)) | round(3) }}
           {% else %}
@@ -90,6 +82,20 @@ template:
           {% endif %}
 
 automation:
+  - id: snapshot_camera
+    alias: Snapshot grow camera every 12 hours
+    trigger:
+      - platform: time_pattern
+        hours: "/12"
+    condition:
+      - "{{ is_state('binary_sensor.tent_lights_status', 'on') }}"
+    action:
+      - service: camera.snapshot
+        target:
+          entity_id: camera.tent_camera_mjpeg
+        data_template:
+          filename: "/config/camera/camera.tent_camera_mjpeg/{{ now().strftime('%Y%m%d-%H%M%S') }}.jpg"
+
   - id: "1635395611631"
     alias: Tent Cam Night Mode When Light Is Off
     description: ""
@@ -297,9 +303,7 @@ automation:
     condition:
       - condition: or
         conditions:
-          - condition: numeric_state
-            entity_id: sensor.tent_wattage
-            below: "150"
+          - "{{ is_state('binary_sensor.tent_lights_status', 'off') }}"
           - condition: numeric_state
             entity_id: sensor.tent_humidity_cached
             above: input_number.minimum_tent_humidity
@@ -311,33 +315,6 @@ automation:
             - switch.tent_humidifier
             - switch.tent_humidifier_local
     mode: restart
-  - id: "1644716285765"
-    alias: Re-focus tent cam regularly
-    description: ""
-    trigger:
-      - platform: time_pattern
-        minutes: /5
-        seconds: "0"
-        hours: "*"
-    condition:
-      - condition: numeric_state
-        entity_id: sensor.tent_wattage
-        above: "150"
-    action:
-      - service: switch.toggle
-        data: {}
-        target:
-          entity_id: switch.tent_cam_focus
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 3
-          milliseconds: 0
-      - service: switch.toggle
-        data: {}
-        target:
-          entity_id: switch.tent_cam_focus
-    mode: single
   - id: "1645058611536"
     alias: Count humidifier run time
     description: ""
@@ -382,38 +359,28 @@ automation:
         target:
           entity_id: timer.humidifier_time_till_refill
     mode: restart
-  - id: "1647038709985"
-    alias: Disable timelapse when lights off
-    description: ""
+
+  - id: "b30ad63e38bec67a0207"
+    alias: Timelapse tent cam only when tent lights on
     trigger:
-      - platform: numeric_state
-        entity_id: sensor.tent_wattage
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 30
-        below: "100"
+      - platform: state
+        entity_id: binary_sensor.tent_lights_status
+        not_to:
+          - unknown
+          - unavailable
+        not_from:
+          - unknown
+          - unavailable
+        variables:
+          service: >
+            {% if trigger.to_state.state == 'on' %}
+              mjpeg_timelapse.resume_recording
+            {% else %}
+              mjpeg_timelapse.pause_recording
+            {% endif %}
     condition: []
     action:
-      - service: mjpeg_timelapse.pause_recording
-        data: {}
-        target:
-          entity_id: camera.tent_timelapse
-    mode: single
-  - id: "1647038771614"
-    alias: Enable timelapse when lights on
-    description: ""
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.tent_wattage
-        for:
-          hours: 0
-          minutes: 15
-          seconds: 0
-        above: "180"
-    condition: []
-    action:
-      - service: mjpeg_timelapse.resume_recording
+      - service: "{{ service }}"
         data: {}
         target:
           entity_id: camera.tent_timelapse

@@ -60,6 +60,28 @@ config:
     - entities:
       - entity: switch.nas
       - entity: switch.tumtum
+      - type: section
+      - entity: automation.power_nas_tumtum_according_to_sleep
+        name: Turn off while sleeping
+      type: entities
+    - entities:
+      - entity: sensor.ups_status
+        name: Status
+      - entity: sensor.ups_battery_charge
+        name: Charge
+      - entity: sensor.ups_load
+        name: Load
+      - entity: automation.notify_on_ups_state_change
+        name: Notify on state change
+      - entity: automation.power_nas_tumtum_according_to_ups
+        name: Shutdown servers on battery
+      footer:
+        detail: 2
+        entity: sensor.ups_battery_charge
+        hours_to_show: 6
+        type: graph
+      show_header_toggle: false
+      title: UPS
       type: entities
     icon: mdi:wardrobe-outline
     path: server-closet
@@ -295,6 +317,54 @@ config:
     path: hass
     theme: Backend-selected
     title: HASS
+  - badges: []
+    cards:
+    - entities:
+      - entity: device_tracker.ugw3
+      - entity: sensor.unifi_gateway_alerts
+      - entity: device_tracker.unifi_controller
+      - entity: sensor.unifi_gateway_firmware_upgradable
+      - entity: sensor.unifi_gateway_lan
+      - entity: sensor.unifi_gateway_vpn
+      - entity: sensor.unifi_gateway_www
+      - entity: sensor.unifi_gateway_wlan
+      type: entities
+    - card:
+        type: entities
+      filter:
+        exclude: []
+        include:
+        - integration: unifi
+          not:
+            domain: device_tracker
+      type: custom:auto-entities
+    - card:
+        state_color: true
+        title: Clients
+        type: entities
+      filter:
+        exclude: []
+        include:
+        - domain: device_tracker
+          integration: unifi
+          options:
+            attribute: ip
+            type: attribute
+          sort:
+            method: friendly_name
+          state: home
+        - type: section
+        - domain: device_tracker
+          integration: unifi
+          not:
+            state: home
+          sort:
+            method: friendly_name
+      type: custom:auto-entities
+    icon: mdi:lan-connect
+    path: lan
+    theme: Backend-selected
+    title: LAN
   - badges: []
     cards:
     - all_series_config:

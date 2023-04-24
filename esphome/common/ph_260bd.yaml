@@ -1,0 +1,195 @@
+# JDY-08
+# https://amperkot.ru/static/3236/uploads/datasheets/JDY-08.pdf
+# [13:44:48][I][ble_client:085]: Attempting BLE connection to 7c:01:0a:43:4e:9e
+# [13:44:49][D][ble_client_lambda:035]: Connected to BLE device
+# [13:44:49][I][ble_client:161]: Service UUID: 0xFFE0
+# [13:44:49][I][ble_client:162]:   start_handle: 0x1  end_handle: 0x9
+# [13:44:49][I][ble_client:341]:  characteristic 0xFFE1, handle 0x3, properties 0x1c
+# [13:44:49][I][ble_client:341]:  characteristic 0xFFE2, handle 0x7, properties 0x1c
+# [13:44:49][I][ble_client:161]: Service UUID: 0x1800
+# [13:44:49][I][ble_client:162]:   start_handle: 0xa  end_handle: 0x14
+# [13:44:49][I][ble_client:341]:  characteristic 0x2A00, handle 0xc, properties 0x2
+# [13:44:49][I][ble_client:341]:  characteristic 0x2A01, handle 0xe, properties 0x2
+# [13:44:49][I][ble_client:341]:  characteristic 0x2A02, handle 0x10, properties 0xa
+# [13:44:49][I][ble_client:341]:  characteristic 0x2A05, handle 0x17, properties 0x20
+ble_client:
+  - mac_address: "7C:01:0A:43:4E:9E"
+    id: ph_260bd
+    on_connect:
+      then:
+        - wait_until: # wait until characteristic is discovered
+            lambda: |-
+              esphome::ble_client::BLEClient* client = id(ph_260bd);
+
+              auto service_uuid = 0xFFE0; // can't get it off `sensor` because it is protected
+              auto char_uuid = 0xFFE1;    // can't get it off `sensor` because it is protected
+
+              esphome::ble_client::BLECharacteristic* chr = client->get_characteristic(service_uuid, char_uuid);
+
+              return chr != nullptr;
+        - lambda: |-
+            ESP_LOGD("ble_client_lambda", "Connected to PH-260BD");
+
+            //esphome::ble_client::BLESensor* sensor = id(ph_260bd_sensor);
+            esphome::ble_client::BLEClient* client = id(ph_260bd);
+
+            auto service_uuid = 0xFFE0; // can't get it off `sensor` because it is protected
+            auto char_uuid = 0xFFE1;    // can't get it off `sensor` because it is protected
+
+            esphome::ble_client::BLECharacteristic* chr = client->get_characteristic(service_uuid, char_uuid);
+
+            if (chr == nullptr) {
+              ESP_LOGW("ble_client", "[0xFFE1] Characteristic not found.  State update can not be written.");
+            } else {
+              unsigned char newVal[8] = {
+                0x00, 0x03,  0x00, 0x00,
+                0x00, 0x14, 0x44, 0x14
+              };
+              int status = esp_ble_gattc_write_char(
+                client->gattc_if,
+                client->conn_id,
+                chr->handle,
+                sizeof(newVal),
+                newVal,
+                ESP_GATT_WRITE_TYPE_NO_RSP,
+                ESP_GATT_AUTH_REQ_NONE
+              );
+
+              if (status) {
+                ESP_LOGW("ble_client", "Error sending write value to BLE gattc server, status=%d", status);
+              }
+            }
+
+            /*
+              decltype(v)::foo = 1; // debug type of v by mis-casting it and looking at compiler error
+            */
+
+    on_disconnect:
+      then:
+        - lambda: |-
+            ESP_LOGD("ble_client", "Disconnected from PH-260BD");
+
+sensor:
+  - platform: template
+    name: "Tent Reservoir EC (µS)"
+    id: ec_us
+    unit_of_measurement: "µS/cm"
+    accuracy_decimals: 0
+    state_class: measurement
+    icon: mdi:water-opacity
+    filters:
+      - filter_out: nan
+      - throttle: 30s
+
+  - platform: template
+    name: "Tent Reservoir Temperature"
+    id: temp
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    state_class: measurement
+    device_class: temperature
+    filters:
+      - filter_out: nan
+      - throttle: 30s
+
+  - platform: template
+    name: "Tent Reservoir pH"
+    id: ph
+    unit_of_measurement: "pH"
+    accuracy_decimals: 2
+    state_class: measurement
+    icon: mdi:ph
+    filters:
+      - filter_out: nan
+      - throttle: 30s
+
+  - platform: ble_client
+    type: characteristic
+    ble_client_id: ph_260bd
+    id: ph_260bd_sensor
+    internal: true
+    service_uuid: FFE0
+    characteristic_uuid: FFE1
+    notify: true
+
+    # The PH-260BD puts bytes onto the characteristic value which needs to be treated as text:
+    #
+    #     [1] pry(main)> ['372e35312070480d0a32312e372020e284830d0a'].pack('H*')
+    #     => "7.51 pH\r\n21.7  \xE2\x84\x83\r\n"
+    #     [2] pry(main)> puts ['372e35312070480d0a32312e372020e284830d0a'].pack('H*')
+    #     7.51 pH
+    #     21.7  ℃
+    #
+    # It alternates between putting the EC/TDS value alone (as a string, with units) and the pH and
+    # temperature together. Perhaps it can't fit all three in a single buffer.
+    #
+    # All values follow: number(s)/dot, space(s), unit, carriage return, new line
+    #
+    # This lambda parses the string and publishes each value+unit to the appropriate template sensor on each newline.
+    lambda: |-
+      ESP_LOGD("ble_client.receive", "value received with %d bytes: [%.*s]", x.size(), x.size(), &x[0]);
+
+      if (x.size() == 0) return NAN;
+      //decltype(parse_float)::foo= 1;
+
+      std::string val_str = "";
+      std::string val_unit = "";
+
+      // ESP_LOGD("ble_client.receive", "value received with %d bytes: [%.*s]", x.size(), x.size(), &x[0]);
+
+      // https://git.faked.org/jan/ph-260bd/-/blob/master/src/main.cpp#L7
+      static int factorMsToPpm = 700;
+
+      for (int i = 0; i < x.size(); i++) {
+        auto c = x[i];
+        switch(c) {
+          case '\x30': // "0"
+          case '\x31': // "1"
+          case '\x32': // "2"
+          case '\x33': // "3"
+          case '\x34': // "4"
+          case '\x35': // "5"
+          case '\x36': // "6"
+          case '\x37': // "7"
+          case '\x38': // "8"
+          case '\x39': // "9"
+          case '\x2E': // "."
+            val_str += c;
+            break;
+          case '\x20': // " "
+            break; // proceed until we hit units
+          case '\x0d': // '\r'
+            break; // ignore
+          case '\x0a': // '\n'
+            // FIXME: Don't publish temperature when ppt is set as it drops the first char
+
+            if (auto val = parse_number<float>(val_str)) {
+              if (val_unit == "pH") {
+                id(ph).publish_state(*val);
+              } else if (val_unit == "\xE2\x84\x83") { // ℃ char
+                id(temp).publish_state(*val);
+              } else if (val_unit == "uS") { // microsiemens
+                id(ec_us)->publish_state(*val);
+              } else if (val_unit == "mS") { // millisiemens
+                id(ec_us)->publish_state(*val * 1000);
+              } else if (val_unit == "ppm") { // TDS parts per million
+                id(ec_us)->publish_state(*val / factorMsToPpm * 1000);
+              } else if (val_unit == "ppt") { // TDS parts per thousand
+                id(ec_us)->publish_state(*val / factorMsToPpm * 1000 * 1000);
+
+              } else {
+                ESP_LOGW("ble_client.receive", "value received with unknown unit: [%s]", val_unit.c_str());
+              }
+            } else {
+              ESP_LOGW("ble_client.receive", "value could not be parsed as float: [%s]", val_str.c_str());
+            }
+
+            val_unit = "";
+            val_str = "";
+            break;
+          default:
+            val_unit += c;
+        }
+      }
+
+      return 0.0; // this sensor isn't actually used

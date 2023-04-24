@@ -202,7 +202,7 @@ template:
         device_class: occupancy
 
       - unique_id: analog_room_is_occupied
-        name: analog Room Is Occupied
+        name: analog Room As Occupied
         state: |
           {{ is_state('sensor.template_room_bo_phone', 'analog_room') or is_state('sensor.template_room_ri_phone', 'analog_room') }}
         icon: |

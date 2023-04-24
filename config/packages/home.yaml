@@ -52,7 +52,17 @@ automation:
     action:
       - service: light.turn_off
         target:
-          entity_id: all
+          area_id:
+            - ri_s_office
+            - bo_s_office
+            - living_room
+            - kitchen
+            - hallway
+            - laundry_room
+            - bathroom
+            - analog_room
+            - outdoors
+            - garden_shed
       - service: light.turn_on
         data:
           color_temp: 462
@@ -117,6 +127,57 @@ automation:
         data:
           entity_id: "{{ toggle }}"
 
+  - id: bedroom_blinds
+    alias: Manage bedroom blinds
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.in_bed
+        to: "on"
+        id: in_bed
+        for:
+          hours: 2 # proxy for "is asleep"
+      - id: sunset
+        platform: state
+        entity_id: sun.sun
+        to: below_horizon
+    action:
+      - service: cover.close_cover
+        target:
+          area_id: bedroom
+      # if we've gone to bed, wait for the us to get up or 8 hours to pass (whichever happens first) to then re-open
+      # blinds.
+      - choose:
+          - conditions:
+              condition: trigger
+              id: in_bed
+            sequence:
+              - wait_for_trigger:
+                  - platform: template
+                    value_template: >
+                      {{ is_state('binary_sensor.in_bed', 'off') }}
+                    for:
+                      minutes: 10 # _staying_ out of bed
+                timeout:
+                  hours: 6 # 2 hours already part of trigger condition, for 8 hours total
+              - wait_for_trigger:
+                  - platform: template
+                    value_template: >
+                      {{ is_state('sun.sun', 'above_horizon') and now().hour >= 7 }}
+              - service: cover.set_cover_position
+                data:
+                  position: 20
+                target:
+                  area_id: bedroom
+              - wait_for_trigger:
+                  - platform: template
+                    value_template: >
+                      {{ is_state('binary_sensor.anyone_in_bed', 'off') }}
+                timeout:
+                  hours: 2
+              - service: cover.open_cover
+                target:
+                  area_id: bedroom
+
 template:
   - binary_sensor:
       - unique_id: in_bed
@@ -166,7 +227,15 @@ homekit:
         - switch.bos_office_heater
         - switch.ri_s_desk_plug
 
+        - cover.analog_room_blinds
+        - cover.bos_office_blinds
+        - cover.bedroom_blinds
+        - cover.front_gate
+        - climate.living_room_a_c
+        - light.fairy_lights
+
       include_entity_globs:
+        - climate.living_room*
         - binary_sensor.*_is_occupied
         - binary_sensor.*_motion
         - binary_sensor.*_presence
@@ -190,6 +259,23 @@ homekit:
         - sensor.*weather*
         - sensor.nas_*
         - sensor.*_nas_*
+
+        # Magic areas entities
+        - light.area_*
+        - light.sleep_lights_*
+        - light.global_lights
+        - light.interior_lights
+        - light.exterior_lights
+        - light.overhead_lights*
+        - light.accent_lights*
+        - cover.area_*
+        - switch.area_light_control_*
+        - binary_sensor.area_battery_*
+        - binary_sensor.area_connectivity_*
+        - binary_sensor.area_door_*
+        - binary_sensor.area_tamper_*
+        - binary_sensor.area_update_*
+        - binary_sensor.area_global
       exclude_domains: []
     entity_config:
       vacuum.robot_vacuum:
