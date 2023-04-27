@@ -386,7 +386,7 @@ script:
           time:
       soc_1:
         name: Schedule 1 Target State-of-Charge
-        default: 85
+        default: 60
         selector:
           number:
             min: 0
