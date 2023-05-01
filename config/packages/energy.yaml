@@ -108,13 +108,13 @@ sensor:
           &v4={{states('sensor.inverter_load_power')|float|round(0)}}    {#- power consumption (W) -#}
           &v6={{states('sensor.inverter_phase_a_voltage')|float|round(1)}}  {#- voltage -#}
 
-      eagle_200_meter_power_demand_w:
-        unique_id: 528a94ffdd069f6f5dcd
-        friendly_name: Eagle-200 Meter Power Demand (W)
-        value_template: >-
-          {{ states('sensor.eagle_200_meter_power_demand') | float * 1000 }}
-        unit_of_measurement: W
-        device_class: power
+      # eagle_200_meter_power_demand_w:
+      #   unique_id: 528a94ffdd069f6f5dcd
+      #   friendly_name: Eagle-200 Meter Power Demand (W)
+      #   value_template: >-
+      #     {{ states('sensor.eagle_200_meter_power_demand') | float * 1000 }}
+      #   unit_of_measurement: W
+      #   device_class: power
 
       inverter_grid_power_demand:
         unique_id: 733c721fd52bf672d0ed
@@ -131,3 +131,18 @@ sensor:
         unit_of_measurement: $/hr
         device_class: monetary
         friendly_name: Current electricity cost
+
+      property_power_usage:
+        unique_id: property_power_usage
+        value_template: |
+          {{ (states('sensor.eagle_200_meter_power_demand') | float + states('sensor.inverter_active_power') | float) | round(0) }}
+        unit_of_measurement: W
+        device_class: power
+        friendly_name: Property power usage
+
+  - platform: integration
+    source: sensor.property_power_usage
+    name: Property energy usage
+    unique_id: property_energy_usage
+    unit_prefix: k
+    round: 2
