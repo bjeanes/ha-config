@@ -124,6 +124,7 @@ automation:
       #       it will become re-enabled again.
       enabled_1: |
         {{ is_state('input_boolean.inverter_charging_schedule_enabled', 'on') and
+
             states('input_number.inverter_charging_schedule_target_soc') | float(default = 0) > states('sensor.inverter_battery_level') | float(default = 0) and
             not is_state('input_datetime.inverter_charging_schedule_start', 'unknown') and
             not is_state('input_datetime.inverter_charging_schedule_end', 'unknown')

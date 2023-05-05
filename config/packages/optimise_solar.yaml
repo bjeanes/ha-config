@@ -293,7 +293,6 @@ template:
 
       - unique_id: d257272c-3ac0-4d93-9ef7-00717757cef3
         name: Solar forecast remaining pessimistic
-        state_class: measurement
         device_class: energy
         unit_of_measurement: kWh
         attributes:
@@ -302,6 +301,21 @@ template:
           {% set forecast_remaining =  states('sensor.solcast_forecast_remaining_today') | float(default=0) %}
           {% set forecast_hour = states('sensor.solcast_forecast_this_hour') | float(default=0) / 1000.0 %}
           {{ [0, forecast_remaining - forecast_hour] | max }}
+
+      - unique_id: dfdaea61-8c96-4b09-82bf-b76e25800cca
+        name: Solar future peak amount
+        device_class: energy
+        unit_of_measurement: kWh
+        attributes:
+          solar: "true"
+          period_start: >-
+            {{ (state_attr('sensor.solcast_forecast_today', 'detailedForecast')
+              | selectattr('period_start', 'ge', now())
+              | max(attribute='pv_estimate90')).period_start }}
+        state: >-
+          {{ (state_attr('sensor.solcast_forecast_today', 'detailedForecast')
+            | selectattr('period_start', 'ge', now())
+            | max(attribute='pv_estimate90')).pv_estimate90 }}
 
       - unique_id: 6bf7ad20-cf6a-4689-8214-13cd63de80a9
         name: Inverter target battery level
@@ -313,7 +327,14 @@ template:
           {% set battery_lower_limit = states('input_number.inverter_battery_reserve') | int + 5 %}
           {% set forecast_remaining_pessimistic = states('sensor.solar_forecast_remaining_pessimistic') | float(default=0) %}
           {% set forecast_total = states('sensor.solcast_forecast_today') | float(default=0) %}
-          {{ [[battery_lower_limit, 100.0 * (1.0 - (forecast_remaining_pessimistic/forecast_total)) | round(2)] | max, 100] | min }}
+
+          {% if states('sensor.solar_future_peak_amount') | float(default=0) <= 1.5 %}
+            100
+          {% elif states('sensor.solar_future_peak_amount') | float(default=0) <= 2.5 %}
+            90
+          {% else %}
+            {{ [[battery_lower_limit, 100.0 * (1.0 - (forecast_remaining_pessimistic/forecast_total)) | round(2)] | max, 100] | min }}
+          {% endif %}
 
       - unique_id: f603d8f8-92ce-4e77-b271-048110394658
         name: Inverter battery mode
