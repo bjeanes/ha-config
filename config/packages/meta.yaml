@@ -13,12 +13,14 @@ automation:
                 | selectattr('state', 'eq', 'on')
                 | selectattr('attributes.title', 'match', 'ESPHome')
                 | selectattr('attributes.auto_update', 'eq', false)
-                | selectattr('attributes.in_progress', 'eq', false) |
+                | selectattr('attributes.in_progress', 'eq', false)
                 | sort(attribute='attributes.installed_version')
+                | map(attribute='entity_id')
                 | list }}
+          next_to_update: "{{ outdated_esp_items | first }}"
       - condition:
           - "{{ outdated_esp_items | count > 0 }}"
       - service: update.install
         target:
-          entity_id: "{{ outdated_esp_items[0].entity_id }}"
+          entity_id: "{{ next_to_update }}"
     mode: single
