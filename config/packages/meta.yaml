@@ -1,20 +1,24 @@
 automation:
-  # https://community.home-assistant.io/t/auto-update-esphome-devices-via-automation/536573/15
+  # Based on https://community.home-assistant.io/t/auto-update-esphome-devices-via-automation/536573/15
   - id: 0f9b330f-a026-49bc-9d1e-57d52f5ac625
     alias: Auto-update ESP devices
     trigger:
       - platform: time_pattern
         hours: "3"
         minutes: "*"
-
-    condition:
-    - "{{ states.update | selectattr('entity_id', 'match', 'update\.node\d+_firmware')
-      | selectattr('state', 'eq', 'on') | list | count > 0 }}"
-    - "{{ states.update | selectattr('entity_id', 'match', 'update\.node\d+_firmware')
-      | selectattr('attributes.in_progress') | list | count == 0 }}"
     action:
-    - service: update.install
-      target:
-        entity_id: "{{ (states.update | selectattr('entity_id', 'match', 'update\.node\d+_firmware')
-          | selectattr('state', 'eq', 'on') | first).entity_id }}"
+      - variables:
+          outdated_esp_items: >-
+            {{ states.update
+                | selectattr('state', 'eq', 'on')
+                | selectattr('attributes.title', 'match', 'ESPHome')
+                | selectattr('attributes.auto_update', 'eq', false)
+                | selectattr('attributes.in_progress', 'eq', false) |
+                | sort(attribute='attributes.installed_version')
+                | list }}
+      - condition:
+          - "{{ outdated_esp_items | count > 0 }}"
+      - service: update.install
+        target:
+          entity_id: "{{ outdated_esp_items[0].entity_id }}"
     mode: single
