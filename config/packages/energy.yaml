@@ -148,7 +148,7 @@ sensor:
       budgeted_property_power_usage:
         unique_id: property_power_usage
         value_template: |
-          {{ [0, (states('sensor.eagle_200_meter_power_demand') | float + states('sensor.inverter_active_power') | float) | round(0)] | max }}
+          {{ [0, (states('sensor.eagle_200_meter_power_demand') | float + states('sensor.inverter_active_power') | float - states('sensor.inverter_pv_power') | float)| round(0)] | max }}
         unit_of_measurement: W
         device_class: power
         friendly_name: Property power usage
@@ -157,5 +157,12 @@ sensor:
     source: sensor.property_power_usage
     name: Property energy usage
     unique_id: property_energy_usage
+    unit_prefix: k
+    round: 2
+
+  - platform: integration
+    source: sensor.budgeted_property_power_usage
+    name: Budgeted property energy usage
+    unique_id: budgeted_property_energy_usage
     unit_prefix: k
     round: 2
