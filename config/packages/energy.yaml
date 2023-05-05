@@ -135,7 +135,20 @@ sensor:
       property_power_usage:
         unique_id: property_power_usage
         value_template: |
-          {{ (states('sensor.eagle_200_meter_power_demand') | float + states('sensor.inverter_active_power') | float) | round(0) }}
+          {{ [0, (states('sensor.eagle_200_meter_power_demand') | float + states('sensor.inverter_active_power') | float) | round(0)] | max }}
+        unit_of_measurement: W
+        device_class: power
+        friendly_name: Property power usage
+
+      # This should count any power that is not coming _directly_ from the sun, including the home battery. This is
+      # because power used here can cause purchasing to happen later when the battery is drained, and the proportion of
+      # usage between the main house and the tiny house should reflect the proportion of the bill.
+      #
+      # Note: Ideally, if we drain from battery and then the sun re-charges it, it wouldn't be counted, but that might be trickier so I'll have to work on that later.
+      budgeted_property_power_usage:
+        unique_id: property_power_usage
+        value_template: |
+          {{ [0, (states('sensor.eagle_200_meter_power_demand') | float + states('sensor.inverter_active_power') | float) | round(0)] | max }}
         unit_of_measurement: W
         device_class: power
         friendly_name: Property power usage
