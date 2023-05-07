@@ -3,22 +3,102 @@
 # * Turn on AC when: someone is home, weather outside is cold, and are out of bed or about to get out of bed
 #     - maybe can change the logic that manages the blinds using the sleep/wake logic to be backed by a schedule state that multiple things can key off?
 automation:
-  - alias: "Living Room AC Ionizer"
+  - alias: "Keep Living Room AC ionizer on"
+    id: dfc2753d-9a70-4e77-adb0-c4a85f8f3406
     trigger:
-      platform: state
-      entity_id: climate.living_room_a_c
-      not_to:
-        - unavailable
-        - unknown
-        - "off"
-      not_from:
-        - unavailable
-        - unknown
+      - platform: state
+        entity_id: climate.living_room_a_c
+        not_to:
+          - unavailable
+          - unknown
+          - "off"
+        not_from:
+          - unavailable
+          - unknown
+      - platform: state
+        entity_id: switch.living_room_a_c_jet_mode
+        not_to:
+          - unavailable
+          - unknown
     action:
       - service: switch.turn_on
         entity_id: switch.living_room_a_c_ionizer
+
+  - alias: "Set Living Room AC fan to auto"
+    id: b09bd43d-4e5d-4ff3-84cb-3aaa8d878463
+    trigger:
+      - platform: state
+        entity_id: climate.living_room_a_c
+        not_to:
+          - unavailable
+          - unknown
+          - "off"
+        not_from:
+          - unavailable
+          - unknown
+      - platform: state
+        entity_id: switch.living_room_a_c_jet_mode
+        not_to:
+          - unavailable
+          - unknown
+          - "on"
+    condition: "{{ not is_state('switch.living_room_a_c_jet_mode', 'on') }}"
+    action:
       - service: climate.set_fan_mode
         data:
           fan_mode: NATURE
         target:
           entity_id: climate.living_room_a_c
+
+  - alias: "Capture Living Room AC state"
+    id: 15a75d0a-bc08-45c7-95d1-b16d02f6927a
+    trigger:
+      - platform: state
+        entity_id: climate.living_room_a_c
+        not_to:
+          - unavailable
+          - unknown
+          - "off"
+        not_from:
+          - unavailable
+          - unknown
+      - platform: numeric_state
+        entity_id: climate.living_room_a_c
+        attribute: temperature
+      - platform: state
+        entity_id: climate.living_room_a_c
+        attribute: fan_mode
+      - platform: state
+        entity_id: climate.living_room_a_c
+        attribute: swing_mode
+      - platform: state
+        entity_id: climate.living_room_a_c
+        attribute: swing_mode_horizontal
+      - platform: state
+        entity_id: climate.living_room_a_c
+        attribute: swing_mode_vertical
+      - platform: state
+        entity_id: switch.living_room_a_c_jet_mode
+        not_to:
+          - unavailable
+          - unknown
+          - "on"
+    condition: "{{ not is_state('switch.living_room_a_c_jet_mode', 'on') }}"
+    action:
+      - service: scene.create
+        data:
+          scene_id: living_room_ac_state
+          snapshot_entities:
+            - switch.living_room_a_c_ionizer
+            - climate.living_room_a_c
+
+  - id: 7e0f6c8f-28ab-4342-96f9-a28a1fa8d580
+    alias: Restore AC state after Jet mode is off
+    trigger:
+      - platform: state
+        entity_id: switch.living_room_a_c_jet_mode
+        to: "off"
+    action:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.living_room_ac_state
