@@ -83,7 +83,7 @@ automation:
           - unavailable
           - unknown
           - "on"
-    condition: "{{ not is_state('switch.living_room_a_c_jet_mode', 'on') }}"
+    condition: "{{ not is_state('switch.living_room_a_c_jet_mode', 'on') and not is_state('climate.living_room_a_c', 'off') }}"
     action:
       - service: scene.create
         data:
