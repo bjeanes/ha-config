@@ -6,6 +6,10 @@ B Tasker HomeAssistant Addons:
   maintainer: B Tasker
   slug: 93f0ddc5
   source: https://github.com/bentasker/HomeAssistantAddons
+Cloudflared:
+  maintainer: Tobia Brenner <https://github.com/brenner-tobias/>
+  slug: 9074a9fa
+  source: https://github.com/brenner-tobias/ha-addons
 EMHASS Add-on Energy Management for Home Assistant:
   maintainer: David HERNANDEZ <davidusb@gmail.com>
   slug: 5b918bf2
@@ -30,6 +34,10 @@ Hass.io add-ons by Nicolai:
   maintainer: Koen Kanters <koenkanters94@gmail.com>
   slug: 45df7312
   source: https://github.com/zigbee2mqtt/hassio-zigbee2mqtt
+Home Assistant Community Add-ons:
+  maintainer: Franck Nijhof <frenck@addons.community>
+  slug: a0d7b954
+  source: https://github.com/hassio-addons/repository
 Home Assistant Google Drive Backup Repository:
   maintainer: Stephen Beechen <stephen@beechens.com>
   slug: cebe7a76
@@ -42,11 +50,15 @@ MickMake Hass.io Add-ons:
   maintainer: MickMake <embed@mickmake.com>
   slug: ba22da74
   source: https://github.com/MickMake/HomeAssistantAddons
+Poeschl Home Assistant Add-ons:
+  maintainer: Poeschl <Poeschl@users.noreply.github.com>
+  slug: 243ffc37
+  source: https://github.com/Poeschl/Hassio-Addons
 Shortumations:
   maintainer: Ari Sosnovsky <ariel@sosnovsky.ca>
   slug: 04377e81
   source: https://github.com/asosnovsky/Shortumation
-unknown:
-  maintainer: unknown
-  slug: a0d7b954
-  source: https://github.com/hassio-addons/repository
+bjeanes Home Assistant add-on repository:
+  maintainer: Bo Jeanes <hassio@bjeanes.com>
+  slug: 9c51689a
+  source: https://github.com/bjeanes/hassio-addons
