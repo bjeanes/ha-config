@@ -182,6 +182,8 @@ config:
         - entity_id: /inverter_.*_soc/
         - entity_id: /athom/
         include:
+        - entity_id: sensor.plex_tumtum_tree
+          state: unavailable
         - attributes:
             device_class: moisture
           domain: binary_sensor
