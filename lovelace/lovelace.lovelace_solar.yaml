@@ -593,7 +593,8 @@ config:
           name: Battery power
           secondary_info: last-updated
         - entities:
-          - entity: sensor.eagle_200_meter_power_demand_w
+          - entity: sensor.eagle_200_meter_power_demand
+            format: precision0
             name: meter
           entity: sensor.inverter_grid_power_demand
           name: Grid demand
@@ -604,7 +605,7 @@ config:
         - entity: sensor.inverter_grid_power_demand
           name: Grid demand (inverter)
           secondary_info: last-updated
-        - entity: sensor.eagle_200_meter_power_demand_w
+        - entity: sensor.eagle_200_meter_power_demand
           name: Grid demand (meter)
           secondary_info: last-updated
         hours_to_show: 6
