@@ -232,6 +232,7 @@ homekit:
         - cover.bedroom_blinds
         - cover.front_gate
         - climate.living_room_a_c
+        - switch.living_room_a_c_jet_mode
         - light.fairy_lights
 
       include_entity_globs:
