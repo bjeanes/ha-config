@@ -443,6 +443,13 @@ config:
       - entity: sensor.home_weather_cloud_coverage
       - entity: sensor.home_weather_forecast_cloud_coverage
       type: history-graph
+    - entities:
+      - entity: sensor.home_weather_temperature
+      - entity: sensor.area_temperature_degc_living_room
+      - entity: sensor.area_temperature_degc_bo_s_office
+      - entity: sensor.area_temperature_degc_bedroom
+      hours_to_show: 300
+      type: history-graph
     icon: hass:thermometer
     path: climate
     title: Climate
