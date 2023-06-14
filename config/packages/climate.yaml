@@ -72,24 +72,35 @@ automation:
     condition: "{{ not is_state('switch.living_room_a_c_jet_mode', 'on') }}"
     action:
       - choose:
-          - conditions: "{{ delta > 10 and not (is_state('climate.living_room_a_c', 'unavailable') or is_state('climate.living_room_a_c', 'unknown')) }}"
+          - conditions: |
+              {{ delta > 10 and not (
+                  is_state('switch.living_room_a_c_jet_mode', 'unavailable') or
+                  is_state('switch.living_room_a_c_jet_mode', 'unknown')
+                )
+              }}
             sequence:
-              - service: switch.turn_on
-                target:
-                  entity_id: switch.living_room_a_c_jet_mode
+              - if: "{{ not is_state('switch.living_room_a_c_jet_mode', 'on') }}"
+                then:
+                  - service: switch.turn_on
+                    target:
+                      entity_id: switch.living_room_a_c_jet_mode
           - conditions: "{{ delta > 5 }}"
             sequence:
+              - if: "{{ not is_state_attr('climate.living_room_a_c', 'fan_mode', 'HIGH') }}"
+                then:
+                  - service: climate.set_fan_mode
+                    data:
+                      fan_mode: HIGH
+                    target:
+                      entity_id: climate.living_room_a_c
+        default:
+          - if: "{{ not is_state_attr('climate.living_room_a_c', 'fan_mode', 'NATURE') }}"
+            then:
               - service: climate.set_fan_mode
                 data:
-                  fan_mode: HIGH
+                  fan_mode: NATURE
                 target:
                   entity_id: climate.living_room_a_c
-        default:
-          - service: climate.set_fan_mode
-            data:
-              fan_mode: NATURE
-            target:
-              entity_id: climate.living_room_a_c
 
   - alias: "Capture Living Room AC state"
     id: 15a75d0a-bc08-45c7-95d1-b16d02f6927a

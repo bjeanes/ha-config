@@ -236,7 +236,6 @@ homekit:
         - light.fairy_lights
 
       include_entity_globs:
-        - climate.living_room*
         - binary_sensor.*_is_occupied
         - binary_sensor.*_motion
         - binary_sensor.*_presence
