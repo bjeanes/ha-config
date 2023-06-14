@@ -32,7 +32,7 @@ automation:
           - unavailable
           - unknown
         entity_id: climate.living_room_a_c
-    condition: "{{ not is_state('switch.living_room_a_c_ionizer', 'on') }}"
+    condition: "{{ not (is_state('climate.living_room_a_c', 'off') or is_state('switch.living_room_a_c_ionizer', 'on')) }}"
     action:
       - service: switch.turn_on
         entity_id: switch.living_room_a_c_ionizer
