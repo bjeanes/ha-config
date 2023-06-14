@@ -69,7 +69,7 @@ automation:
           - "on"
     variables:
       delta: "{{ (state_attr('climate.living_room_a_c', 'current_temperature') - state_attr('climate.living_room_a_c', 'temperature')) | abs }}"
-    condition: "{{ not is_state('switch.living_room_a_c_jet_mode', 'on') }}"
+    condition: "{{ not (is_state('climate.living_room_a_c', 'off') or is_state('switch.living_room_a_c_jet_mode', 'on')) }}"
     action:
       - choose:
           - conditions: |
