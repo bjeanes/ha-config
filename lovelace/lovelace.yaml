@@ -170,6 +170,57 @@ config:
           reverse: true
         type: custom:auto-entities
       type: horizontal-stack
+    - cards:
+      - collapsible_controls: false
+        entity: climate.living_room_a_c
+        fill_container: true
+        hvac_modes:
+        - auto
+        - dry
+        - heat
+        - cool
+        - 'off'
+        - heat_cool
+        icon: mdi:air-conditioner
+        layout: horizontal
+        primary_info: state
+        secondary_info: last-changed
+        show_temperature_control: true
+        type: custom:mushroom-climate-card
+      - card:
+          entities:
+          - switch.living_room_a_c_ionizer
+          type: entities
+        conditions:
+        - entity: climate.living_room_a_c
+          state_not: 'off'
+        type: conditional
+      - card:
+          entities:
+          - switch.living_room_a_c_jet_mode
+          type: entities
+        conditions:
+        - entity: switch.living_room_a_c_jet_mode
+          state_not: unavailable
+        type: conditional
+      - entities:
+        - entity: climate.living_room_a_c
+          name: A/C
+        - entity: sensor.ble_temperature_living_room_a4c1382a9b6e
+        - entity: sensor.area_temperature_degc_living_room
+          name: Average temperature
+        hours_to_show: 6
+        type: history-graph
+      type: custom:stack-in-card
+    - entities:
+        battery: sensor.inverter_battery_power
+        battery_charge: sensor.inverter_battery_level
+        grid: sensor.inverter_grid_power_demand
+        solar: sensor.inverter_pv_power
+      kw_decimals: 2
+      type: custom:power-flow-card
+      w_decimals: 0
+      watt_threshold: 900
     - card:
         state_color: true
         title: Important
@@ -261,57 +312,6 @@ config:
         method: none
       type: custom:auto-entities
       unique: true
-    - entities:
-        battery: sensor.inverter_battery_power
-        battery_charge: sensor.inverter_battery_level
-        grid: sensor.inverter_grid_power_demand
-        solar: sensor.inverter_pv_power
-      kw_decimals: 2
-      type: custom:power-flow-card
-      w_decimals: 0
-      watt_threshold: 900
-    - cards:
-      - collapsible_controls: false
-        entity: climate.living_room_a_c
-        fill_container: true
-        hvac_modes:
-        - auto
-        - dry
-        - heat
-        - cool
-        - 'off'
-        - heat_cool
-        icon: mdi:air-conditioner
-        layout: horizontal
-        primary_info: state
-        secondary_info: last-changed
-        show_temperature_control: true
-        type: custom:mushroom-climate-card
-      - card:
-          entities:
-          - switch.living_room_a_c_ionizer
-          type: entities
-        conditions:
-        - entity: climate.living_room_a_c
-          state_not: 'off'
-        type: conditional
-      - card:
-          entities:
-          - switch.living_room_a_c_jet_mode
-          type: entities
-        conditions:
-        - entity: switch.living_room_a_c_jet_mode
-          state_not: unavailable
-        type: conditional
-      - entities:
-        - entity: climate.living_room_a_c
-          name: A/C
-        - entity: sensor.ble_temperature_living_room_a4c1382a9b6e
-        - entity: sensor.area_temperature_degc_living_room
-          name: Average temperature
-        hours_to_show: 6
-        type: history-graph
-      type: custom:stack-in-card
     icon: hass:home
     panel: false
     path: default_view
