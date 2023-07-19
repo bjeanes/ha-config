@@ -298,13 +298,6 @@ config:
           state: '> 70'
         - entity_id: /memory_percent/
           state: '> 70'
-        - attributes:
-            device_class: update
-          not:
-            entity_id: /ikea_remote/
-          state: 'on'
-        - domain: update
-          state: 'on'
         - entity_id: sensor.recorder_age
           state: '> 180'
       show_empty: false
