@@ -54,6 +54,10 @@ Poeschl Home Assistant Add-ons:
   maintainer: Poeschl <Poeschl@users.noreply.github.com>
   slug: 243ffc37
   source: https://github.com/Poeschl/Hassio-Addons
+Rbillon addons:
+  maintainer: unknown
+  slug: 3cfc8f0f
+  source: https://github.com/Rbillon59/home-assistant-addons
 Shortumations:
   maintainer: Ari Sosnovsky <ariel@sosnovsky.ca>
   slug: 04377e81
